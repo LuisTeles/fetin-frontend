@@ -1,23 +1,20 @@
 "use client"
 
 import { useState } from "react"
-import { BookOpen, AlertCircle, RefreshCw, LogOut, CheckCircle2 } from "lucide-react"
-
-import { DashboardActions } from "@/components/auth/dashboard-actions"
-import { ProfilePanel } from "@/components/auth/profile-panel"
-import { SubjectList } from "@/components/dashboard/subject-list"
+import { Calendar, AlertCircle, RefreshCw, CheckCircle2, Clock } from "lucide-react"
+import { ExamList } from "@/components/dashboard/exam-list"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
-export default function DashboardPage() {
-    const [stats, setStats] = useState({ count: 0, avgPriority: 0 })
+export default function ExamsPage() {
+    const [stats, setStats] = useState({ count: 0, pendingCount: 0 })
 
     return (
         <section className="space-y-6">
             {/* Header / Welcome Area */}
             <div className="flex flex-col gap-1.5 border-b border-border/40 pb-4">
-                <h1 className="text-xl font-bold tracking-tight text-foreground">Gestão Acadêmica</h1>
+                <h1 className="text-xl font-bold tracking-tight text-foreground">Provas e Avaliações</h1>
                 <p className="text-xs text-muted-foreground">
-                    Monitore suas disciplinas, prioridades de estudos e configure seus cronogramas.
+                    Gerencie suas provas agendadas e associe tópicos de estudos para automatizar a geração de cronogramas.
                 </p>
             </div>
 
@@ -26,13 +23,13 @@ export default function DashboardPage() {
                 <Card className="border-border/60 bg-card shadow-xs">
                     <CardHeader className="p-4 pb-1">
                         <CardDescription className="text-[10px] uppercase font-semibold tracking-wider text-muted-foreground">
-                            Disciplinas
+                            Provas Cadastradas
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="p-4 pt-0 flex items-center justify-between">
                         <span className="text-2xl font-bold tracking-tight">{stats.count}</span>
                         <div className="rounded-md bg-muted p-1.5 text-muted-foreground">
-                            <BookOpen className="h-4 w-4" />
+                            <Calendar className="h-4 w-4" />
                         </div>
                     </CardContent>
                 </Card>
@@ -40,13 +37,13 @@ export default function DashboardPage() {
                 <Card className="border-border/60 bg-card shadow-xs">
                     <CardHeader className="p-4 pb-1">
                         <CardDescription className="text-[10px] uppercase font-semibold tracking-wider text-muted-foreground">
-                            Média de Peso
+                            Provas com Pendências
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="p-4 pt-0 flex items-center justify-between">
-                        <span className="text-2xl font-bold tracking-tight">{stats.avgPriority}</span>
+                        <span className="text-2xl font-bold tracking-tight">{stats.pendingCount}</span>
                         <div className="rounded-md bg-muted p-1.5 text-muted-foreground">
-                            <RefreshCw className="h-4 w-4" />
+                            <Clock className="h-4 w-4" />
                         </div>
                     </CardContent>
                 </Card>
@@ -54,13 +51,13 @@ export default function DashboardPage() {
                 <Card className="border-border/60 bg-card shadow-xs">
                     <CardHeader className="p-4 pb-1">
                         <CardDescription className="text-[10px] uppercase font-semibold tracking-wider text-muted-foreground">
-                            Status da Integração
+                            Status da Sincronização
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="p-4 pt-0 flex items-center justify-between">
                         <span className="text-xs font-semibold text-foreground flex items-center gap-1">
                             <CheckCircle2 className="h-3.5 w-3.5 text-foreground shrink-0" />
-                            Online & Conectado
+                            Sincronizado
                         </span>
                         <div className="rounded-md bg-muted p-1.5 text-muted-foreground">
                             <CheckCircle2 className="h-4 w-4" />
@@ -70,38 +67,18 @@ export default function DashboardPage() {
             </div>
 
             {/* Main Content Grid */}
-            <div className="grid gap-6 grid-cols-1 md:grid-cols-3">
-                {/* Subject List Area */}
-                <div className="md:col-span-2 space-y-4">
-                    <Card className="border-border/60 bg-card shadow-xs">
-                        <CardHeader className="p-4 border-b border-border/40">
-                            <CardTitle className="text-sm font-bold">Grade de Disciplinas</CardTitle>
-                            <CardDescription className="text-xs text-muted-foreground">
-                                Crie e edite as materias para associar cronogramas e topicos.
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent className="p-4">
-                            <SubjectList onStatsChange={setStats} />
-                        </CardContent>
-                    </Card>
-                </div>
-
-                {/* Profile and Settings Panel */}
-                <div className="space-y-4 md:col-span-1">
-                    <ProfilePanel />
-                    
-                    <Card className="border-border/60 bg-card shadow-xs">
-                        <CardHeader className="p-4 border-b border-border/40">
-                            <CardTitle className="text-sm font-bold">Acoes da Conta</CardTitle>
-                            <CardDescription className="text-xs text-muted-foreground">
-                                Gerencie sua sessao ativa ou remova seus dados do banco.
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent className="p-4">
-                            <DashboardActions />
-                        </CardContent>
-                    </Card>
-                </div>
+            <div className="grid gap-6 grid-cols-1">
+                <Card className="border-border/60 bg-card shadow-xs">
+                    <CardHeader className="p-4 border-b border-border/40">
+                        <CardTitle className="text-sm font-bold">Calendário de Avaliações</CardTitle>
+                        <CardDescription className="text-xs text-muted-foreground">
+                            Agende provas para suas disciplinas e conecte os tópicos de estudo exigidos por cada uma delas.
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="p-4">
+                        <ExamList onStatsChange={setStats} />
+                    </CardContent>
+                </Card>
             </div>
         </section>
     )
