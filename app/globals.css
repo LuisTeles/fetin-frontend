@@ -46,6 +46,23 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+
+  --text-xs: 0.8625rem;
+  --text-xs--line-height: 1.15rem;
+  --text-sm: 1.00625rem;
+  --text-sm--line-height: 1.4375rem;
+  --text-base: 1.15rem;
+  --text-base--line-height: 1.725rem;
+  --text-lg: 1.29375rem;
+  --text-lg--line-height: 2.0125rem;
+  --text-xl: 1.4375rem;
+  --text-xl--line-height: 2.0125rem;
+  --text-2xl: 1.725rem;
+  --text-2xl--line-height: 2.3rem;
+  --text-3xl: 2.15625rem;
+  --text-3xl--line-height: 2.5875rem;
+  --text-4xl: 2.5875rem;
+  --text-4xl--line-height: 2.875rem;
 }
 
 :root {
@@ -126,5 +143,20 @@
   }
   html {
     @apply font-sans;
+  }
+}
+
+@layer utilities {
+  .text-\[8px\] {
+    font-size: 0.575rem;
+  }
+  .text-\[9px\] {
+    font-size: 0.646875rem;
+  }
+  .text-\[10px\] {
+    font-size: 0.71875rem;
+  }
+  .text-\[11px\] {
+    font-size: 0.790625rem;
   }
 }

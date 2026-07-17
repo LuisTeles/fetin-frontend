@@ -9,12 +9,16 @@ import {
     toJsonResponse,
 } from "@/lib/server-auth"
 
-async function fetchTopics(accessToken: string, subjectId: string) {
+async function fetchTopics(accessToken: string, subjectId: string, impersonateUserId?: string | null) {
+    const headers: Record<string, string> = {
+        Authorization: `Bearer ${accessToken}`,
+    }
+    if (impersonateUserId) {
+        headers["x-impersonate-user-id"] = impersonateUserId
+    }
     return forwardToBackend(`/topics?subjectId=${subjectId}`, {
         method: "GET",
-        headers: {
-            Authorization: `Bearer ${accessToken}`,
-        },
+        headers,
     })
 }
 
@@ -31,6 +35,7 @@ async function createTopic(accessToken: string, body: unknown) {
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url)
     const subjectId = searchParams.get("subjectId")
+    const userId = searchParams.get("userId")
 
     if (!subjectId) {
         return toJsonError(400, "O parâmetro subjectId é obrigatório.")
@@ -41,14 +46,14 @@ export async function GET(request: Request) {
         return toJsonError(401, "Sessão expirada. Faça login novamente.")
     }
 
-    let response = await fetchTopics(accessToken, subjectId)
+    let response = await fetchTopics(accessToken, subjectId, userId)
 
     if (response.status === 401) {
         const refreshed = await refreshTokensFromCookie()
         if (!refreshed.ok || !refreshed.accessToken) {
             return toJsonError(401, refreshed.error ?? "Sessão expirada.")
         }
-        response = await fetchTopics(refreshed.accessToken, subjectId)
+        response = await fetchTopics(refreshed.accessToken, subjectId, userId)
     }
 
     if (!response.ok) {

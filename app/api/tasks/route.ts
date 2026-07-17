@@ -9,21 +9,31 @@ import {
     toJsonResponse,
 } from "@/lib/server-auth"
 
-async function fetchSubjects(accessToken: string, impersonateUserId?: string | null) {
+async function fetchTasks(accessToken: string, startDate?: string | null, endDate?: string | null, impersonateUserId?: string | null) {
     const headers: Record<string, string> = {
         Authorization: `Bearer ${accessToken}`,
     }
     if (impersonateUserId) {
         headers["x-impersonate-user-id"] = impersonateUserId
     }
-    return forwardToBackend("/subjects", {
+
+    let url = "/tasks"
+    const params = new URLSearchParams()
+    if (startDate) params.append("startDate", startDate)
+    if (endDate) params.append("endDate", endDate)
+    const queryString = params.toString()
+    if (queryString) {
+        url += `?${queryString}`
+    }
+
+    return forwardToBackend(url, {
         method: "GET",
         headers,
     })
 }
 
-async function createSubject(accessToken: string, body: unknown) {
-    return forwardToBackend("/subjects", {
+async function createTask(accessToken: string, body: unknown) {
+    return forwardToBackend("/tasks", {
         method: "POST",
         headers: {
             Authorization: `Bearer ${accessToken}`,
@@ -35,22 +45,21 @@ async function createSubject(accessToken: string, body: unknown) {
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url)
     const userId = searchParams.get("userId")
+    const startDate = searchParams.get("startDate")
+    const endDate = searchParams.get("endDate")
     const accessToken = await getAccessTokenFromCookie()
-
     if (!accessToken) {
-        return toJsonError(401, "Sessao expirada. Faca login novamente.")
+        return toJsonError(401, "Sessão expirada. Faça login novamente.")
     }
 
-    let response = await fetchSubjects(accessToken, userId)
+    let response = await fetchTasks(accessToken, startDate, endDate, userId)
 
     if (response.status === 401) {
         const refreshed = await refreshTokensFromCookie()
-
         if (!refreshed.ok || !refreshed.accessToken) {
-            return toJsonError(401, refreshed.error ?? "Sessao expirada.")
+            return toJsonError(401, refreshed.error ?? "Sessão expirada.")
         }
-
-        response = await fetchSubjects(refreshed.accessToken, userId)
+        response = await fetchTasks(refreshed.accessToken, startDate, endDate, userId)
     }
 
     if (!response.ok) {
@@ -58,28 +67,25 @@ export async function GET(request: Request) {
         return toJsonError(response.status, getMessageFromApiError(payload))
     }
 
-    const subjects = await safeJson<unknown>(response)
-    return toJsonResponse({ subjects })
+    const tasks = await safeJson<unknown>(response)
+    return toJsonResponse({ tasks })
 }
 
 export async function POST(request: Request) {
     const accessToken = await getAccessTokenFromCookie()
-
     if (!accessToken) {
-        return toJsonError(401, "Sessao expirada. Faca login novamente.")
+        return toJsonError(401, "Sessão expirada. Faça login novamente.")
     }
 
     const body = await request.json()
-    let response = await createSubject(accessToken, body)
+    let response = await createTask(accessToken, body)
 
     if (response.status === 401) {
         const refreshed = await refreshTokensFromCookie()
-
         if (!refreshed.ok || !refreshed.accessToken) {
-            return toJsonError(401, refreshed.error ?? "Sessao expirada.")
+            return toJsonError(401, refreshed.error ?? "Sessão expirada.")
         }
-
-        response = await createSubject(refreshed.accessToken, body)
+        response = await createTask(refreshed.accessToken, body)
     }
 
     if (!response.ok) {
@@ -87,6 +93,6 @@ export async function POST(request: Request) {
         return toJsonError(response.status, getMessageFromApiError(payload))
     }
 
-    const newSubject = await safeJson<unknown>(response)
-    return toJsonResponse({ subject: newSubject }, 201)
+    const newTask = await safeJson<unknown>(response)
+    return toJsonResponse({ task: newTask }, 201)
 }

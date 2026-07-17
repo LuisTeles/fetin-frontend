@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { useSearchParams } from "next/navigation"
 import { Calendar, Search, Trash2, Edit2, AlertTriangle, BookOpen, Clock, BadgeAlert } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -35,6 +36,10 @@ type ExamListProps = {
 }
 
 export function ExamList({ onStatsChange }: ExamListProps) {
+    const searchParams = useSearchParams()
+    const impersonateUserId = searchParams.get("userId")
+    const isImpersonating = !!impersonateUserId
+
     const [exams, setExams] = useState<Exam[]>([])
     const [search, setSearch] = useState("")
     const [isLoading, setIsLoading] = useState(true)
@@ -48,7 +53,8 @@ export function ExamList({ onStatsChange }: ExamListProps) {
         setIsLoading(true)
         setError(null)
         try {
-            const response = await fetch("/api/exams", { cache: "no-store" })
+            const url = impersonateUserId ? `/api/exams?userId=${impersonateUserId}` : "/api/exams"
+            const response = await fetch(url, { cache: "no-store" })
             const payload = (await response.json().catch(() => ({}))) as ExamsResponse
 
             if (!response.ok) {
@@ -75,7 +81,7 @@ export function ExamList({ onStatsChange }: ExamListProps) {
 
     useEffect(() => {
         loadExams()
-    }, [])
+    }, [impersonateUserId])
 
     async function handleDelete(id: string, date: string, subjectName: string) {
         const formattedDate = new Date(date + "T00:00:00").toLocaleDateString("pt-BR")
@@ -134,21 +140,23 @@ export function ExamList({ onStatsChange }: ExamListProps) {
                         className="pl-8 h-9 text-sm"
                     />
                 </div>
-                <Button
-                    onClick={() => {
-                        setEditingExam(null)
-                        setShowForm(!showForm)
-                    }}
-                    size="sm"
-                    className="h-9 gap-1 shadow-xs"
-                >
-                    <Calendar className="h-4 w-4" />
-                    Agendar Prova
-                </Button>
+                {!isImpersonating && (
+                    <Button
+                        onClick={() => {
+                            setEditingExam(null)
+                            setShowForm(!showForm)
+                        }}
+                        size="sm"
+                        className="h-9 gap-1 shadow-xs"
+                    >
+                        <Calendar className="h-4 w-4" />
+                        Agendar Prova
+                    </Button>
+                )}
             </div>
 
             {/* Form Embed */}
-            {(showForm || editingExam) && (
+            {!isImpersonating && (showForm || editingExam) && (
                 <div className="animate-in fade-in slide-in-from-top-2 duration-200">
                     <ExamForm
                         exam={editingExam ?? undefined}
@@ -248,31 +256,33 @@ export function ExamList({ onStatsChange }: ExamListProps) {
                                     </div>
 
                                     {/* Action Buttons */}
-                                    <div className="flex items-center justify-between sm:justify-end gap-3 border-t border-border/40 pt-3 sm:border-0 sm:pt-0 shrink-0">
-                                        <div className="flex items-center gap-1 opacity-80 group-hover:opacity-100 transition-opacity">
-                                            <Button
-                                                onClick={() => {
-                                                    setShowForm(false)
-                                                    setEditingExam(exam)
-                                                }}
-                                                variant="ghost"
-                                                size="icon-xs"
-                                                className="hover:bg-muted hover:text-foreground"
-                                                title="Editar Prova"
-                                            >
-                                                <Edit2 className="h-3 w-3" />
-                                            </Button>
-                                            <Button
-                                                onClick={() => handleDelete(exam.id, exam.exam_date, exam.subject_name)}
-                                                variant="ghost"
-                                                size="icon-xs"
-                                                className="hover:bg-destructive/10 hover:text-destructive text-muted-foreground"
-                                                title="Excluir Prova"
-                                            >
-                                                <Trash2 className="h-3 w-3" />
-                                            </Button>
+                                    {!isImpersonating && (
+                                        <div className="flex items-center justify-between sm:justify-end gap-3 border-t border-border/40 pt-3 sm:border-0 sm:pt-0 shrink-0">
+                                            <div className="flex items-center gap-1 opacity-80 group-hover:opacity-100 transition-opacity">
+                                                <Button
+                                                    onClick={() => {
+                                                        setShowForm(false)
+                                                        setEditingExam(exam)
+                                                    }}
+                                                    variant="ghost"
+                                                    size="icon-xs"
+                                                    className="hover:bg-muted hover:text-foreground"
+                                                    title="Editar Prova"
+                                                >
+                                                    <Edit2 className="h-3 w-3" />
+                                                </Button>
+                                                <Button
+                                                    onClick={() => handleDelete(exam.id, exam.exam_date, exam.subject_name)}
+                                                    variant="ghost"
+                                                    size="icon-xs"
+                                                    className="hover:bg-destructive/10 hover:text-destructive text-muted-foreground"
+                                                    title="Excluir Prova"
+                                                >
+                                                    <Trash2 className="h-3 w-3" />
+                                                </Button>
+                                            </div>
                                         </div>
-                                    </div>
+                                    )}
                                 </CardContent>
                             </Card>
                         )

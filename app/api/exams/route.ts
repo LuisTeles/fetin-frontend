@@ -9,12 +9,16 @@ import {
     toJsonResponse,
 } from "@/lib/server-auth"
 
-async function fetchExams(accessToken: string) {
+async function fetchExams(accessToken: string, impersonateUserId?: string | null) {
+    const headers: Record<string, string> = {
+        Authorization: `Bearer ${accessToken}`,
+    }
+    if (impersonateUserId) {
+        headers["x-impersonate-user-id"] = impersonateUserId
+    }
     return forwardToBackend("/exams", {
         method: "GET",
-        headers: {
-            Authorization: `Bearer ${accessToken}`,
-        },
+        headers,
     })
 }
 
@@ -28,20 +32,22 @@ async function createExam(accessToken: string, body: unknown) {
     })
 }
 
-export async function GET() {
+export async function GET(request: Request) {
+    const { searchParams } = new URL(request.url)
+    const userId = searchParams.get("userId")
     const accessToken = await getAccessTokenFromCookie()
     if (!accessToken) {
         return toJsonError(401, "Sessão expirada. Faça login novamente.")
     }
 
-    let response = await fetchExams(accessToken)
+    let response = await fetchExams(accessToken, userId)
 
     if (response.status === 401) {
         const refreshed = await refreshTokensFromCookie()
         if (!refreshed.ok || !refreshed.accessToken) {
             return toJsonError(401, refreshed.error ?? "Sessão expirada.")
         }
-        response = await fetchExams(refreshed.accessToken)
+        response = await fetchExams(refreshed.accessToken, userId)
     }
 
     if (!response.ok) {

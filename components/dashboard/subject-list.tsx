@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { useSearchParams } from "next/navigation"
 import { Plus, Search, Trash2, Edit2, BookOpen } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -27,6 +28,10 @@ type SubjectListProps = {
 }
 
 export function SubjectList({ onStatsChange }: SubjectListProps) {
+    const searchParams = useSearchParams()
+    const impersonateUserId = searchParams.get("userId")
+    const isImpersonating = !!impersonateUserId
+
     const [subjects, setSubjects] = useState<Subject[]>([])
     const [search, setSearch] = useState("")
     const [isLoading, setIsLoading] = useState(true)
@@ -40,7 +45,8 @@ export function SubjectList({ onStatsChange }: SubjectListProps) {
         setIsLoading(true)
         setError(null)
         try {
-            const response = await fetch("/api/subjects", { cache: "no-store" })
+            const url = impersonateUserId ? `/api/subjects?userId=${impersonateUserId}` : "/api/subjects"
+            const response = await fetch(url, { cache: "no-store" })
             const payload = (await response.json().catch(() => ({}))) as SubjectsResponse
 
             if (!response.ok) {
@@ -68,7 +74,7 @@ export function SubjectList({ onStatsChange }: SubjectListProps) {
 
     useEffect(() => {
         loadSubjects()
-    }, [])
+    }, [impersonateUserId])
 
     async function handleDelete(id: string, name: string) {
         const confirmed = window.confirm(`Deseja realmente excluir a disciplina "${name}"?`)
@@ -113,21 +119,23 @@ export function SubjectList({ onStatsChange }: SubjectListProps) {
                         className="pl-8 h-9 text-sm"
                     />
                 </div>
-                <Button
-                    onClick={() => {
-                        setEditingSubject(null)
-                        setShowForm(!showForm)
-                    }}
-                    size="sm"
-                    className="h-9 gap-1 shadow-xs"
-                >
-                    <Plus className="h-4 w-4" />
-                    Nova Disciplina
-                </Button>
+                {!isImpersonating && (
+                    <Button
+                        onClick={() => {
+                            setEditingSubject(null)
+                            setShowForm(!showForm)
+                        }}
+                        size="sm"
+                        className="h-9 gap-1 shadow-xs"
+                    >
+                        <Plus className="h-4 w-4" />
+                        Nova Disciplina
+                    </Button>
+                )}
             </div>
 
             {/* Form Drawer / Embed */}
-            {(showForm || editingSubject) && (
+            {!isImpersonating && (showForm || editingSubject) && (
                 <div className="animate-in fade-in slide-in-from-top-2 duration-200">
                     <SubjectForm
                         subject={editingSubject ?? undefined}
@@ -185,29 +193,31 @@ export function SubjectList({ onStatsChange }: SubjectListProps) {
                                         Peso: {subject.priority_weight ?? subject.priorityWeight ?? 0}
                                     </Badge>
                                     
-                                    <div className="flex items-center gap-1 opacity-80 group-hover:opacity-100 transition-opacity">
-                                        <Button
-                                            onClick={() => {
-                                                setShowForm(false)
-                                                setEditingSubject(subject)
-                                            }}
-                                            variant="ghost"
-                                            size="icon-xs"
-                                            className="hover:bg-muted hover:text-foreground"
-                                            title="Editar"
-                                        >
-                                            <Edit2 className="h-3 w-3" />
-                                        </Button>
-                                        <Button
-                                            onClick={() => handleDelete(subject.id, subject.name)}
-                                            variant="ghost"
-                                            size="icon-xs"
-                                            className="hover:bg-destructive/10 hover:text-destructive text-muted-foreground"
-                                            title="Excluir"
-                                        >
-                                            <Trash2 className="h-3 w-3" />
-                                        </Button>
-                                    </div>
+                                    {!isImpersonating && (
+                                        <div className="flex items-center gap-1 opacity-80 group-hover:opacity-100 transition-opacity">
+                                            <Button
+                                                onClick={() => {
+                                                    setShowForm(false)
+                                                    setEditingSubject(subject)
+                                                }}
+                                                variant="ghost"
+                                                size="icon-xs"
+                                                className="hover:bg-muted hover:text-foreground"
+                                                title="Editar"
+                                            >
+                                                <Edit2 className="h-3 w-3" />
+                                            </Button>
+                                            <Button
+                                                onClick={() => handleDelete(subject.id, subject.name)}
+                                                variant="ghost"
+                                                size="icon-xs"
+                                                className="hover:bg-destructive/10 hover:text-destructive text-muted-foreground"
+                                                title="Excluir"
+                                            >
+                                                <Trash2 className="h-3 w-3" />
+                                            </Button>
+                                        </div>
+                                    )}
                                 </div>
                             </CardContent>
                         </Card>
