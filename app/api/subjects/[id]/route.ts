@@ -9,6 +9,15 @@ import {
     toJsonResponse,
 } from "@/lib/server-auth"
 
+async function fetchSubject(id: string, accessToken: string) {
+    return forwardToBackend(`/subjects/${id}`, {
+        method: "GET",
+        headers: {
+            Authorization: `Bearer ${accessToken}`,
+        },
+    })
+}
+
 async function updateSubject(id: string, accessToken: string, body: unknown) {
     return forwardToBackend(`/subjects/${id}`, {
         method: "PATCH",
@@ -26,6 +35,38 @@ async function deleteSubject(id: string, accessToken: string) {
             Authorization: `Bearer ${accessToken}`,
         },
     })
+}
+
+export async function GET(
+    request: Request,
+    { params }: { params: Promise<{ id: string }> }
+) {
+    const { id } = await params
+    const accessToken = await getAccessTokenFromCookie()
+
+    if (!accessToken) {
+        return toJsonError(401, "Sessao expirada. Faca login novamente.")
+    }
+
+    let response = await fetchSubject(id, accessToken)
+
+    if (response.status === 401) {
+        const refreshed = await refreshTokensFromCookie()
+
+        if (!refreshed.ok || !refreshed.accessToken) {
+            return toJsonError(401, refreshed.error ?? "Sessao expirada.")
+        }
+
+        response = await fetchSubject(id, refreshed.accessToken)
+    }
+
+    if (!response.ok) {
+        const payload = await safeJson<ApiErrorResponse>(response)
+        return toJsonError(response.status, getMessageFromApiError(payload))
+    }
+
+    const subject = await safeJson<unknown>(response)
+    return toJsonResponse({ subject })
 }
 
 export async function PATCH(
