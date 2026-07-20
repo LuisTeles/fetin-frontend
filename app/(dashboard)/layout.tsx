@@ -38,9 +38,9 @@ export default async function DashboardLayout({
     return (
         <div className="min-h-screen bg-muted/40 flex flex-col">
             <ImpersonationBanner />
-            
+
             <header className="border-b bg-background">
-                <div className="mx-auto flex w-full max-w-5xl items-center justify-between gap-4 px-4 py-4">
+                <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-4 py-4 md:px-6">
                     <div>
                         <p className="text-lg font-semibold">Fetin Dashboard</p>
                         <p className="text-sm text-muted-foreground">MVP de integracao com backend de usuarios</p>
@@ -52,7 +52,7 @@ export default async function DashboardLayout({
                 </div>
             </header>
 
-            <div className="mx-auto grid w-full max-w-5xl grid-cols-1 gap-4 px-4 py-4 md:grid-cols-[220px_1fr] flex-1">
+            <div className="mx-auto grid w-full max-w-7xl grid-cols-1 gap-4 px-4 py-4 md:px-6 md:grid-cols-[220px_1fr] flex-1">
                 <nav className="rounded-lg border bg-background p-2 h-fit">
                     <ul className="space-y-1 text-sm">
                         <li>
@@ -80,6 +80,16 @@ export default async function DashboardLayout({
                                 Calendário
                             </Link>
                         </li>
+                        <li>
+                            <Link className="block rounded-md px-3 py-2 hover:bg-muted font-medium text-primary flex items-center justify-between" href="/auto-schedule">
+                                <span>Calendário Automático</span>
+                            </Link>
+                        </li>
+                        <li>
+                            <Link className="block rounded-md px-3 py-2 hover:bg-muted font-medium" href="/availability">
+                                Disponibilidade
+                            </Link>
+                        </li>
                         {isAdmin && (
                             <li>
                                 <Link className="block rounded-md px-3 py-2 hover:bg-muted text-yellow-600 font-medium" href="/admin/users">
@@ -90,7 +100,7 @@ export default async function DashboardLayout({
                     </ul>
                 </nav>
 
-                <main className="rounded-lg border bg-background p-4 h-fit">
+                <main className="rounded-lg border bg-background p-4 h-fit min-w-0">
                     <Separator className="mb-4" />
                     {children}
                 </main>

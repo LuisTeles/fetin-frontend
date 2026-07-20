@@ -113,20 +113,45 @@ export function CalendarView({ onStatsChange }: CalendarViewProps) {
             const loadedExams = examsPayload.exams ?? []
             setExams(loadedExams)
 
-            // 3. Optional Study Sessions (Safe check/Try to fetch)
+            // 3. Fetch Study Sessions from active schedule
             try {
-                const sessionsUrl = impersonateUserId 
-                    ? `/api/study-sessions?userId=${impersonateUserId}&startDate=${start}&endDate=${end}`
-                    : `/api/study-sessions?startDate=${start}&endDate=${end}`
-                const sessionsRes = await fetch(sessionsUrl, { cache: "no-store" })
-                if (sessionsRes.ok) {
-                    const sessionsPayload = await sessionsRes.json()
-                    setStudySessions(sessionsPayload.sessions ?? [])
+                const schedulesUrl = impersonateUserId 
+                    ? `/api/schedules?userId=${impersonateUserId}`
+                    : `/api/schedules`
+                const schedulesRes = await fetch(schedulesUrl, { cache: "no-store" })
+                if (schedulesRes.ok) {
+                    const schedulesPayload = await schedulesRes.json()
+                    const schedulesList: any[] = schedulesPayload.schedules ?? []
+                    const activeSchedule = schedulesList.find((s) => s.status === "active")
+
+                    if (activeSchedule && activeSchedule.days) {
+                        const extractedSessions: StudySession[] = []
+                        const subjectName = activeSchedule.exam?.subject_name || activeSchedule.exam?.subject?.name || "Disciplina"
+                        for (const day of activeSchedule.days) {
+                            if (day.studySessions) {
+                                const dateStr = day.studyDate?.split("T")[0]
+                                for (const session of day.studySessions) {
+                                    extractedSessions.push({
+                                        id: session.id,
+                                        topicName: session.topic?.name || "Tópico de Estudo",
+                                        subjectName: subjectName,
+                                        sessionType: session.sessionType,
+                                        durationMinutes: session.durationMinutes,
+                                        status: session.status,
+                                        studyDate: dateStr,
+                                    })
+                                }
+                            }
+                        }
+                        setStudySessions(extractedSessions)
+                    } else {
+                        setStudySessions([])
+                    }
                 } else {
-                    setStudySessions([]) // Silent fallback if endpoint doesn't exist yet
+                    setStudySessions([])
                 }
             } catch {
-                setStudySessions([]) // Silent fallback
+                setStudySessions([])
             }
 
             if (onStatsChange) {
