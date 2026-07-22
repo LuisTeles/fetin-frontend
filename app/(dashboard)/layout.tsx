@@ -7,6 +7,7 @@ import { Separator } from "@/components/ui/separator"
 import { ACCESS_TOKEN_COOKIE, REFRESH_TOKEN_COOKIE } from "@/lib/api-config"
 import { ImpersonationBanner } from "@/components/auth/impersonation-banner"
 import { ThemeToggle } from "@/components/ui/theme-toggle"
+import { GlobalNoteFab } from "@/components/notes/global-note-fab"
 
 export default async function DashboardLayout({
     children,
@@ -81,6 +82,11 @@ export default async function DashboardLayout({
                             </Link>
                         </li>
                         <li>
+                            <Link className="block rounded-md px-3 py-2 hover:bg-muted font-medium" href="/notes">
+                                Notas Rápidas
+                            </Link>
+                        </li>
+                        <li>
                             <Link className="block rounded-md px-3 py-2 hover:bg-muted font-medium text-primary flex items-center justify-between" href="/auto-schedule">
                                 <span>Calendário Automático</span>
                             </Link>
@@ -105,6 +111,8 @@ export default async function DashboardLayout({
                     {children}
                 </main>
             </div>
+
+            <GlobalNoteFab />
         </div>
     )
 }

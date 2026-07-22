@@ -172,4 +172,58 @@
       transform: translateY(16px) scale(0.92);
     }
   }
+
+  /* ── FAB pulse ring ───────────────────────────────────────────────────────── */
+  @keyframes fab-pulse {
+    0%   { box-shadow: 0 0 0 0 oklch(0.205 0 0 / 30%); }
+    70%  { box-shadow: 0 0 0 10px oklch(0.205 0 0 / 0%); }
+    100% { box-shadow: 0 0 0 0 oklch(0.205 0 0 / 0%); }
+  }
+  .dark {
+    @keyframes fab-pulse {
+      0%   { box-shadow: 0 0 0 0 oklch(0.922 0 0 / 30%); }
+      70%  { box-shadow: 0 0 0 10px oklch(0.922 0 0 / 0%); }
+      100% { box-shadow: 0 0 0 0 oklch(0.922 0 0 / 0%); }
+    }
+  }
+  .fab-pulse {
+    animation: fab-pulse 2.5s ease-out infinite;
+  }
+
+  /* ── Drawer slide-in / slide-out ─────────────────────────────────────────── */
+  @keyframes drawer-in {
+    from { transform: translateX(100%); opacity: 0; }
+    to   { transform: translateX(0);    opacity: 1; }
+  }
+  @keyframes drawer-out {
+    from { transform: translateX(0);    opacity: 1; }
+    to   { transform: translateX(100%); opacity: 0; }
+  }
+  .drawer-enter {
+    animation: drawer-in 0.28s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+  .drawer-exit {
+    animation: drawer-out 0.22s ease-in forwards;
+  }
+
+  /* ── Backdrop fade ───────────────────────────────────────────────────────── */
+  @keyframes backdrop-in {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+  @keyframes backdrop-out {
+    from { opacity: 1; }
+    to   { opacity: 0; }
+  }
+  .backdrop-enter { animation: backdrop-in 0.22s ease-out forwards; }
+  .backdrop-exit  { animation: backdrop-out 0.18s ease-in forwards; }
+
+  /* ── Note card hover lift ────────────────────────────────────────────────── */
+  .note-card-hover {
+    transition: transform 0.15s ease-out, box-shadow 0.15s ease-out;
+  }
+  .note-card-hover:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px oklch(0 0 0 / 8%);
+  }
 }
