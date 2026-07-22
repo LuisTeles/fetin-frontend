@@ -21,6 +21,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { fetchAvailabilitySchedule, RoutineBlock } from "@/lib/api/availability"
 import { TaskForm } from "./task-form"
 
 // Types matching database schemas
@@ -59,7 +60,7 @@ type StudySession = {
 }
 
 type CalendarViewProps = {
-    onStatsChange?: (stats: { tasksCount: number; examsCount: number }) => void
+    onStatsChange?: (stats: { tasksCount: number; examsCount: number; studySessionsCount: number; routineBlocksCount: number }) => void
 }
 
 export function CalendarView({ onStatsChange }: CalendarViewProps) {
@@ -74,9 +75,11 @@ export function CalendarView({ onStatsChange }: CalendarViewProps) {
     const [tasks, setTasks] = useState<Task[]>([])
     const [exams, setExams] = useState<Exam[]>([])
     const [studySessions, setStudySessions] = useState<StudySession[]>([])
+    const [routineBlocks, setRoutineBlocks] = useState<RoutineBlock[]>([])
     
     // Toggles
     const [showStudySessions, setShowStudySessions] = useState(true)
+    const [showRoutineBlocks, setShowRoutineBlocks] = useState(true)
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
 
@@ -106,14 +109,15 @@ export function CalendarView({ onStatsChange }: CalendarViewProps) {
             const loadedTasks = tasksPayload.tasks ?? []
             setTasks(loadedTasks)
 
-            // 2. Fetch Exams (Existing Endpoint)
+            // 2. Fetch Exams
             const examsUrl = impersonateUserId ? `/api/exams?userId=${impersonateUserId}` : "/api/exams"
             const examsRes = await fetch(examsUrl, { cache: "no-store" })
             const examsPayload = await examsRes.json().catch(() => ({}))
             const loadedExams = examsPayload.exams ?? []
             setExams(loadedExams)
 
-            // 3. Fetch Study Sessions from active schedule
+            // 3. Fetch Study Sessions from active schedules
+            let extractedSessions: StudySession[] = []
             try {
                 const schedulesUrl = impersonateUserId 
                     ? `/api/schedules?userId=${impersonateUserId}`
@@ -121,32 +125,35 @@ export function CalendarView({ onStatsChange }: CalendarViewProps) {
                 const schedulesRes = await fetch(schedulesUrl, { cache: "no-store" })
                 if (schedulesRes.ok) {
                     const schedulesPayload = await schedulesRes.json()
-                    const schedulesList: any[] = schedulesPayload.schedules ?? []
-                    const activeSchedule = schedulesList.find((s) => s.status === "active")
+                    const schedulesList: any[] = Array.isArray(schedulesPayload)
+                        ? schedulesPayload
+                        : (schedulesPayload.schedules ?? [])
+                    const activeSchedules = schedulesList.filter((s) => s.status === "active")
 
-                    if (activeSchedule && activeSchedule.days) {
-                        const extractedSessions: StudySession[] = []
-                        const subjectName = activeSchedule.exam?.subject_name || activeSchedule.exam?.subject?.name || "Disciplina"
-                        for (const day of activeSchedule.days) {
-                            if (day.studySessions) {
-                                const dateStr = day.studyDate?.split("T")[0]
-                                for (const session of day.studySessions) {
-                                    extractedSessions.push({
-                                        id: session.id,
-                                        topicName: session.topic?.name || "Tópico de Estudo",
-                                        subjectName: subjectName,
-                                        sessionType: session.sessionType,
-                                        durationMinutes: session.durationMinutes,
-                                        status: session.status,
-                                        studyDate: dateStr,
-                                    })
+                    for (const schedule of activeSchedules) {
+                        const subjectName = schedule.exam?.subject_name || schedule.exam?.subject?.name || "Disciplina"
+                        if (schedule.days) {
+                            for (const day of schedule.days) {
+                                if (day.studySessions) {
+                                    const dateStr = typeof day.studyDate === "string"
+                                        ? day.studyDate.split("T")[0]
+                                        : new Date(day.studyDate).toISOString().split("T")[0]
+                                    for (const session of day.studySessions) {
+                                        extractedSessions.push({
+                                            id: session.id,
+                                            topicName: session.topic?.name || "Tópico de Estudo",
+                                            subjectName: subjectName,
+                                            sessionType: session.sessionType,
+                                            durationMinutes: session.durationMinutes,
+                                            status: session.status,
+                                            studyDate: dateStr,
+                                        })
+                                    }
                                 }
                             }
                         }
-                        setStudySessions(extractedSessions)
-                    } else {
-                        setStudySessions([])
                     }
+                    setStudySessions(extractedSessions)
                 } else {
                     setStudySessions([])
                 }
@@ -154,10 +161,22 @@ export function CalendarView({ onStatsChange }: CalendarViewProps) {
                 setStudySessions([])
             }
 
+            // 4. Fetch Routine Blocks (Compromissos Recorrentes da Rotina)
+            let loadedRoutineBlocks: RoutineBlock[] = []
+            try {
+                const availData = await fetchAvailabilitySchedule(impersonateUserId)
+                loadedRoutineBlocks = availData.routineBlocks ?? []
+                setRoutineBlocks(loadedRoutineBlocks)
+            } catch {
+                setRoutineBlocks([])
+            }
+
             if (onStatsChange) {
                 onStatsChange({
                     tasksCount: loadedTasks.length,
-                    examsCount: loadedExams.length
+                    examsCount: loadedExams.length,
+                    studySessionsCount: extractedSessions.length,
+                    routineBlocksCount: loadedRoutineBlocks.length,
                 })
             }
         } catch (err) {
@@ -274,7 +293,15 @@ export function CalendarView({ onStatsChange }: CalendarViewProps) {
             ? studySessions.filter(s => s.studyDate === dateStr) 
             : []
         
-        return { dayTasks, dayExams, daySessions }
+        // Calculate day of week (0 = Sunday, 1 = Monday, ..., 6 = Saturday)
+        const [y, m, d] = dateStr.split("-").map(Number)
+        const dayOfWeek = new Date(y, m - 1, d).getDay()
+
+        const dayRoutineBlocks = showRoutineBlocks
+            ? routineBlocks.filter(b => b.dayOfWeek === dayOfWeek)
+            : []
+        
+        return { dayTasks, dayExams, daySessions, dayRoutineBlocks }
     }
 
     // MONTH VIEW GENERATION LOGIC
@@ -300,8 +327,6 @@ export function CalendarView({ onStatsChange }: CalendarViewProps) {
         // Days of current month
         const currentMonthDays = []
         for (let i = 1; i <= totalDays; i++) {
-            const date = new Date(year, month, i)
-            // Fix timezone issue when outputting YYYY-MM-DD
             const localMonth = String(month + 1).padStart(2, "0")
             const localDay = String(i).padStart(2, "0")
             currentMonthDays.push({
@@ -339,9 +364,8 @@ export function CalendarView({ onStatsChange }: CalendarViewProps) {
 
                 {/* Day Cells */}
                 {allDays.map((cell, index) => {
-                    const { dayTasks, dayExams, daySessions } = getEventsForDay(cell.dateStr)
+                    const { dayTasks, dayExams, daySessions, dayRoutineBlocks } = getEventsForDay(cell.dateStr)
                     const isToday = cell.dateStr === todayStr
-                    const hasEvents = dayTasks.length > 0 || dayExams.length > 0 || daySessions.length > 0
 
                     return (
                         <div 
@@ -399,6 +423,22 @@ export function CalendarView({ onStatsChange }: CalendarViewProps) {
                                     )
                                 })}
 
+                                {/* Compromissos de Rotina (Routine Blocks) */}
+                                {dayRoutineBlocks.map(block => (
+                                    <div 
+                                        key={block.id || `${block.title}-${block.startTime}`}
+                                        onClick={(e) => {
+                                            e.stopPropagation()
+                                            window.location.href = `/availability`
+                                        }}
+                                        className="text-[9px] px-1 py-0.5 rounded-sm bg-amber-500/15 text-amber-800 dark:text-amber-300 font-semibold truncate flex items-center gap-0.5 border-l-2 border-amber-500 hover:bg-amber-500/25 cursor-pointer"
+                                        title={`Compromisso de Rotina: ${block.title} (${block.startTime} - ${block.endTime})`}
+                                    >
+                                        <Clock className="w-2.5 h-2.5 shrink-0 text-amber-600 dark:text-amber-400" />
+                                        <span className="truncate">{block.title}</span>
+                                    </div>
+                                ))}
+
                                 {/* Custom Tasks */}
                                 {dayTasks.map(task => (
                                     <div 
@@ -428,7 +468,11 @@ export function CalendarView({ onStatsChange }: CalendarViewProps) {
                                 {daySessions.map(session => (
                                     <div 
                                         key={session.id}
-                                        className="text-[9px] px-1 py-0.5 rounded-sm bg-blue-500/10 text-blue-700 dark:text-blue-300 truncate flex items-center gap-0.5 border-l-2 border-blue-500"
+                                        onClick={(e) => {
+                                            e.stopPropagation()
+                                            window.location.href = `/auto-schedule`
+                                        }}
+                                        className="text-[9px] px-1 py-0.5 rounded-sm bg-blue-500/10 text-blue-700 dark:text-blue-300 truncate flex items-center gap-0.5 border-l-2 border-blue-500 hover:bg-blue-500/20 cursor-pointer"
                                         title={`Estudo: ${session.topicName} (${session.durationMinutes} min)`}
                                     >
                                         <Clock className="w-2.5 h-2.5 shrink-0 text-blue-500" />
@@ -468,7 +512,7 @@ export function CalendarView({ onStatsChange }: CalendarViewProps) {
         return (
             <div className="grid grid-cols-1 sm:grid-cols-7 gap-2 border border-border/60 rounded-md p-2 bg-muted/5">
                 {weekDays.map((wDay, index) => {
-                    const { dayTasks, dayExams, daySessions } = getEventsForDay(wDay.dateStr)
+                    const { dayTasks, dayExams, daySessions, dayRoutineBlocks } = getEventsForDay(wDay.dateStr)
                     const isToday = wDay.dateStr === todayStr
 
                     return (
@@ -519,6 +563,26 @@ export function CalendarView({ onStatsChange }: CalendarViewProps) {
                                     )
                                 })}
 
+                                {/* Routine Blocks */}
+                                {dayRoutineBlocks.map(block => (
+                                    <div 
+                                        key={block.id || `${block.title}-${block.startTime}`}
+                                        onClick={() => window.location.href = '/availability'}
+                                        className="p-2 rounded-md bg-amber-500/10 border-l-4 border-amber-500 text-xs flex flex-col gap-1 text-amber-800 dark:text-amber-300 hover:bg-amber-500/20 cursor-pointer shadow-xs"
+                                    >
+                                        <div className="font-bold flex items-center justify-between">
+                                            <span className="truncate">{block.title}</span>
+                                            <Badge variant="outline" className="text-[9px] uppercase border-amber-500/30 text-amber-700 dark:text-amber-300 py-0 px-1">
+                                                Rotina
+                                            </Badge>
+                                        </div>
+                                        <div className="text-[10px] opacity-80 flex items-center gap-1">
+                                            <Clock className="w-2.5 h-2.5 text-amber-600" />
+                                            <span>{block.startTime} - {block.endTime}</span>
+                                        </div>
+                                    </div>
+                                ))}
+
                                 {/* Custom Tasks */}
                                 {dayTasks.map(task => (
                                     <div 
@@ -555,7 +619,8 @@ export function CalendarView({ onStatsChange }: CalendarViewProps) {
                                 {daySessions.map(session => (
                                     <div 
                                         key={session.id}
-                                        className="p-2 rounded-md bg-blue-500/10 border-l-4 border-blue-500 text-xs flex flex-col gap-1 text-blue-700 dark:text-blue-300"
+                                        onClick={() => window.location.href = '/auto-schedule'}
+                                        className="p-2 rounded-md bg-blue-500/10 border-l-4 border-blue-500 text-xs flex flex-col gap-1 text-blue-700 dark:text-blue-300 hover:bg-blue-500/20 cursor-pointer"
                                     >
                                         <div className="font-semibold flex items-center gap-1">
                                             <Clock className="w-3.5 h-3.5 text-blue-500" />
@@ -567,7 +632,7 @@ export function CalendarView({ onStatsChange }: CalendarViewProps) {
                                     </div>
                                 ))}
 
-                                {dayExams.length === 0 && dayTasks.length === 0 && daySessions.length === 0 && (
+                                {dayExams.length === 0 && dayTasks.length === 0 && daySessions.length === 0 && dayRoutineBlocks.length === 0 && (
                                     <span className="text-[10px] text-muted-foreground/60 italic block py-4 text-center">
                                         Nenhum evento
                                     </span>
@@ -586,7 +651,7 @@ export function CalendarView({ onStatsChange }: CalendarViewProps) {
         const localDay = String(currentDate.getDate()).padStart(2, "0")
         const dateStr = `${currentDate.getFullYear()}-${localMonth}-${localDay}`
         
-        const { dayTasks, dayExams, daySessions } = getEventsForDay(dateStr)
+        const { dayTasks, dayExams, daySessions, dayRoutineBlocks } = getEventsForDay(dateStr)
         const dayName = currentDate.toLocaleDateString("pt-BR", { weekday: "long" })
         const formattedDate = currentDate.toLocaleDateString("pt-BR", { day: "numeric", month: "long" })
 
@@ -603,10 +668,10 @@ export function CalendarView({ onStatsChange }: CalendarViewProps) {
                     </Button>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     {/* Tasks & Exams Column */}
                     <div className="space-y-3">
-                        <h3 className="text-sm font-bold border-l-2 border-primary pl-2 mb-2">Compromissos e Provas</h3>
+                        <h3 className="text-sm font-bold border-l-2 border-primary pl-2 mb-2">Tarefas e Provas</h3>
                         
                         {/* Exams list */}
                         {dayExams.map(exam => {
@@ -689,6 +754,38 @@ export function CalendarView({ onStatsChange }: CalendarViewProps) {
                         )}
                     </div>
 
+                    {/* Routine Blocks Column */}
+                    <div className="space-y-3">
+                        <h3 className="text-sm font-bold border-l-2 border-amber-500 pl-2 mb-2">Compromissos da Rotina</h3>
+                        
+                        {dayRoutineBlocks.length > 0 ? (
+                            <div className="space-y-3">
+                                {dayRoutineBlocks.map(block => (
+                                    <Card 
+                                        key={block.id || block.title} 
+                                        className="shadow-xs border-l-4 border-amber-500 bg-amber-500/5 cursor-pointer hover:bg-amber-500/10 transition-colors"
+                                        onClick={() => window.location.href = '/availability'}
+                                    >
+                                        <CardContent className="p-4 flex items-center justify-between gap-4">
+                                            <div className="space-y-1">
+                                                <p className="text-xs font-bold text-amber-700 dark:text-amber-300 uppercase tracking-wider">
+                                                    Compromisso Fixo ({block.category})
+                                                </p>
+                                                <p className="text-sm font-semibold">{block.title}</p>
+                                                <p className="text-xs text-muted-foreground">Repete semanalmente neste dia</p>
+                                            </div>
+                                            <Badge className="bg-amber-500 text-white font-bold">{block.startTime} - {block.endTime}</Badge>
+                                        </CardContent>
+                                    </Card>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="text-center py-8 border border-dashed rounded-md text-xs text-muted-foreground">
+                                Nenhum compromisso de rotina para este dia.
+                            </div>
+                        )}
+                    </div>
+
                     {/* Study Sessions Column */}
                     <div>
                         <h3 className="text-sm font-bold border-l-2 border-blue-500 pl-2 mb-2">Sessões de Estudo do Cronograma</h3>
@@ -744,6 +841,7 @@ export function CalendarView({ onStatsChange }: CalendarViewProps) {
                 </AlertTitle>
                 <AlertDescription className="text-[11px] text-muted-foreground space-y-1 mt-1 leading-relaxed">
                     <p>• Clique em qualquer quadrado do dia para criar uma tarefa personalizada.</p>
+                    <p>• **Compromissos da Rotina**: Atividades fixas (ex: Trabalho, Gym, Aulas) definidas na sua disponibilidade repetem-se semanalmente.</p>
                     <p>• **Legenda de Provas**: Provas acadêmicas importantes exibem uma borda de progresso correspondente aos tópicos estudados.</p>
                     <div className="flex items-center gap-3 mt-1.5 flex-wrap">
                         <span className="flex items-center gap-1 text-[10px] font-medium"><span className="w-2.5 h-2.5 bg-red-500 rounded-xs shrink-0"></span> Baixo Progresso (&lt;30%)</span>
@@ -772,10 +870,23 @@ export function CalendarView({ onStatsChange }: CalendarViewProps) {
                     </h2>
                 </div>
 
-                <div className="flex items-center gap-2.5">
-                    {/* Study Sessions Filter Toggle */}
+                <div className="flex items-center gap-2.5 flex-wrap">
+                    {/* Routine Blocks Filter Toggle */}
                     <div className="flex items-center gap-1.5 border-r pr-3 border-border/60">
                         <Filter className="w-3.5 h-3.5 text-muted-foreground" />
+                        <label className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5 cursor-pointer select-none">
+                            <input 
+                                type="checkbox" 
+                                checked={showRoutineBlocks} 
+                                onChange={(e) => setShowRoutineBlocks(e.target.checked)}
+                                className="rounded-sm border-input text-primary focus:ring-primary w-3.5 h-3.5"
+                            />
+                            Compromissos de Rotina
+                        </label>
+                    </div>
+
+                    {/* Study Sessions Filter Toggle */}
+                    <div className="flex items-center gap-1.5 border-r pr-3 border-border/60">
                         <label className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5 cursor-pointer select-none">
                             <input 
                                 type="checkbox" 
@@ -783,7 +894,7 @@ export function CalendarView({ onStatsChange }: CalendarViewProps) {
                                 onChange={(e) => setShowStudySessions(e.target.checked)}
                                 className="rounded-sm border-input text-primary focus:ring-primary w-3.5 h-3.5"
                             />
-                            Mostrar Sessões de Estudo
+                            Sessões de Estudo
                         </label>
                     </div>
 
