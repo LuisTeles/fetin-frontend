@@ -1,36 +1,70 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Fetin Frontend — Plataforma de Gestão Acadêmica Inteligente
 
-## Getting Started
+Frontend web moderno desenvolvido com **Next.js (App Router)**, **TypeScript**, **TailwindCSS** e **shadcn/ui**, integrado à API backend NestJS.
 
-First, run the development server:
+---
+
+## 🌟 Funcionalidades Principais
+
+- **Dashboard Analítico**: Gráficos e KPIs de ritmo de estudo, mapas de calor de atividade e progresso de retenção.
+- **Notas Rápidas (Quick Notes)**:
+  - **Frictionless Capture**: Editor Markdown completo (< 5.000 caracteres) com barra de ferramentas e pré-visualização em tempo real.
+  - **Color Tagging**: Sistema de marcadores coloridos com seletor de paletas pré-definidas e criador de tags personalizadas.
+  - **Vínculos Relacionais Searchable**: Vínculo a Disciplinas, Tópicos ou Provas através de dropdown com busca ao vivo.
+  - **Inline `@` Mentions**: Menu popover autocompletável para mencionar disciplinas, tópicos, provas e notas com a sintaxe `@tipo:UUID[Rótulo]`, renderizadas como pills coloridas interativas.
+  - **Gaveta Global (Drawer)**: Acesso instantâneo de qualquer página via Botão Flutuante (FAB) ou atalho de teclado `Option+N` (`Alt+N`) / `Cmd+Shift+K`.
+  - **Visualização em Tela Cheia**: Página dedicada (`/notes/[id]`) para leitura sem distrações, navegação por notas conectadas e edição direta.
+- **Calendário & Agendamento Automático**: Cronogramas inteligentes ajustados à disponibilidade do estudante.
+- **Gestão de Disciplinas & Provas**: Organização de tópicos, pesos e retenção de memória.
+
+---
+
+## 🚀 Como Executar
+
+### 1. Instalar dependências
+
+```bash
+npm install
+```
+
+### 2. Configurar variáveis de ambiente
+
+Crie um arquivo `.env` baseado no `.env.example`:
+
+```env
+NEXT_PUBLIC_API_URL="http://localhost:3000/api/v1"
+```
+
+### 3. Executar o servidor de desenvolvimento
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Abra [http://localhost:3001](http://localhost:3001) (ou a porta atribuída) no navegador.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 📁 Estrutura de Componentes das Notas Rápidas
 
-## Learn More
+```
+components/notes/
+├── global-note-fab.tsx          # Botão flutuante (FAB) & atalho global (Alt+N / Cmd+Shift+K)
+├── quick-note-drawer.tsx        # Painel lateral slide-in para captura rápida de notas
+├── note-card.tsx                # Card de pré-visualização com menu de ações e acionador de tela cheia
+├── note-form.tsx                # Formulário completo de criação/edição de notas
+├── markdown-toolbar.tsx         # Barra de ferramentas de formatação Markdown com botão @
+├── markdown-preview.tsx         # Renderizador de pré-visualização de Markdown estendido
+├── inline-mention-popover.tsx   # Popover autocompletável para menções @ de entidades
+├── wiki-link-renderer.tsx       # Renderizador de pills coloridas para sintaxe @tipo:UUID[Rótulo]
+├── entity-selector-dropdown.tsx # Dropdown searchable de Disciplinas/Tópicos/Provas
+├── tag-selector-dropdown.tsx    # Multi-seletor dropdown de tags coloridas
+├── tag-manager.tsx              # Gerenciador de criação/edição/exclusão de tags
+└── color-palette-picker.tsx     # Seletor de cores hex com 8 presets de estudo
+```
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 📖 Documentação Adicional
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- [Regras de Negócio (`docs/business-rules.md`)](docs/business-rules.md)

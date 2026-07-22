@@ -176,6 +176,25 @@ Registra o estado de memorização do usuário para cada tópico, baseado na cur
 
 ---
 
+### 3.6 NOTES & TAGS — Notas Rápidas e Tags
+
+Gerencia notas de texto rápido em Markdown (< 5.000 caracteres), marcadores coloridos organizacionais (Tags) e relacionamentos híbridos entre conhecimento (vínculos a Disciplinas, Tópicos, Provas e Grafo de Notas).
+
+| Código | Regra de Negócio |
+|--------|-----------------|
+| RN-NOT-01 | Toda nota pertence a exatamente um usuário. Uma nota pode estar vinculada a no máximo 1 entidade primária (uma Disciplina `subject_id`, um Tópico `topic_id`, OU uma Prova `exam_id`). Não é permitido vincular uma nota a múltiplas entidades primárias simultaneamente. |
+| RN-NOT-02 | A exclusão de uma Disciplina, Tópico ou Prova não exclui a nota vinculada. A chave estrangeira é definida como `ON DELETE SET NULL`, preservando o conteúdo da nota. |
+| RN-NOT-03 | O campo `title` é opcional. Caso omitido no cadastro, o sistema deve extrair automaticamente os primeiros 80 caracteres da primeira linha não vazia do `content` para exibição. |
+| RN-NOT-04 | O `content` suporta formatação em Markdown e menções a entidades usando a sintaxe `@tipo:UUID[Rótulo]` (`@subject`, `@topic`, `@exam`, `@note`). No modo de visualização, a sintaxe é renderizada como pills coloridas interativas. |
+| RN-NOT-05 | O limite máximo do campo `content` é de 5.000 caracteres. |
+| RN-TAG-01 | Toda tag pertence a exatamente um usuário. A combinação `(user_id, name)` deve ser única. |
+| RN-TAG-02 | O campo `color` deve armazenar um código hexadecimal de cor de 7 caracteres (ex: `#EF4444`). |
+| RN-TAG-03 | A exclusão de uma tag remove os vínculos com notas em `NOTE_TAGS` em cascata (`ON DELETE CASCADE`), mantendo a nota intacta. |
+| RN-LNK-01 | A tabela `NOTE_LINKS` suporta o grafo de notas (vínculos autorreferenciais direcionados de `source_note_id` para `target_note_id`). Uma nota não pode ser vinculada a si mesma. |
+| RN-LNK-02 | A exclusão de qualquer uma das notas vinculadas remove o registro em `NOTE_LINKS` em cascata (`ON DELETE CASCADE`). |
+
+---
+
 ## 4. Regras do Algoritmo de Geração de Cronograma
 
 O algoritmo de geração é executado no momento em que o usuário cria um novo cronograma. Ele segue as etapas abaixo em ordem estrita:
