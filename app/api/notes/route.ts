@@ -9,12 +9,17 @@ import {
     toJsonResponse,
 } from "@/lib/server-auth"
 
-async function fetchNotes(accessToken: string, queryString: string) {
+async function fetchNotes(
+    accessToken: string,
+    queryString: string,
+    impersonateUserId?: string | null
+) {
     const path = queryString ? `/notes?${queryString}` : "/notes"
-    return forwardToBackend(path, {
-        method: "GET",
-        headers: { Authorization: `Bearer ${accessToken}` },
-    })
+    const headers: Record<string, string> = { Authorization: `Bearer ${accessToken}` }
+    if (impersonateUserId) {
+        headers["x-impersonate-user-id"] = impersonateUserId
+    }
+    return forwardToBackend(path, { method: "GET", headers })
 }
 
 async function createNote(accessToken: string, body: unknown) {
@@ -27,17 +32,22 @@ async function createNote(accessToken: string, body: unknown) {
 
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url)
-    const queryString = searchParams.toString()
+    // userId drives impersonation and is not part of QueryNoteDto. Forwarding it
+    // as a query param trips forbidNonWhitelisted and 400s the whole notes page.
+    const userId = searchParams.get("userId")
+    const forwarded = new URLSearchParams(searchParams)
+    forwarded.delete("userId")
+    const queryString = forwarded.toString()
 
     const accessToken = await getAccessTokenFromCookie()
     if (!accessToken) return toJsonError(401, "Sessão expirada. Faça login novamente.")
 
-    let response = await fetchNotes(accessToken, queryString)
+    let response = await fetchNotes(accessToken, queryString, userId)
 
     if (response.status === 401) {
         const refreshed = await refreshTokensFromCookie()
         if (!refreshed.ok || !refreshed.accessToken) return toJsonError(401, refreshed.error ?? "Sessão expirada.")
-        response = await fetchNotes(refreshed.accessToken, queryString)
+        response = await fetchNotes(refreshed.accessToken, queryString, userId)
     }
 
     if (!response.ok) {

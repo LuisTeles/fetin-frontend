@@ -4,6 +4,7 @@ import { ResponsiveHeatMapCanvas } from "@nivo/heatmap"
 import type { HeatmapRow } from "@/lib/api/dashboard"
 import { ChartEmptyState } from "./chart-empty-state"
 import { useNivoTheme } from "@/lib/nivo-theme"
+import { useReducedMotion } from "@/lib/use-reduced-motion"
 
 interface ActivityHeatmapProps {
     data: HeatmapRow[]
@@ -16,6 +17,8 @@ const SHOWN_HOURS = [
 ]
 
 export function ActivityHeatmap({ data }: ActivityHeatmapProps) {
+    const reducedMotion = useReducedMotion()
+
     const { theme, isDark } = useNivoTheme()
 
     const hasData = data.some((row) => row.data.some((d) => d.y > 0))
@@ -74,7 +77,7 @@ export function ActivityHeatmap({ data }: ActivityHeatmapProps) {
                         <span className="ml-2 font-bold text-primary">{cell.value} min</span>
                     </div>
                 )}
-                animate={true}
+                animate={!reducedMotion}
             />
         </div>
     )

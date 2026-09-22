@@ -180,3 +180,15 @@ export async function cancelSchedule(id: string, impersonateUserId?: string | nu
   }
   return res.json();
 }
+
+export async function deleteSchedule(id: string, impersonateUserId?: string | null): Promise<{ message: string }> {
+  const url = impersonateUserId ? `/api/schedules/${id}?userId=${impersonateUserId}` : `/api/schedules/${id}`;
+  const res = await fetch(url, {
+    method: 'DELETE',
+  });
+  if (!res.ok) {
+    const error = await res.json().catch(() => ({}));
+    throw new Error(error.message || 'Falha ao excluir cronograma.');
+  }
+  return res.json();
+}

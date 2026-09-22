@@ -8,7 +8,11 @@ export type AuthUser = {
 
 export type AuthTokens = {
     access_token: string
-    refresh_token: string
+    /**
+     * Never present. The backend delivers the refresh token only as an httpOnly
+     * cookie; read it with extractBackendRefreshToken() instead of from the body.
+     */
+    refresh_token?: never
     token_type: string
     expires_in: number
 }

@@ -66,6 +66,19 @@
 }
 
 :root {
+  /* Native scrollbars, form controls and caret follow the theme. */
+  color-scheme: light;
+  /* Status palette — mirrors lib/chart-palette.ts. Validated for THIS surface;
+     dark gets its own steps below rather than a flip. */
+  --status-good: #10b981;
+  --status-warning: #f59e0b;
+  --status-critical: #ef4444;
+  /* Sequential ramp for rate (magnitude). One hue, light -> dark on a light surface. */
+  --seq-1: #e0e7ff;
+  --seq-2: #a5b4fc;
+  --seq-3: #818cf8;
+  --seq-4: #6366f1;
+  --seq-5: #4338ca;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
@@ -101,6 +114,16 @@
 }
 
 .dark {
+  color-scheme: dark;
+  --status-good: #059669;
+  --status-warning: #c2870a;
+  --status-critical: #dc2626;
+  /* Dark: inverted direction — low values recede into the surface, high values glow. */
+  --seq-1: #1e1b4b;
+  --seq-2: #312e81;
+  --seq-3: #4338ca;
+  --seq-4: #6366f1;
+  --seq-5: #a5b4fc;
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.205 0 0);

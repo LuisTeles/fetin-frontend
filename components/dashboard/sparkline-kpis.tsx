@@ -88,7 +88,7 @@ function KpiCard({ label, value, trend, delta, color, icon, health }: KpiCardPro
             </CardHeader>
             <CardContent className="p-4 pt-2">
                 <div className="flex items-end justify-between gap-2">
-                    <span className="text-2xl font-bold tracking-tight">{value}</span>
+                    <span className="text-2xl font-bold tracking-tight tabular-nums">{value}</span>
                     {delta !== null && delta !== undefined && (
                         <span className={`flex items-center gap-0.5 text-xs font-medium ${healthColor[health]}`}>
                             <TrendIcon className="h-3 w-3" />

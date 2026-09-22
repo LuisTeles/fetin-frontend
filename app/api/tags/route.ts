@@ -9,11 +9,12 @@ import {
     toJsonResponse,
 } from "@/lib/server-auth"
 
-async function fetchTags(accessToken: string) {
-    return forwardToBackend("/tags", {
-        method: "GET",
-        headers: { Authorization: `Bearer ${accessToken}` },
-    })
+async function fetchTags(accessToken: string, impersonateUserId?: string | null) {
+    const headers: Record<string, string> = { Authorization: `Bearer ${accessToken}` }
+    if (impersonateUserId) {
+        headers["x-impersonate-user-id"] = impersonateUserId
+    }
+    return forwardToBackend("/tags", { method: "GET", headers })
 }
 
 async function createTag(accessToken: string, body: unknown) {
@@ -24,16 +25,19 @@ async function createTag(accessToken: string, body: unknown) {
     })
 }
 
-export async function GET() {
+export async function GET(request: Request) {
+    const { searchParams } = new URL(request.url)
+    const userId = searchParams.get("userId")
+
     const accessToken = await getAccessTokenFromCookie()
     if (!accessToken) return toJsonError(401, "Sessão expirada. Faça login novamente.")
 
-    let response = await fetchTags(accessToken)
+    let response = await fetchTags(accessToken, userId)
 
     if (response.status === 401) {
         const refreshed = await refreshTokensFromCookie()
         if (!refreshed.ok || !refreshed.accessToken) return toJsonError(401, refreshed.error ?? "Sessão expirada.")
-        response = await fetchTags(refreshed.accessToken)
+        response = await fetchTags(refreshed.accessToken, userId)
     }
 
     if (!response.ok) {

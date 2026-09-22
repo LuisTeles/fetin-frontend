@@ -31,11 +31,31 @@ export interface DivergingDatum {
     planned: number
 }
 
+export interface RetentionDatum {
+    topicId: string
+    topicName: string
+    subjectName: string
+    /** 0–1, computed at read time as R = e^(-t/S) — never the stored column. */
+    retentionScore: number
+    reviewIntervalDays: number
+    lastStudiedAt: string | null
+    nextReviewAt: string | null
+    isDue: boolean
+}
+
+export interface RetentionSummary {
+    /** Sorted weakest-first: this list is a study queue, not a report. */
+    topics: RetentionDatum[]
+    dueCount: number
+    averageRetention: number
+}
+
 export interface DashboardSummary {
     kpis: SparklineKpis
     heatmapData: HeatmapRow[]
     bulletData: BulletDatum[]
     divergingData: DivergingDatum[]
+    retention: RetentionSummary
 }
 
 // ─── API Call ─────────────────────────────────────────────────────────────────

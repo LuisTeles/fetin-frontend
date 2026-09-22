@@ -37,13 +37,15 @@ export async function GET(request: Request) {
     const subjectId = searchParams.get("subjectId")
     const userId = searchParams.get("userId")
 
-    if (!subjectId) {
-        return toJsonError(400, "O parâmetro subjectId é obrigatório.")
-    }
-
+    // Authenticate first: validating parameters ahead of the session check tells
+    // anonymous callers what this endpoint expects.
     const accessToken = await getAccessTokenFromCookie()
     if (!accessToken) {
         return toJsonError(401, "Sessão expirada. Faça login novamente.")
+    }
+
+    if (!subjectId) {
+        return toJsonError(400, "O parâmetro subjectId é obrigatório.")
     }
 
     let response = await fetchTopics(accessToken, subjectId, userId)

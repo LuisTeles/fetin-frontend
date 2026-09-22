@@ -4,12 +4,16 @@ import { ResponsiveBullet } from "@nivo/bullet"
 import type { BulletDatum } from "@/lib/api/dashboard"
 import { ChartEmptyState } from "./chart-empty-state"
 import { useNivoTheme } from "@/lib/nivo-theme"
+import { useReducedMotion } from "@/lib/use-reduced-motion"
+import { statusForScore } from "@/lib/chart-palette"
 
 interface BulletChartProps {
     data: BulletDatum[]
 }
 
 export function BulletChart({ data }: BulletChartProps) {
+    const reducedMotion = useReducedMotion()
+
     const { theme, isDark } = useNivoTheme()
 
     if (!data || data.length === 0) {
@@ -27,7 +31,8 @@ export function BulletChart({ data }: BulletChartProps) {
 
     const coloredData = data.map((d) => {
         const pct = d.measures[0]
-        const color = pct >= 80 ? "#10b981" : pct >= 50 ? "#f59e0b" : "#ef4444"
+        // Validated status steps, chosen per surface (see lib/chart-palette.ts).
+        const color = statusForScore(pct / 100, isDark)
         const formattedTitle = d.id.length > 25 ? `${d.id.slice(0, 23)}...` : d.id
         return {
             ...d,
@@ -64,7 +69,7 @@ export function BulletChart({ data }: BulletChartProps) {
                         </p>
                     </div>
                 )}
-                animate={true}
+                animate={!reducedMotion}
             />
         </div>
     )

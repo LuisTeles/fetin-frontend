@@ -1,5 +1,6 @@
 import type { ApiErrorResponse, AuthSuccessResponse } from "@/lib/auth-types"
 import {
+    extractBackendRefreshToken,
     forwardToBackend,
     getMessageFromApiError,
     safeJson,
@@ -27,7 +28,14 @@ export async function POST(request: Request) {
         return toJsonError(502, "Resposta invalida do backend.")
     }
 
-    await writeAuthCookies(payload.tokens)
+    // The refresh token arrives only as a Set-Cookie on the backend response.
+    const refreshToken = extractBackendRefreshToken(response)
+
+    if (!refreshToken) {
+        return toJsonError(502, "Backend nao retornou o cookie de refresh.")
+    }
+
+    await writeAuthCookies(payload.tokens, refreshToken)
 
     return toJsonResponse({
         message: payload.message,

@@ -42,6 +42,7 @@ import {
   toggleDayAvailability,
   updateSessionStatus,
   cancelSchedule,
+  deleteSchedule,
   Exam,
   Schedule,
   ScheduleDay,
@@ -414,6 +415,22 @@ export default function AutoSchedulePage() {
     }
   }
 
+  async function handleDeleteSchedule(id: string) {
+    if (!confirm("Excluir este cronograma permanentemente? Essa ação não pode ser desfeita, mas libera a prova para gerar um novo cronograma imediatamente.")) return
+    setIsLoading(true)
+    setError(null)
+    try {
+      await deleteSchedule(id, impersonateUserId)
+      setSelectedSchedule(null)
+      setSuccessMessage("Cronograma excluído com sucesso. Você já pode gerar um novo.")
+      loadInitialData()
+    } catch (err: any) {
+      setError(err.message || "Erro ao excluir cronograma.")
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   const activeDay = selectedSchedule?.days.find((d) => d.dayNumber === activeDayNumber)
   const unifiedTimeline = activeDay ? buildUnifiedTimeline(activeDay, routineBlocks) : []
 
@@ -581,14 +598,24 @@ export default function AutoSchedulePage() {
                 </CardDescription>
               </div>
 
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => handleCancelSchedule(selectedSchedule.id)}
-                className="text-xs text-destructive hover:bg-destructive/10 shrink-0"
-              >
-                Cancelar Cronograma
-              </Button>
+              <div className="flex items-center gap-1 shrink-0">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleCancelSchedule(selectedSchedule.id)}
+                  className="text-xs text-destructive hover:bg-destructive/10"
+                >
+                  Cancelar Cronograma
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleDeleteSchedule(selectedSchedule.id)}
+                  className="text-xs text-destructive hover:bg-destructive/10"
+                >
+                  Excluir Cronograma
+                </Button>
+              </div>
             </CardHeader>
 
             <CardContent className="p-4 grid grid-cols-2 sm:grid-cols-4 gap-3">

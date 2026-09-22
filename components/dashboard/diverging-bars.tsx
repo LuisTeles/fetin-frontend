@@ -6,6 +6,8 @@ import type { DivergingDatum } from "@/lib/api/dashboard"
 import { ChartEmptyState } from "./chart-empty-state"
 import { Button } from "@/components/ui/button"
 import { useNivoTheme } from "@/lib/nivo-theme"
+import { useReducedMotion } from "@/lib/use-reduced-motion"
+import { statusPalette } from "@/lib/chart-palette"
 
 interface DivergingBarsProps {
     data: DivergingDatum[]
@@ -17,9 +19,11 @@ const PERIOD_OPTIONS: { label: string; value: string }[] = [
 ]
 
 export function DivergingBars({ data }: DivergingBarsProps) {
+    const reducedMotion = useReducedMotion()
+
     const router = useRouter()
     const searchParams = useSearchParams()
-    const { theme } = useNivoTheme()
+    const { theme, isDark } = useNivoTheme()
 
     // URL-Driven State per spec
     const period = searchParams.get("period") ?? "14"
@@ -84,7 +88,9 @@ export function DivergingBars({ data }: DivergingBarsProps) {
                     valueScale={{ type: "linear", min: -bound, max: bound }}
                     indexScale={{ type: "band", round: true }}
                     colors={({ id }) =>
-                        id === "Acima do Plano" ? "#10b981" : "#ef4444"
+                        id === "Acima do Plano"
+                            ? statusPalette(isDark).good
+                            : statusPalette(isDark).critical
                     }
                     borderRadius={3}
                     axisLeft={{
@@ -100,7 +106,7 @@ export function DivergingBars({ data }: DivergingBarsProps) {
                     enableGridY={true}
                     gridYValues={[-Math.round(bound / 2), 0, Math.round(bound / 2)]}
                     enableLabel={false}
-                    animate={true}
+                    animate={!reducedMotion}
                     tooltip={({ data: d }) => {
                         const item = d as unknown as typeof chartData[0]
                         const delta = item.delta
