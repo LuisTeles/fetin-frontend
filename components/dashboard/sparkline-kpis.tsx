@@ -2,6 +2,7 @@
 
 import { CountUp } from "@/components/ui/count-up"
 import { addDays, localToday, weekdayOfDateString } from "@/lib/time"
+import { InfoTip } from "@/components/ui/info-tip"
 import { TrendingUp, TrendingDown, Clock, CheckCircle2, Target, Flame } from "lucide-react"
 import { Card, CardContent, CardHeader, CardDescription } from "@/components/ui/card"
 import type { SparklineKpis } from "@/lib/api/dashboard"
@@ -166,6 +167,10 @@ function DotsChart({ data, runLength }: { data: DayDatum[]; runLength?: number }
 
 interface KpiCardProps {
     label: string
+    /** §4 tooltip: what the number means and its window. */
+    tooltip: string
+    /** Footer: unit · window, e.g. "Últimos 7 dias". */
+    footer?: string
     value: string
     /** One-sentence verdict under the number. */
     verdict: string
@@ -173,10 +178,12 @@ interface KpiCardProps {
     icon: React.ReactNode
     delta?: number | null
     deltaHint?: string
+    /** What the arrow compared, baseline included. */
+    deltaTitle?: string
     children: React.ReactNode
 }
 
-function KpiCard({ label, value, verdict, health, icon, delta, deltaHint, children }: KpiCardProps) {
+function KpiCard({ label, tooltip, footer = "Últimos 7 dias", value, verdict, health, icon, delta, deltaHint, deltaTitle, children }: KpiCardProps) {
     const badge = healthBadge[health]
     const hasDelta = delta !== null && delta !== undefined
     const TrendIcon = hasDelta && delta >= 0 ? TrendingUp : TrendingDown
@@ -185,7 +192,10 @@ function KpiCard({ label, value, verdict, health, icon, delta, deltaHint, childr
         <Card className="overflow-visible">
             <CardHeader className="p-4 pb-0">
                 <div className="flex items-center justify-between gap-2">
-                    <CardDescription className="kpi-label">{label}</CardDescription>
+                    <CardDescription className="kpi-label flex items-center gap-1">
+                        {label}
+                        <InfoTip id={`kpi-tip-${label}`}>{tooltip}</InfoTip>
+                    </CardDescription>
                     <div className="rounded-md bg-muted p-1 text-muted-foreground">{icon}</div>
                 </div>
             </CardHeader>
@@ -202,7 +212,7 @@ function KpiCard({ label, value, verdict, health, icon, delta, deltaHint, childr
                         {hasDelta && (
                             <span
                                 className="ml-1.5 inline-flex items-center gap-0.5 font-medium text-foreground"
-                                title={deltaHint}
+                                title={deltaTitle ?? deltaHint}
                             >
                                 <TrendIcon className="h-3 w-3" aria-hidden="true" />
                                 {delta >= 0 ? "+" : "−"}
@@ -212,7 +222,7 @@ function KpiCard({ label, value, verdict, health, icon, delta, deltaHint, childr
                     </p>
                 </div>
                 {children}
-                <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Últimos 7 dias</p>
+                <p className="text-[10px] uppercase tracking-wide text-muted-foreground">{footer}</p>
             </CardContent>
         </Card>
     )
@@ -240,10 +250,10 @@ export function SparklineKpiCards({ data }: { data: SparklineKpis }) {
 
     const sessions = data.sessionsCompletedThisWeek
 
-    // Last 3 days vs first 3 days (the middle day is left out so the windows don't overlap).
-    const last3 = data.totalHoursTrend.slice(4).reduce((a, b) => a + b, 0)
-    const first3 = data.totalHoursTrend.slice(0, 3).reduce((a, b) => a + b, 0)
-    const hoursDelta = first3 > 0 ? Math.round(((last3 - first3) / first3) * 100) : null
+    // The API compares the last 3 CLOSED days (today is partial and excluded) with the 3 before.
+    const cmp = data.hoursComparison
+    const hoursDelta = cmp.deltaPct === null ? null : Math.round(cmp.deltaPct * 100)
+    const hoursDeltaTitle = `Últimos 3 dias fechados: ${fmtHours(cmp.recentHours)} · 3 dias anteriores: ${fmtHours(cmp.baselineHours)}. Hoje fica de fora por estar incompleto.`
 
     const hoursData: DayDatum[] = days.map((day, i) => ({
         day,
@@ -269,7 +279,8 @@ export function SparklineKpiCards({ data }: { data: SparklineKpis }) {
     return (
         <div className="stagger grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
             <KpiCard
-                label="Horas de Estudo"
+                label="Horas estudadas"
+                tooltip="Tempo total das sessões concluídas nos últimos 7 dias. A seta compara os 3 dias mais recentes fechados com os 3 primeiros."
                 value={fmtHours(data.totalHoursThisWeek)}
                 verdict={
                     data.totalHoursThisWeek >= HOURS_GOAL
@@ -277,7 +288,8 @@ export function SparklineKpiCards({ data }: { data: SparklineKpis }) {
                         : `Faltam ${fmtHours(Math.round((HOURS_GOAL - data.totalHoursThisWeek) * 10) / 10)} para a meta de ${HOURS_GOAL}h.`
                 }
                 delta={hoursDelta}
-                deltaHint="vs. início da semana"
+                deltaHint="vs. 3 dias anteriores"
+                deltaTitle={hoursDeltaTitle}
                 health={hoursHealth}
                 icon={<Clock className="h-3.5 w-3.5" />}
             >
@@ -285,7 +297,8 @@ export function SparklineKpiCards({ data }: { data: SparklineKpis }) {
             </KpiCard>
 
             <KpiCard
-                label="Dias Ativos"
+                label="Dias com estudo"
+                tooltip="Em quantos dos últimos 7 dias você concluiu ao menos uma sessão. 4 de 7 dias = 57%."
                 value={`${ratePercent}%`}
                 verdict={`${activeDays} de 7 dias com ao menos uma sessão.`}
                 health={rateHealth}
@@ -295,7 +308,8 @@ export function SparklineKpiCards({ data }: { data: SparklineKpis }) {
             </KpiCard>
 
             <KpiCard
-                label="Sessões Realizadas"
+                label="Sessões concluídas"
+                tooltip="Sessões que você marcou como concluídas nos últimos 7 dias, independentemente do dia em que estavam planejadas."
                 value={String(sessions)}
                 verdict={
                     sessions === 0
@@ -309,11 +323,13 @@ export function SparklineKpiCards({ data }: { data: SparklineKpis }) {
             </KpiCard>
 
             <KpiCard
-                label="Sequência Atual"
+                label="Sequência de estudo"
+                tooltip="Dias seguidos com ao menos uma sessão concluída. Estudar hoje mantém a sequência; ela só zera após um dia inteiro sem estudar."
+                footer="Dias seguidos"
                 value={`${streak}d`}
                 verdict={
                     streak === 0
-                        ? "Sem sessão hoje — a sequência recomeça na próxima."
+                        ? "Sem sessão ontem nem hoje — a sequência recomeça quando você estudar."
                         : streak >= bestStreak && streak > 1
                           ? "Melhor sequência da semana."
                           : `Dias seguidos estudando · melhor da semana: ${bestStreak}d.`
