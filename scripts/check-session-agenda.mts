@@ -2,7 +2,14 @@
 //   node --experimental-strip-types scripts/check-session-agenda.mts
 import assert from "node:assert/strict"
 import type { Exam, Schedule, StudySession } from "../lib/api/schedules.ts"
-import { applySessionStatus, buildAgenda } from "../lib/session-agenda.ts"
+import {
+    agendaReducer,
+    agendaView,
+    applySessionStatus,
+    buildAgenda,
+    initialAgendaState,
+    sessionActions,
+} from "../lib/session-agenda.ts"
 import { daysBetween, localToday } from "../lib/time.ts"
 
 const TODAY = "2026-09-24"
@@ -148,6 +155,49 @@ assert.equal(localToday(new Date("2026-09-25T02:30:00.000Z")), "2026-09-24", "23
     const sessions = out[0].days[0].studySessions
     assert.equal(sessions[0].status, "completed")
     assert.equal(sessions[1].status, "pending")
+}
+
+// sessionActions: buttons only for a pending session, and never while impersonating (writes are blocked)
+{
+    assert.deepEqual(sessionActions(session(), false), ["skipped", "completed"])
+    assert.deepEqual(sessionActions(session({ status: "completed" }), false), [])
+    assert.deepEqual(sessionActions(session(), true), [], "read-only while an admin impersonates")
+}
+
+// agendaReducer: a failed status change rolls the one session back, keeps its error through the recovery reload
+{
+    const s = session()
+    const loadedState = agendaReducer(initialAgendaState, { type: "loaded", schedules: [schedule({ [TODAY]: [s] })], exams: [] })
+    const optimistic = agendaReducer(loadedState, { type: "statusStart", sessionId: s.id, status: "completed" })
+    assert.equal(optimistic.busy, true)
+    assert.equal(optimistic.schedules[0].days[0].studySessions[0].status, "completed")
+
+    const failed = agendaReducer(optimistic, { type: "statusFailed", sessionId: s.id, message: "Sessão já finalizada" })
+    assert.equal(failed.error, "Sessão já finalizada")
+    assert.equal(failed.busy, false)
+    assert.equal(failed.loading, true, "a recovery reload starts")
+    assert.equal(failed.schedules[0].days[0].studySessions[0].status, "pending", "rolled back")
+
+    const recovered = agendaReducer(failed, { type: "loaded", schedules: loadedState.schedules, exams: [] })
+    assert.equal(recovered.error, "Sessão já finalizada", "the recovery reload must not swallow the error")
+    assert.equal(recovered.loading, false)
+
+    const manual = agendaReducer(recovered, { type: "reload" })
+    assert.equal(manual.error, null, "only a user-initiated reload clears it")
+}
+
+// agendaView: a failed first load is an error, never "nothing ahead"
+{
+    const empty = buildAgenda([], [], WINDOW)
+    assert.equal(agendaView(initialAgendaState, empty), "loading")
+    const failedFirst = agendaReducer(initialAgendaState, { type: "loadFailed", message: "API fora do ar" })
+    assert.equal(agendaView(failedFirst, empty), "failed")
+    const loadedEmpty = agendaReducer(initialAgendaState, { type: "loaded", schedules: [], exams: [] })
+    assert.equal(agendaView(loadedEmpty, empty), "empty")
+    const failedLater = agendaReducer(loadedEmpty, { type: "loadFailed", message: "x" })
+    assert.equal(agendaView(failedLater, empty), "empty", "after one good load, keep showing what we have")
+    const withData = buildAgenda([schedule({ [TODAY]: [session()] })], [], WINDOW)
+    assert.equal(agendaView(loadedEmpty, withData), "agenda")
 }
 
 console.log("session-agenda: all checks passed")

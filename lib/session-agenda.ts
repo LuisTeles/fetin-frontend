@@ -128,6 +128,83 @@ export function buildAgenda(schedules: Schedule[], exams: Exam[], window: Agenda
     }
 }
 
+/** The actions a row offers: only for a pending session, and none while impersonating (writes are blocked). */
+export function sessionActions(session: StudySession, readOnly: boolean): ("skipped" | "completed")[] {
+    return readOnly || session.status !== "pending" ? [] : ["skipped", "completed"]
+}
+
+// ─── Page state ───────────────────────────────────────────────────────────────
+
+export interface AgendaState {
+    schedules: Schedule[]
+    exams: Exam[]
+    /** At least one load succeeded: from then on an error never hides what we have. */
+    loaded: boolean
+    loading: boolean
+    error: string | null
+    /** A status change is in flight; every row's buttons wait for it. */
+    busy: boolean
+}
+
+export type AgendaAction =
+    | { type: "reload" }
+    | { type: "loaded"; schedules: Schedule[]; exams: Exam[] }
+    | { type: "loadFailed"; message: string }
+    | { type: "statusStart"; sessionId: string; status: "completed" | "skipped" }
+    | { type: "statusDone" }
+    | { type: "statusFailed"; sessionId: string; message: string }
+
+export const initialAgendaState: AgendaState = {
+    schedules: [],
+    exams: [],
+    loaded: false,
+    loading: true,
+    error: null,
+    busy: false,
+}
+
+export function agendaReducer(state: AgendaState, action: AgendaAction): AgendaState {
+    switch (action.type) {
+        case "reload":
+            return { ...state, loading: true, error: null }
+        case "loaded":
+            // keeps `error`: a reload that recovers from a failed action must not swallow its message
+            return { ...state, schedules: action.schedules, exams: action.exams, loaded: true, loading: false }
+        case "loadFailed":
+            return { ...state, loading: false, error: action.message }
+        case "statusStart":
+            return {
+                ...state,
+                busy: true,
+                error: null,
+                schedules: applySessionStatus(state.schedules, action.sessionId, action.status),
+            }
+        case "statusDone":
+            return { ...state, busy: false }
+        case "statusFailed":
+            // only pending sessions offer actions, so pending is what it was; the caller reloads right after
+            return {
+                ...state,
+                busy: false,
+                loading: true,
+                error: action.message,
+                schedules: applySessionStatus(state.schedules, action.sessionId, "pending"),
+            }
+    }
+}
+
+export type AgendaView = "loading" | "failed" | "empty" | "agenda"
+
+export function agendaView(state: AgendaState, agenda: Agenda): AgendaView {
+    if (!state.loaded) return state.error ? "failed" : "loading"
+    const nothing =
+        agenda.overdue.length === 0 &&
+        agenda.today.length === 0 &&
+        agenda.upcoming.length === 0 &&
+        agenda.later.length === 0
+    return nothing ? "empty" : "agenda"
+}
+
 /** A copy of `schedules` with one session's status replaced — for optimistic updates and rollback. */
 export function applySessionStatus(
     schedules: Schedule[],

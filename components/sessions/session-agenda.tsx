@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useReducer } from "react"
 import { AlertCircle, CalendarCheck2, RefreshCw } from "lucide-react"
 
 import { Alert, AlertDescription } from "@/components/ui/alert"
@@ -18,7 +18,13 @@ import {
     type Schedule,
 } from "@/lib/api/schedules"
 import { formatDateShort, pluralize } from "@/lib/format"
-import { applySessionStatus, buildAgenda, type AgendaItem } from "@/lib/session-agenda"
+import {
+    agendaReducer,
+    agendaView,
+    buildAgenda,
+    initialAgendaState,
+    type AgendaItem,
+} from "@/lib/session-agenda"
 import { addDays, localToday } from "@/lib/time"
 
 import { ExamRow, SessionRow } from "./agenda-rows"
@@ -31,25 +37,21 @@ function fetchAgenda(userId: string | null): Promise<[Schedule[], Exam[]]> {
 
 export function SessionAgenda() {
     const userId = useSearchParams().get("userId")
-    const [schedules, setSchedules] = useState<Schedule[]>([])
-    const [exams, setExams] = useState<Exam[]>([])
-    const [loading, setLoading] = useState(true)
-    const [error, setError] = useState<string | null>(null)
-    const [busyId, setBusyId] = useState<string | null>(null)
+    // Admin impersonation is read-only on the backend (every non-GET is a 403), so offer no actions.
+    const readOnly = userId !== null
+    const [state, dispatch] = useReducer(agendaReducer, initialAgendaState)
+    const { loading, error, busy } = state
 
     /** Applies a fetch result; `isCurrent` drops a response that a newer request superseded. */
     const track = useCallback((request: Promise<[Schedule[], Exam[]]>, isCurrent: () => boolean) => {
         return request.then(
-            ([s, e]) => {
-                if (!isCurrent()) return
-                setSchedules(s)
-                setExams(e)
-                setLoading(false)
+            ([schedules, exams]) => {
+                if (isCurrent()) dispatch({ type: "loaded", schedules, exams })
             },
             (err: unknown) => {
-                if (!isCurrent()) return
-                setError(err instanceof Error ? err.message : "Falha ao carregar a agenda.")
-                setLoading(false)
+                if (isCurrent()) {
+                    dispatch({ type: "loadFailed", message: err instanceof Error ? err.message : "Falha ao carregar a agenda." })
+                }
             },
         )
     }, [])
@@ -63,30 +65,26 @@ export function SessionAgenda() {
     }, [track, userId])
 
     const load = useCallback(() => {
-        setLoading(true)
-        setError(null)
+        dispatch({ type: "reload" })
         return track(fetchAgenda(userId), () => true)
     }, [track, userId])
 
     const today = localToday()
     const agenda = useMemo(
-        () => buildAgenda(schedules, exams, { today, horizonEnd: addDays(today, HORIZON_DAYS) }),
-        [schedules, exams, today],
+        () => buildAgenda(state.schedules, state.exams, { today, horizonEnd: addDays(today, HORIZON_DAYS) }),
+        [state.schedules, state.exams, today],
     )
 
     async function handleStatus(sessionId: string, status: "completed" | "skipped") {
-        const previous = schedules
-        setBusyId(sessionId)
-        setError(null)
-        setSchedules(applySessionStatus(previous, sessionId, status))
+        dispatch({ type: "statusStart", sessionId, status })
         try {
             await updateSessionStatus(sessionId, status, userId)
+            dispatch({ type: "statusDone" })
         } catch (err) {
-            setSchedules(previous)
-            setError(err instanceof Error ? err.message : "Falha ao atualizar a sessão.")
-            void load() // the server may already hold a different status (400 "já finalizada")
-        } finally {
-            setBusyId(null)
+            const message = err instanceof Error ? err.message : "Falha ao atualizar a sessão."
+            dispatch({ type: "statusFailed", sessionId, message })
+            // the server may already hold a different status (400 "já finalizada"); this reload keeps the message
+            void track(fetchAgenda(userId), () => true)
         }
     }
 
@@ -98,12 +96,15 @@ export function SessionAgenda() {
                 key={item.session.id}
                 item={item}
                 showDate={showDate}
-                busy={busyId !== null}
+                busy={busy}
+                readOnly={readOnly}
                 onStatus={handleStatus}
             />
         )
 
-    if (loading && schedules.length === 0 && exams.length === 0) {
+    const view = agendaView(state, agenda)
+
+    if (view === "loading") {
         return (
             <div className="space-y-3">
                 <Skeleton className="h-24 w-full" />
@@ -112,11 +113,21 @@ export function SessionAgenda() {
         )
     }
 
-    const nothing =
-        agenda.overdue.length === 0 &&
-        agenda.today.length === 0 &&
-        agenda.upcoming.length === 0 &&
-        agenda.later.length === 0
+    if (view === "failed") {
+        return (
+            <Alert variant="destructive">
+                <AlertCircle />
+                <AlertDescription className="flex flex-wrap items-center justify-between gap-2">
+                    <span>{error}</span>
+                    <Button size="sm" variant="outline" onClick={() => void load()}>
+                        <RefreshCw /> Tentar de novo
+                    </Button>
+                </AlertDescription>
+            </Alert>
+        )
+    }
+
+    const nothing = view === "empty"
 
     const withUser = (path: string) => (userId ? `${path}?userId=${userId}` : path)
 

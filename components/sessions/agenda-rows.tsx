@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import type { StudySessionType } from "@/lib/api/schedules"
 import { formatDateShort, formatMinutes, pluralize } from "@/lib/format"
-import type { AgendaExam, AgendaSession } from "@/lib/session-agenda"
+import { sessionActions, type AgendaExam, type AgendaSession } from "@/lib/session-agenda"
 import { daysBetween } from "@/lib/time"
 import { cn } from "@/lib/utils"
 
@@ -18,16 +18,20 @@ const SESSION_TYPE_LABEL: Record<StudySessionType, string> = {
 export function SessionRow({
     item,
     busy,
+    readOnly,
     onStatus,
     showDate = false,
 }: {
     item: AgendaSession
     busy: boolean
+    /** Impersonating: the backend rejects writes, so no buttons. */
+    readOnly: boolean
     onStatus: (sessionId: string, status: "completed" | "skipped") => void
     showDate?: boolean
 }) {
     const { session } = item
     const finished = session.status !== "pending"
+    const actions = sessionActions(session, readOnly)
 
     return (
         <li
@@ -53,14 +57,18 @@ export function SessionRow({
                 </div>
             </div>
 
-            {!finished && (
+            {actions.length > 0 && (
                 <div className="flex shrink-0 gap-1.5 self-end sm:self-auto">
-                    <Button size="sm" variant="ghost" disabled={busy} onClick={() => onStatus(session.id, "skipped")}>
-                        <SkipForward /> Pular
-                    </Button>
-                    <Button size="sm" disabled={busy} onClick={() => onStatus(session.id, "completed")}>
-                        <Check /> Concluir
-                    </Button>
+                    {actions.includes("skipped") && (
+                        <Button size="sm" variant="ghost" disabled={busy} onClick={() => onStatus(session.id, "skipped")}>
+                            <SkipForward /> Pular
+                        </Button>
+                    )}
+                    {actions.includes("completed") && (
+                        <Button size="sm" disabled={busy} onClick={() => onStatus(session.id, "completed")}>
+                            <Check /> Concluir
+                        </Button>
+                    )}
                 </div>
             )}
         </li>
