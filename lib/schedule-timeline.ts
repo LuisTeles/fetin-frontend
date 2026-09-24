@@ -1,5 +1,6 @@
 import type { RoutineBlock, RoutineCategory } from "./api/availability"
 import type { ScheduleDay, StudySession } from "./api/schedules"
+import { weekdayOfDateString } from "./time"
 
 export type TimelineItem =
   | {
@@ -93,8 +94,8 @@ export function buildUnifiedTimeline(
   day: Pick<ScheduleDay, "studyDate" | "studySessions">,
   routineBlocks: RoutineBlock[]
 ): TimelineItem[] {
-  const dateObj = new Date(`${day.studyDate.split("T")[0]}T00:00:00.000Z`)
-  const dayOfWeek = dateObj.getUTCDay()
+  // study_date is a calendar date: its weekday, never shifted by a zone
+  const dayOfWeek = weekdayOfDateString(day.studyDate)
 
   const routine = routineIntervalsForDay(dayOfWeek, routineBlocks)
 

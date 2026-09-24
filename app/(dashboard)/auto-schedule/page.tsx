@@ -37,6 +37,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { buildUnifiedTimeline } from "@/lib/schedule-timeline"
+import { dateOnlyString, localToday } from "@/lib/time"
 
 import {
   fetchExamsList,
@@ -118,16 +119,6 @@ const ROUTINE_CATEGORY_CONFIG: Record<
   },
 }
 
-/** Today's date on the student's calendar (America/Sao_Paulo, D1), not the browser's UTC day. */
-function todayLocal(): string {
-  return new Intl.DateTimeFormat("en-CA", {
-    timeZone: "America/Sao_Paulo",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).format(new Date())
-}
-
 export default function AutoSchedulePage() {
   const searchParams = useSearchParams()
   const impersonateUserId = searchParams.get("userId")
@@ -148,7 +139,7 @@ export default function AutoSchedulePage() {
   const [selectedExamId, setSelectedExamId] = useState<string>("")
   const [maxStudyHour, setMaxStudyHour] = useState<string>("22:00")
   const [sessionDurationMinutes, setSessionDurationMinutes] = useState<number>(45)
-  const [startDate, setStartDate] = useState<string>(todayLocal())
+  const [startDate, setStartDate] = useState<string>(localToday())
 
   // Animation State
   const [isAnimating, setIsAnimating] = useState<boolean>(false)
@@ -211,7 +202,7 @@ export default function AutoSchedulePage() {
       setError("Não foi possível identificar a prova deste cronograma.")
       return
     }
-    await runGeneration(examId, todayLocal())
+    await runGeneration(examId, localToday())
   }
 
   async function runGeneration(examId: string, from: string) {
@@ -503,7 +494,7 @@ export default function AutoSchedulePage() {
                 >
                   {exams.map((ex) => {
                     const subjectName = ex.subject_name || ex.subject?.name || "Disciplina"
-                    const examDateStr = ex.exam_date || ex.examDate?.split("T")[0] || ""
+                    const examDateStr = ex.exam_date || (ex.examDate ? dateOnlyString(ex.examDate) : "")
                     return (
                       <option key={ex.id} value={ex.id}>
                         {subjectName} — {formatDateSafe(examDateStr, "sem data")}

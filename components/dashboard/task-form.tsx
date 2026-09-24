@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Loader2, Check } from "lucide-react"
+import { instantToWallClockInput, localToday, wallClockInputToInstant } from "@/lib/time"
 
 type Task = {
     id: string
@@ -46,26 +47,15 @@ export function TaskForm({ task, defaultDate, onSuccess, onCancel }: TaskFormPro
     // Set default datetime to defaultDate (passed from calendar click) + "T12:00"
     const [dateTime, setDateTime] = useState(() => {
         if (task?.date) {
-            // ISO format from DB is typically like 2026-07-20T14:00:00.000Z
-            // We need to convert it to YYYY-MM-DDTHH:MM for datetime-local
-            const d = new Date(task.date)
-            const year = d.getFullYear()
-            const month = String(d.getMonth() + 1).padStart(2, "0")
-            const day = String(d.getDate()).padStart(2, "0")
-            const hours = String(d.getHours()).padStart(2, "0")
-            const minutes = String(d.getMinutes()).padStart(2, "0")
-            return `${year}-${month}-${day}T${hours}:${minutes}`
+            // The stored instant, shown as a São Paulo wall-clock time (D1), not the browser's.
+            return instantToWallClockInput(task.date)
         }
         if (defaultDate) {
             return `${defaultDate}T12:00`
         }
-        
-        // Default to current time
-        const now = new Date()
-        const year = now.getFullYear()
-        const month = String(now.getMonth() + 1).padStart(2, "0")
-        const day = String(now.getDate()).padStart(2, "0")
-        return `${year}-${month}-${day}T12:00`
+
+        // Default to today (São Paulo) at noon
+        return `${localToday()}T12:00`
     })
 
     const [color, setColor] = useState(task?.color ?? "#3B82F6")
@@ -89,7 +79,8 @@ export function TaskForm({ task, defaultDate, onSuccess, onCancel }: TaskFormPro
         setError(null)
 
         try {
-            const parsedDate = new Date(dateTime).toISOString()
+            // The input is a São Paulo wall-clock time; convert it to the instant we store.
+            const parsedDate = wallClockInputToInstant(dateTime).toISOString()
             const payload = {
                 title: title.trim(),
                 description: description.trim() || undefined,

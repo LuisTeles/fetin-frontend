@@ -27,6 +27,7 @@ import { SlidingIndicator } from "@/components/ui/sliding-indicator"
 import { fetchAvailabilitySchedule, RoutineBlock } from "@/lib/api/availability"
 import { TaskForm } from "./task-form"
 import { formatTime, pluralize } from "@/lib/format"
+import { cursorFromYmd, dateOnlyString, localDateOf, localToday, todayCursor, toYmd, weekdayOfDateString, ymdOfCursor } from "@/lib/time"
 
 const MAX_MONTH_CHIPS = 3
 const HELP_STORAGE_KEY = "fetin:calendar-help"
@@ -75,7 +76,7 @@ export function CalendarView({ onStatsChange }: CalendarViewProps) {
     const impersonateUserId = searchParams.get("userId")
 
     // Date navigation states
-    const [currentDate, setCurrentDate] = useState(new Date())
+    const [currentDate, setCurrentDate] = useState(todayCursor())
     // Instructions box: open on the first visit, then remembers the user's last choice.
     const [helpOpen, setHelpOpen] = useState(true)
     useEffect(() => {
@@ -120,8 +121,8 @@ export function CalendarView({ onStatsChange }: CalendarViewProps) {
             const year = currentDate.getFullYear()
             const month = currentDate.getMonth()
             
-            const start = new Date(year, month - 1, 1).toISOString().split("T")[0]
-            const end = new Date(year, month + 2, 0).toISOString().split("T")[0]
+            const start = toYmd(year, month - 1, 1)
+            const end = toYmd(year, month + 2, 0)
 
             // 1. Fetch Tasks
             const tasksUrl = impersonateUserId 
@@ -158,9 +159,8 @@ export function CalendarView({ onStatsChange }: CalendarViewProps) {
                         if (schedule.days) {
                             for (const day of schedule.days) {
                                 if (day.studySessions) {
-                                    const dateStr = typeof day.studyDate === "string"
-                                        ? day.studyDate.split("T")[0]
-                                        : new Date(day.studyDate).toISOString().split("T")[0]
+                                    // study_date is a calendar date: never shifted by a zone
+                                    const dateStr = dateOnlyString(day.studyDate)
                                     for (const session of day.studySessions) {
                                         extractedSessions.push({
                                             id: session.id,
@@ -245,7 +245,7 @@ export function CalendarView({ onStatsChange }: CalendarViewProps) {
     }
 
     const handleToday = () => {
-        setCurrentDate(new Date())
+        setCurrentDate(todayCursor())
     }
 
     // Modal Operations
@@ -257,7 +257,7 @@ export function CalendarView({ onStatsChange }: CalendarViewProps) {
 
     const openEditModal = (task: Task) => {
         setEditingTask(task)
-        setSelectedDateForNewTask(task.date.split("T")[0])
+        setSelectedDateForNewTask(localDateOf(task.date))
         setIsModalOpen(true)
     }
 
@@ -310,15 +310,14 @@ export function CalendarView({ onStatsChange }: CalendarViewProps) {
 
     // Filter events for a specific day string (YYYY-MM-DD)
     const getEventsForDay = (dateStr: string) => {
-        const dayTasks = tasks.filter(t => t.date.split("T")[0] === dateStr)
+        const dayTasks = tasks.filter(t => localDateOf(t.date) === dateStr)
         const dayExams = exams.filter(e => e.exam_date === dateStr)
         const daySessions = showStudySessions 
             ? studySessions.filter(s => s.studyDate === dateStr) 
             : []
         
         // Calculate day of week (0 = Sunday, 1 = Monday, ..., 6 = Saturday)
-        const [y, m, d] = dateStr.split("-").map(Number)
-        const dayOfWeek = new Date(y, m - 1, d).getDay()
+        const dayOfWeek = weekdayOfDateString(dateStr)
 
         const dayRoutineBlocks = showRoutineBlocks
             ? routineBlocks.filter(b => b.dayOfWeek === dayOfWeek)
@@ -328,8 +327,7 @@ export function CalendarView({ onStatsChange }: CalendarViewProps) {
     }
 
     const openDay = (dateStr: string) => {
-        const [y, m, d] = dateStr.split("-").map(Number)
-        setCurrentDate(new Date(y, m - 1, d))
+        setCurrentDate(cursorFromYmd(dateStr))
         setViewMode("day")
     }
 
@@ -349,7 +347,7 @@ export function CalendarView({ onStatsChange }: CalendarViewProps) {
             prevMonthDays.push({
                 dayNum: prevMonthTotalDays - i,
                 isCurrentMonth: false,
-                dateStr: new Date(year, month - 1, prevMonthTotalDays - i).toISOString().split("T")[0]
+                dateStr: toYmd(year, month - 1, prevMonthTotalDays - i)
             })
         }
 
@@ -370,17 +368,15 @@ export function CalendarView({ onStatsChange }: CalendarViewProps) {
         const nextMonthDays = []
         const remainingCells = (7 - (totalCells % 7)) % 7
         for (let i = 1; i <= remainingCells; i++) {
-            const localMonth = String(month + 2).padStart(2, "0")
-            const localDay = String(i).padStart(2, "0")
             nextMonthDays.push({
                 dayNum: i,
                 isCurrentMonth: false,
-                dateStr: `${month === 11 ? year + 1 : year}-${month === 11 ? "01" : localMonth}-${localDay}`
+                dateStr: toYmd(year, month + 1, i)
             })
         }
 
         const allDays = [...prevMonthDays, ...currentMonthDays, ...nextMonthDays]
-        const todayStr = new Date().toISOString().split("T")[0]
+        const todayStr = localToday()
 
         return (
             <div className="grid grid-cols-7 gap-1 border border-border rounded-md bg-muted/20 overflow-hidden">
@@ -550,16 +546,14 @@ export function CalendarView({ onStatsChange }: CalendarViewProps) {
         for (let i = 0; i < 7; i++) {
             const date = new Date(startOfWeek)
             date.setDate(startOfWeek.getDate() + i)
-            const localMonth = String(date.getMonth() + 1).padStart(2, "0")
-            const localDay = String(date.getDate()).padStart(2, "0")
             weekDays.push({
                 name: ["Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"][i],
                 dayNum: date.getDate(),
-                dateStr: `${date.getFullYear()}-${localMonth}-${localDay}`
+                dateStr: ymdOfCursor(date)
             })
         }
 
-        const todayStr = new Date().toISOString().split("T")[0]
+        const todayStr = localToday()
 
         return (
             <div className="grid grid-cols-1 sm:grid-cols-7 gap-2 border border-border rounded-md p-2 bg-muted/5">
@@ -699,9 +693,7 @@ export function CalendarView({ onStatsChange }: CalendarViewProps) {
 
     // DAY VIEW GENERATION LOGIC
     const renderDayGrid = () => {
-        const localMonth = String(currentDate.getMonth() + 1).padStart(2, "0")
-        const localDay = String(currentDate.getDate()).padStart(2, "0")
-        const dateStr = `${currentDate.getFullYear()}-${localMonth}-${localDay}`
+        const dateStr = ymdOfCursor(currentDate)
         
         const { dayTasks, dayExams, daySessions, dayRoutineBlocks } = getEventsForDay(dateStr)
         const dayName = currentDate.toLocaleDateString("pt-BR", { weekday: "long" })
@@ -991,7 +983,7 @@ export function CalendarView({ onStatsChange }: CalendarViewProps) {
                     {error}
                 </div>
             ) : (
-                <div key={`${viewMode}-${currentDate.toISOString().slice(0, 10)}`} className="enter" style={{ "--rise": "4px" } as React.CSSProperties}>
+                <div key={`${viewMode}-${ymdOfCursor(currentDate)}`} className="enter" style={{ "--rise": "4px" } as React.CSSProperties}>
                     {viewMode === "month" && renderMonthGrid()}
                     {viewMode === "week" && renderWeekGrid()}
                     {viewMode === "day" && renderDayGrid()}

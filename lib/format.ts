@@ -9,7 +9,12 @@
  * and these are called once per row in tables that can run to hundreds of rows.
  */
 
+import { APP_TIMEZONE } from "./time"
+
 const DEFAULT_LOCALE = "pt-BR"
+
+/** Every instant is shown on the student's clock (America/Sao_Paulo, D1), whatever the browser's zone. */
+const TZ = { timeZone: APP_TIMEZONE } as const
 
 const cache = new Map<string, Intl.DateTimeFormat | Intl.NumberFormat>()
 
@@ -36,19 +41,19 @@ function numberFormatter(locale: string, options: Intl.NumberFormatOptions) {
 /** "14:32" */
 export function formatTime(value: Date | string, locale = DEFAULT_LOCALE): string {
     const date = typeof value === "string" ? new Date(value) : value
-    return dateFormatter(locale, { hour: "2-digit", minute: "2-digit" }).format(date)
+    return dateFormatter(locale, { ...TZ, hour: "2-digit", minute: "2-digit" }).format(date)
 }
 
 /** "27/08/2026" */
 export function formatDate(value: Date | string, locale = DEFAULT_LOCALE): string {
     const date = typeof value === "string" ? new Date(value) : value
-    return dateFormatter(locale, { day: "2-digit", month: "2-digit", year: "numeric" }).format(date)
+    return dateFormatter(locale, { ...TZ, day: "2-digit", month: "2-digit", year: "numeric" }).format(date)
 }
 
 /** "Qui 27" — the short weekday + day-of-month used along chart axes. */
 export function formatShortDay(value: Date | string, locale = DEFAULT_LOCALE): string {
     const date = typeof value === "string" ? new Date(value) : value
-    return dateFormatter(locale, { weekday: "short", day: "numeric" }).format(date)
+    return dateFormatter(locale, { ...TZ, weekday: "short", day: "numeric" }).format(date)
 }
 
 /**
@@ -58,7 +63,8 @@ export function formatShortDay(value: Date | string, locale = DEFAULT_LOCALE): s
  * server should ship data, not display strings.
  */
 export function weekdayLabels(locale = DEFAULT_LOCALE): string[] {
-    const formatter = dateFormatter(locale, { weekday: "short" })
+    // Fixed UTC: these are synthetic calendar days (no instant), so no zone may shift them.
+    const formatter = dateFormatter(locale, { timeZone: "UTC", weekday: "short" })
     // 2024-01-07 was a Sunday; add days to walk one full week.
     return Array.from({ length: 7 }, (_, index) =>
         formatter.format(new Date(Date.UTC(2024, 0, 7 + index))),
@@ -90,13 +96,17 @@ export function formatMinutes(minutes: number, locale = DEFAULT_LOCALE): string 
     return `${formatNumber(hours, { locale, maximumFractionDigits: 0 })}h ${formatNumber(rest, { locale, maximumFractionDigits: 0 })}min`
 }
 
-/** Parses "YYYY-MM-DD" or a full ISO string as a local calendar date (no UTC day shift). */
+/**
+ * Parses "YYYY-MM-DD" (or an ISO string whose date part is the calendar date) as that calendar
+ * date at UTC noon, which is 09:00 in São Paulo: formatting it on the São Paulo clock can never
+ * roll it into another day, in any browser zone.
+ */
 export function parseDateOnly(value: string | Date | null | undefined): Date | null {
     if (!value) return null
     if (value instanceof Date) return Number.isNaN(value.getTime()) ? null : value
     const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(value)
     const date = match
-        ? new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]), 12)
+        ? new Date(Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3]), 12))
         : new Date(value)
     return Number.isNaN(date.getTime()) ? null : date
 }
@@ -119,13 +129,13 @@ export function formatDateShort(
 ): string {
     const date = parseDateOnly(value)
     if (!date) return fallback
-    return dateFormatter(locale, { day: "numeric", month: "short" }).format(date).replace(" de ", " ").replace(".", "")
+    return dateFormatter(locale, { ...TZ, day: "numeric", month: "short" }).format(date).replace(" de ", " ").replace(".", "")
 }
 
 /** "08/09" — compact numeric day/month, for chart axes. */
 export function formatDayMonth(value: string | Date | null | undefined, locale = DEFAULT_LOCALE): string {
     const date = parseDateOnly(value)
-    return date ? dateFormatter(locale, { day: "2-digit", month: "2-digit" }).format(date) : ""
+    return date ? dateFormatter(locale, { ...TZ, day: "2-digit", month: "2-digit" }).format(date) : ""
 }
 
 /** "1 tópico" / "3 tópicos" */

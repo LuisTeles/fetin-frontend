@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Plus, Check, Loader2 } from "lucide-react"
+import { addDays, localToday } from "@/lib/time"
 
 type Subject = {
     id: string
@@ -60,9 +61,7 @@ export function ExamForm({ exam, onSuccess, onCancel }: ExamFormProps) {
 
     // Calculate tomorrow's date for date picker min constraint
     const getTomorrowStr = () => {
-        const tomorrow = new Date()
-        tomorrow.setDate(tomorrow.getDate() + 1)
-        return tomorrow.toISOString().split("T")[0]
+        return addDays(localToday(), 1)
     }
 
     // Load subjects
