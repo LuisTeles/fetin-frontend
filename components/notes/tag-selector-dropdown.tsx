@@ -85,7 +85,7 @@ export function TagSelectorDropdown({
             </button>
 
             {open && (
-                <div className="absolute z-50 mt-1 w-full rounded-md border border-border bg-popover shadow-lg">
+                <div className="pop-in [--pop-duration:150ms] absolute z-50 mt-1 w-full rounded-md border border-border bg-popover shadow-lg">
                     <div className="border-b border-border px-2 py-1.5">
                         <input
                             autoFocus

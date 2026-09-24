@@ -1,5 +1,7 @@
 "use client"
 
+import { NotesSkeleton } from "@/components/skeletons/notes-skeleton"
+import { CountUp } from "@/components/ui/count-up"
 import { useState, useEffect, useCallback } from "react"
 import {
     Plus,
@@ -167,7 +169,7 @@ export default function NotesPage() {
             </div>
 
             {/* ── Stats row ── */}
-            <div className="grid gap-3 grid-cols-2 sm:grid-cols-3">
+            <div className="stagger grid gap-3 grid-cols-2 sm:grid-cols-3">
                 <Card>
                     <CardHeader className="p-3 pb-0.5">
                         <CardDescription className="kpi-label">
@@ -175,7 +177,7 @@ export default function NotesPage() {
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="p-3 pt-0 flex items-center justify-between">
-                        <span className="text-2xl font-semibold tracking-tight num">{activeCount}</span>
+                        <CountUp className="text-2xl font-semibold tracking-tight num" value={activeCount} />
                         <div className="rounded-md bg-muted p-1.5 text-muted-foreground">
                             <StickyNote className="h-4 w-4" />
                         </div>
@@ -188,7 +190,7 @@ export default function NotesPage() {
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="p-3 pt-0 flex items-center justify-between">
-                        <span className="text-2xl font-semibold tracking-tight num">{tags.length}</span>
+                        <CountUp className="text-2xl font-semibold tracking-tight num" value={tags.length} />
                         <div className="rounded-md bg-muted p-1.5 text-muted-foreground">
                             <TagIcon className="h-4 w-4" />
                         </div>
@@ -201,7 +203,7 @@ export default function NotesPage() {
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="p-3 pt-0 flex items-center justify-between">
-                        <span className="text-2xl font-semibold tracking-tight num">{archivedCount}</span>
+                        <CountUp className="text-2xl font-semibold tracking-tight num" value={archivedCount} />
                         <div className="rounded-md bg-muted p-1.5 text-muted-foreground">
                             <Archive className="h-4 w-4" />
                         </div>
@@ -348,10 +350,7 @@ export default function NotesPage() {
 
                     {/* Notes grid */}
                     {isLoadingNotes ? (
-                        <div className="flex items-center justify-center py-16 text-muted-foreground">
-                            <Loader2 className="h-5 w-5 animate-spin mr-2" />
-                            <span className="text-xs">Carregando notas…</span>
-                        </div>
+                        <NotesSkeleton />
                     ) : filteredNotes.length === 0 ? (
                         <div className="flex flex-col items-center justify-center py-16 gap-3 text-muted-foreground">
                             <StickyNote className="h-10 w-10 opacity-20" />
@@ -377,7 +376,7 @@ export default function NotesPage() {
                             )}
                         </div>
                     ) : (
-                        <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+                        <div className="stagger grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
                             {filteredNotes.map((note) => (
                                 <NoteCard
                                     key={note.id}

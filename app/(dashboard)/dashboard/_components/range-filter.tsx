@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { usePathname, useSearchParams } from "next/navigation"
 
+import { SlidingIndicator } from "@/components/ui/sliding-indicator"
 import { DEFAULT_RANGE, parseRange, RANGE_OPTIONS } from "@/lib/dashboard-range"
 
 /**
@@ -32,7 +33,7 @@ export function RangeFilter() {
     }
 
     return (
-        <nav aria-label="Período de análise" className="flex items-center gap-1">
+        <SlidingIndicator as="nav" aria-label="Período de análise" className="flex items-center gap-1">
             {RANGE_OPTIONS.map((option) => {
                 const isActive = option.value === active
                 return (
@@ -42,10 +43,10 @@ export function RangeFilter() {
                         scroll={false}
                         aria-current={isActive ? "page" : undefined}
                         className={[
-                            "rounded-lg px-2.5 py-1 text-xs num transition-colors",
+                            "relative z-10 rounded-lg px-2.5 py-1 text-xs num transition-colors duration-150",
                             "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                             isActive
-                                ? "bg-brand-subtle text-brand font-medium"
+                                ? "text-brand font-medium"
                                 : "text-muted-foreground hover:bg-muted hover:text-foreground",
                         ].join(" ")}
                     >
@@ -53,6 +54,6 @@ export function RangeFilter() {
                     </Link>
                 )
             })}
-        </nav>
+        </SlidingIndicator>
     )
 }

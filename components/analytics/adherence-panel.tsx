@@ -1,3 +1,4 @@
+import { CountUp } from "@/components/ui/count-up"
 import { formatPercent } from "@/lib/format"
 import { weekdayLabels } from "@/lib/format"
 import {
@@ -77,7 +78,7 @@ function RateRow({ label, bucket }: { label: string; bucket: AdherenceBucket }) 
                 aria-label={`${label}: ${pct}% de aderência`}
             >
                 <div
-                    className="h-full rounded-full"
+                    className="bar-fill h-full rounded-full"
                     style={{ width: `${pct}%`, background: rampStep(bucket.rate) }}
                 />
             </div>
@@ -111,7 +112,7 @@ export function AdherencePanel({ data }: { data: AdherenceSummary }) {
     }
 
     return (
-        <Card>
+        <Card className="enter">
             <CardHeader className="border-b border-border/40 p-4">
                 <CardTitle className="text-sm font-bold">Aderência ao Cronograma</CardTitle>
                 <CardDescription className="text-pretty text-xs text-muted-foreground">
@@ -125,7 +126,7 @@ export function AdherencePanel({ data }: { data: AdherenceSummary }) {
                 <div className="flex flex-wrap items-baseline gap-x-6 gap-y-1">
                     <div className="flex items-baseline gap-2">
                         <span className="text-3xl font-semibold tracking-tight num text-foreground">
-                            {data.overall.rate === null ? "—" : formatPercent(data.overall.rate)}
+                            {data.overall.rate === null ? "—" : <CountUp value={formatPercent(data.overall.rate)} />}
                         </span>
                         <span className="text-xs text-muted-foreground">de aderência geral</span>
                     </div>

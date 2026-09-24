@@ -1,5 +1,6 @@
 "use client"
 
+import { CountUp } from "@/components/ui/count-up"
 import { useEffect, useState } from "react"
 import { useSearchParams } from "next/navigation"
 import {
@@ -297,7 +298,7 @@ export default function AvailabilityPage() {
       )}
 
       {/* Overview Metric Cards */}
-      <div className="grid gap-3 grid-cols-1 sm:grid-cols-3">
+      <div className="stagger grid gap-3 grid-cols-1 sm:grid-cols-3">
         <Card>
           <CardHeader className="p-4 pb-1">
             <CardDescription className="kpi-label">
@@ -306,7 +307,7 @@ export default function AvailabilityPage() {
           </CardHeader>
           <CardContent className="p-4 pt-0 flex items-center justify-between">
             <div>
-              <span className="text-2xl font-semibold tracking-tight num text-primary">{totalHours} hrs</span>
+              <CountUp className="text-2xl font-semibold tracking-tight num text-primary" value={totalHours} suffix=" hrs" />
               <p className="text-[11px] text-muted-foreground">disponíveis nesta semana</p>
             </div>
             <div className="rounded-md bg-primary/10 p-2 text-primary">
@@ -323,7 +324,7 @@ export default function AvailabilityPage() {
           </CardHeader>
           <CardContent className="p-4 pt-0 flex items-center justify-between">
             <div>
-              <span className="text-2xl font-semibold tracking-tight num">{Math.round((totalHours / 7) * 10) / 10} hrs</span>
+              <CountUp className="text-2xl font-semibold tracking-tight num" value={Math.round((totalHours / 7) * 10) / 10} suffix=" hrs" />
               <p className="text-[11px] text-muted-foreground">por dia para cronogramas</p>
             </div>
             <div className="rounded-md bg-muted p-2 text-muted-foreground">
@@ -340,7 +341,7 @@ export default function AvailabilityPage() {
           </CardHeader>
           <CardContent className="p-4 pt-0 flex items-center justify-between">
             <div>
-              <span className="text-2xl font-semibold tracking-tight num">{routineBlocks.length}</span>
+              <CountUp className="text-2xl font-semibold tracking-tight num" value={routineBlocks.length} />
               <p className="text-[11px] text-muted-foreground">atividades cadastradas</p>
             </div>
             <div className="rounded-md bg-muted p-2 text-muted-foreground">
@@ -535,8 +536,8 @@ export default function AvailabilityPage() {
 
       {/* Modal / Dialog for Add / Edit Routine Block */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-md rounded-lg border bg-background p-6 shadow-lg space-y-4">
+        <div className="fade-in fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="pop-in [--pop-origin:center] w-full max-w-md rounded-lg border bg-background p-6 shadow-lg space-y-4">
             <div className="flex items-center justify-between border-b pb-3">
               <h3 className="font-bold text-sm">
                 {editingId ? "Editar Compromisso" : "Adicionar Compromisso de Rotina"}

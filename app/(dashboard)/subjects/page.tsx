@@ -218,7 +218,7 @@ export default function SubjectsPage() {
                                         </div>
                                         <div className="w-full bg-muted rounded-full h-1.5 overflow-hidden">
                                             <div 
-                                                className="bg-primary h-full rounded-full" 
+                                                className="bar-fill bg-primary h-full rounded-full" 
                                                 style={{ width: `${priority * 10}%` }}
                                             />
                                         </div>

@@ -1,5 +1,6 @@
 "use client"
 
+import { ListSkeleton } from "@/components/skeletons/list-skeleton"
 import { useEffect, useState } from "react"
 import { useSearchParams } from "next/navigation"
 import { Plus, Search, Trash2, Edit2, BookOpen } from "lucide-react"
@@ -158,9 +159,7 @@ export function SubjectList({ onStatsChange }: SubjectListProps) {
 
             {/* Listing */}
             {isLoading ? (
-                <div className="flex h-32 items-center justify-center rounded-lg border border-dashed border-border text-sm text-muted-foreground">
-                    Carregando disciplinas...
-                </div>
+                <ListSkeleton label="Carregando disciplinas" />
             ) : filteredSubjects.length === 0 ? (
                 <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-border/80 bg-muted/20 p-8 text-center">
                     <BookOpen className="h-8 w-8 text-muted-foreground/60 mb-2" />
@@ -170,9 +169,9 @@ export function SubjectList({ onStatsChange }: SubjectListProps) {
                     </p>
                 </div>
             ) : (
-                <div className="grid gap-2">
+                <div className="stagger grid gap-2">
                     {filteredSubjects.map((subject) => (
-                        <Card key={subject.id} className="group overflow-hidden border border-border hover:border-foreground/20 hover:bg-muted/10 transition-all duration-200">
+                        <Card key={subject.id} className="card-interactive group overflow-hidden">
                             <CardContent className="flex items-center justify-between p-3">
                                 <div className="flex items-center gap-3 min-w-0">
                                     <div className="flex h-7 w-7 items-center justify-center rounded-md bg-muted text-foreground group-hover:bg-foreground group-hover:text-background transition-colors duration-200">

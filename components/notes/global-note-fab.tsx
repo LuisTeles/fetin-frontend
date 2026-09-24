@@ -77,16 +77,16 @@ export function GlobalNoteFab() {
                     className={cn(
                         "flex h-14 w-14 items-center justify-center rounded-full shadow-lg",
                         "bg-primary text-primary-foreground",
-                        "transition-all duration-200 ease-out",
-                        "hover:scale-110 hover:shadow-xl active:scale-95",
+                        "group/fab transition-[scale,box-shadow] duration-150 ease-out",
+                        "hover:scale-105 hover:shadow-xl active:scale-95",
                         "focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 cursor-pointer",
                         hasPulsed && "fab-pulse",
                     )}
                 >
                     <Plus
                         className={cn(
-                            "h-6 w-6 transition-transform duration-200",
-                            isOpen && "rotate-45",
+                            "h-6 w-6 transition-transform duration-150 ease-out group-hover/fab:rotate-90",
+                            isOpen && "rotate-45 group-hover/fab:rotate-[135deg]",
                         )}
                         strokeWidth={2.5}
                     />

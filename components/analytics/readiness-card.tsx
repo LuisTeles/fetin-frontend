@@ -64,7 +64,7 @@ function ComparisonBar({
                 role="img"
                 aria-label={`${label}: ${pct}%`}
             >
-                <div className="h-full rounded-full" style={{ width: `${pct}%`, background: barColor }} />
+                <div className="bar-fill h-full rounded-full" style={{ width: `${pct}%`, background: barColor }} />
             </div>
         </div>
     )

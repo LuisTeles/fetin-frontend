@@ -1,5 +1,6 @@
 "use client"
 
+import { DetailSkeleton } from "@/components/skeletons/detail-skeleton"
 import { useState, useEffect, useCallback } from "react"
 import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
@@ -106,10 +107,7 @@ export default function SingleNotePage() {
 
     if (isLoading) {
         return (
-            <div className="flex flex-col items-center justify-center min-h-[60vh] gap-3 text-muted-foreground">
-                <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                <p className="text-xs">Carregando nota…</p>
-            </div>
+            <DetailSkeleton label="Carregando nota" />
         )
     }
 

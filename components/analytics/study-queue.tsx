@@ -57,7 +57,7 @@ export function StudyQueue({ items }: { items: StudyQueueItem[] }) {
     const maxRisk = Math.max(...items.map((i) => i.risk), 0.0001)
 
     return (
-        <Card>
+        <Card className="enter">
             <CardHeader className="border-b border-border/40 p-4">
                 <CardTitle className="text-sm font-bold">Fila de Estudo</CardTitle>
                 <CardDescription className="text-xs text-muted-foreground">
@@ -116,7 +116,7 @@ export function StudyQueue({ items }: { items: StudyQueueItem[] }) {
                                                 aria-label={`Risco ${item.risk.toFixed(2)}`}
                                             >
                                                 <div
-                                                    className="h-full rounded-full"
+                                                    className="bar-fill h-full rounded-full"
                                                     style={{
                                                         width: `${(item.risk / maxRisk) * 100}%`,
                                                         background: "var(--status-warning)",

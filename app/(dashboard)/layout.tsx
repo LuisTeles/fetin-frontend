@@ -7,6 +7,8 @@ import { ThemeToggle } from "@/components/ui/theme-toggle"
 import { GlobalNoteFab } from "@/components/notes/global-note-fab"
 import { NavLink } from "@/components/layout/nav-link"
 import { UserAvatar } from "@/components/layout/user-avatar"
+import { PageEnter } from "@/components/layout/page-enter"
+import { SlidingIndicator } from "@/components/ui/sliding-indicator"
 
 export default async function DashboardLayout({
     children,
@@ -57,7 +59,8 @@ export default async function DashboardLayout({
                     aria-label="Navegação principal"
                     className="h-fit rounded-xl border bg-surface p-2 shadow-[var(--shadow-card)] md:sticky md:top-12 md:self-start"
                 >
-                    <ul className="space-y-0.5">
+                    <SlidingIndicator>
+                    <ul className="relative z-10 space-y-0.5">
                         <li><NavLink href="/dashboard" icon="dashboard">Dashboard</NavLink></li>
                         <li><NavLink href="/me" icon="profile">Meu perfil</NavLink></li>
                         <li><NavLink href="/exams" icon="exams">Provas</NavLink></li>
@@ -70,9 +73,12 @@ export default async function DashboardLayout({
                             <li><NavLink href="/admin/users" icon="admin">Painel Admin</NavLink></li>
                         )}
                     </ul>
+                    </SlidingIndicator>
                 </nav>
 
-                <main className="min-w-0">{children}</main>
+                <main className="min-w-0">
+                    <PageEnter>{children}</PageEnter>
+                </main>
             </div>
 
             <GlobalNoteFab />

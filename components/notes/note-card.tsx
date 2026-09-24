@@ -50,7 +50,7 @@ export function NoteCard({ note, onEdit, onDelete, onArchiveToggle }: NoteCardPr
     return (
         <article
             className={cn(
-                "group relative rounded-lg border border-border bg-card p-3.5 transition-all card-pop-in note-card-hover flex flex-col justify-between cursor-pointer",
+                "group relative rounded-lg border border-border bg-card p-3.5 card-interactive flex flex-col justify-between cursor-pointer",
                 note.isArchived && "opacity-60",
             )}
         >
@@ -117,7 +117,7 @@ export function NoteCard({ note, onEdit, onDelete, onArchiveToggle }: NoteCardPr
                             <>
                                 {/* Backdrop */}
                                 <div className="fixed inset-0 z-40" onClick={(e) => { e.stopPropagation(); setMenuOpen(false) }} />
-                                <div className="absolute right-0 top-6 z-50 w-40 rounded-md border border-border bg-popover shadow-lg py-1">
+                                <div className="pop-in [--pop-origin:top_right] [--pop-duration:150ms] absolute right-0 top-6 z-50 w-40 rounded-md border border-border bg-popover shadow-lg py-1">
                                     {!confirmDelete ? (
                                         <>
                                             <Link

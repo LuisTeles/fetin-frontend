@@ -1,5 +1,6 @@
 "use client"
 
+import { Skeleton } from "@/components/ui/skeleton"
 import { useEffect, useState } from "react"
 import { User as UserIcon, Calendar, Mail, ShieldAlert } from "lucide-react"
 
@@ -62,14 +63,14 @@ export function ProfilePanel() {
     if (!user) {
         return (
             <Card>
-                <CardHeader className="p-4 pb-2 animate-pulse">
-                    <div className="h-5 w-32 bg-muted rounded"></div>
-                    <div className="h-3 w-48 bg-muted rounded mt-2"></div>
+                <CardHeader className="p-4 pb-2">
+                    <Skeleton className="h-5 w-32" />
+                    <Skeleton className="mt-2 h-3 w-48" />
                 </CardHeader>
                 <CardContent className="p-4 pt-2">
-                    <div className="space-y-2">
-                        <div className="h-4 w-full bg-muted rounded"></div>
-                        <div className="h-4 w-3/4 bg-muted rounded"></div>
+                    <div className="space-y-2" role="status" aria-label="Carregando perfil">
+                        <Skeleton className="h-4 w-full" />
+                        <Skeleton className="h-4 w-3/4" />
                     </div>
                 </CardContent>
             </Card>

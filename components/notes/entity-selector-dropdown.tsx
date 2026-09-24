@@ -242,7 +242,7 @@ export function EntitySelectorDropdown({
 
                     {/* Dropdown */}
                     {isOpen && (
-                        <div className="absolute z-50 mt-1 w-full rounded-md border border-border bg-popover shadow-lg">
+                        <div className="pop-in [--pop-duration:150ms] absolute z-50 mt-1 w-full rounded-md border border-border bg-popover shadow-lg">
                             {/* Search */}
                             <div className="border-b border-border p-2">
                                 <input

@@ -1,5 +1,6 @@
 "use client"
 
+import { CountUp } from "@/components/ui/count-up"
 import { useState } from "react"
 import { Calendar, AlertCircle, RefreshCw, CheckCircle2, Clock } from "lucide-react"
 import { ExamList } from "@/components/dashboard/exam-list"
@@ -19,7 +20,7 @@ export default function ExamsPage() {
             </div>
 
             {/* Quick Stats Grid */}
-            <div className="grid gap-3 grid-cols-1 sm:grid-cols-3">
+            <div className="stagger grid gap-3 grid-cols-1 sm:grid-cols-3">
                 <Card>
                     <CardHeader className="p-4 pb-1">
                         <CardDescription className="kpi-label">
@@ -27,7 +28,7 @@ export default function ExamsPage() {
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="p-4 pt-0 flex items-center justify-between">
-                        <span className="text-2xl font-semibold tracking-tight num">{stats.count}</span>
+                        <CountUp className="text-2xl font-semibold tracking-tight num" value={stats.count} />
                         <div className="rounded-md bg-muted p-1.5 text-muted-foreground">
                             <Calendar className="h-4 w-4" />
                         </div>
@@ -41,7 +42,7 @@ export default function ExamsPage() {
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="p-4 pt-0 flex items-center justify-between">
-                        <span className="text-2xl font-semibold tracking-tight num">{stats.pendingCount}</span>
+                        <CountUp className="text-2xl font-semibold tracking-tight num" value={stats.pendingCount} />
                         <div className="rounded-md bg-muted p-1.5 text-muted-foreground">
                             <Clock className="h-4 w-4" />
                         </div>

@@ -246,7 +246,7 @@ export function InlineMentionPopover({
         <div
             ref={popoverRef}
             style={{ position: "fixed", top: popoverPos.top, left: popoverPos.left, zIndex: 9999 }}
-            className="w-72 rounded-lg border border-border bg-popover shadow-xl"
+            className="pop-in [--pop-duration:150ms] w-72 rounded-lg border border-border bg-popover shadow-xl"
             onMouseDown={(e) => e.preventDefault()} // prevent textarea blur
         >
             {/* Header */}

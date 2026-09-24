@@ -1,5 +1,6 @@
 "use client"
 
+import { DetailSkeleton } from "@/components/skeletons/detail-skeleton"
 import { use, useEffect, useState, FormEvent } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 import { 
@@ -252,10 +253,7 @@ export default function SubjectDetailPage({ params }: SubjectDetailPageProps) {
 
     if (isLoading) {
         return (
-            <div className="flex flex-col items-center justify-center py-20 border border-dashed rounded-lg space-y-2">
-                <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
-                <span className="text-xs text-muted-foreground font-medium">Carregando dados da disciplina...</span>
-            </div>
+            <DetailSkeleton label="Carregando dados da disciplina" />
         )
     }
 

@@ -1,5 +1,6 @@
 "use client"
 
+import { ListSkeleton } from "@/components/skeletons/list-skeleton"
 import { useEffect, useState } from "react"
 import { useSearchParams } from "next/navigation"
 import { Calendar, Search, Trash2, Edit2, AlertTriangle, BookOpen, Clock, BadgeAlert } from "lucide-react"
@@ -179,9 +180,7 @@ export function ExamList({ onStatsChange }: ExamListProps) {
 
             {/* Listing */}
             {isLoading ? (
-                <div className="flex h-32 items-center justify-center rounded-lg border border-dashed border-border text-sm text-muted-foreground">
-                    Carregando cronograma de provas...
-                </div>
+                <ListSkeleton label="Carregando cronograma de provas" />
             ) : filteredExams.length === 0 ? (
                 <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-border/80 bg-muted/20 p-8 text-center">
                     <Calendar className="h-8 w-8 text-muted-foreground/60 mb-2" />
@@ -191,12 +190,12 @@ export function ExamList({ onStatsChange }: ExamListProps) {
                     </p>
                 </div>
             ) : (
-                <div className="grid gap-3">
+                <div className="stagger grid gap-3">
                     {filteredExams.map((exam) => {
                         const hasNoTopics = exam.topics.length === 0
 
                         return (
-                            <Card key={exam.id} className="group overflow-hidden border border-border hover:border-foreground/20 hover:bg-muted/10 transition-all duration-200">
+                            <Card key={exam.id} className="card-interactive group overflow-hidden">
                                 <CardContent className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-4">
                                     <div className="flex items-start gap-3 min-w-0">
                                         <div className="flex h-9 w-9 items-center justify-center rounded-md bg-muted text-foreground group-hover:bg-foreground group-hover:text-background transition-colors duration-200 shrink-0">

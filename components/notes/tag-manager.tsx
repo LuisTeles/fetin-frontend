@@ -1,5 +1,6 @@
 "use client"
 
+import { Skeleton } from "@/components/ui/skeleton"
 import { useState, useEffect, useCallback } from "react"
 import { Plus, Pencil, Trash2, Check, X, Loader2, Tag as TagIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -158,9 +159,10 @@ export function TagManager() {
                 </p>
 
                 {isLoading ? (
-                    <div className="flex items-center justify-center py-8 text-muted-foreground">
-                        <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                        <span className="text-xs">Carregando tags…</span>
+                    <div role="status" aria-label="Carregando tags" className="space-y-2">
+                        {[0, 1, 2].map((i) => (
+                            <Skeleton key={i} className="h-9 w-full rounded-lg" />
+                        ))}
                     </div>
                 ) : tags.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-10 text-muted-foreground gap-2">

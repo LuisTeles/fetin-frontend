@@ -1,5 +1,6 @@
 "use client"
 
+import { CountUp } from "@/components/ui/count-up"
 import { ResponsiveLine } from "@nivo/line"
 import { TrendingUp, TrendingDown, Clock, CheckCircle2, Target, Flame } from "lucide-react"
 import { Card, CardContent, CardHeader, CardDescription } from "@/components/ui/card"
@@ -17,7 +18,7 @@ function Sparkline({ data, color }: { data: number[]; color: string }) {
         },
     ]
     return (
-        <div className="h-10 w-full">
+        <div className="chart-reveal h-10 w-full">
             <ResponsiveLine
                 data={chartData}
                 theme={theme}
@@ -88,7 +89,7 @@ function KpiCard({ label, value, trend, delta, color, icon, health }: KpiCardPro
             </CardHeader>
             <CardContent className="p-4 pt-2">
                 <div className="flex items-end justify-between gap-2">
-                    <span className="text-2xl font-semibold tracking-tight num">{value}</span>
+                    <CountUp className="text-2xl font-semibold tracking-tight num" value={value} />
                     {delta !== null && delta !== undefined && (
                         <span className={`flex items-center gap-0.5 text-xs font-medium ${healthColor[health]}`}>
                             <TrendIcon className="h-3 w-3" />
@@ -127,7 +128,7 @@ export function SparklineKpiCards({ data }: SparklineKpisProps) {
         first3 > 0 ? Math.round(((last3 - first3) / first3) * 100) : null
 
     return (
-        <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+        <div className="stagger grid grid-cols-2 gap-3 md:grid-cols-4">
             <KpiCard
                 label="Horas de Estudo"
                 value={`${data.totalHoursThisWeek}h`}

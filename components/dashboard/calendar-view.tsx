@@ -1,5 +1,6 @@
 "use client"
 
+import { CalendarSkeleton } from "@/components/skeletons/calendar-skeleton"
 import { useEffect, useState } from "react"
 import { useSearchParams } from "next/navigation"
 import { 
@@ -21,6 +22,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { SlidingIndicator } from "@/components/ui/sliding-indicator"
 import { fetchAvailabilitySchedule, RoutineBlock } from "@/lib/api/availability"
 import { TaskForm } from "./task-form"
 
@@ -899,36 +901,34 @@ export function CalendarView({ onStatsChange }: CalendarViewProps) {
                     </div>
 
                     {/* View Modes */}
-                    <div className="flex bg-background border rounded-md p-0.5">
+                    <SlidingIndicator className="flex bg-background border rounded-lg p-0.5" watch={viewMode}>
                         {(["month", "week", "day"] as const).map(mode => (
                             <Button 
                                 key={mode}
                                 variant="ghost" 
                                 size="sm" 
-                                className={`h-7 px-3 rounded-sm font-semibold capitalize text-xs cursor-pointer ${
-                                    viewMode === mode ? "bg-muted text-foreground" : "text-muted-foreground"
+                                data-active={viewMode === mode}
+                                className={`relative z-10 h-7 px-3 rounded-md font-semibold capitalize text-xs cursor-pointer ${
+                                    viewMode === mode ? "text-brand hover:bg-transparent" : "text-muted-foreground"
                                 }`}
                                 onClick={() => setViewMode(mode)}
                             >
                                 {mode === "month" ? "Mês" : mode === "week" ? "Semana" : "Dia"}
                             </Button>
                         ))}
-                    </div>
+                    </SlidingIndicator>
                 </div>
             </div>
 
             {/* CALENDAR BODY */}
             {isLoading ? (
-                <div className="flex flex-col items-center justify-center py-20 border border-dashed rounded-lg space-y-2">
-                    <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
-                    <span className="text-xs text-muted-foreground font-medium">Buscando compromissos...</span>
-                </div>
+                <CalendarSkeleton />
             ) : error ? (
                 <div className="p-4 bg-red-500/10 border border-red-500/20 text-red-700 dark:text-red-300 rounded-md text-xs font-semibold text-center">
                     {error}
                 </div>
             ) : (
-                <div className="animate-fade-in duration-200">
+                <div key={`${viewMode}-${currentDate.toISOString().slice(0, 10)}`} className="enter" style={{ "--rise": "4px" } as React.CSSProperties}>
                     {viewMode === "month" && renderMonthGrid()}
                     {viewMode === "week" && renderWeekGrid()}
                     {viewMode === "day" && renderDayGrid()}
@@ -937,8 +937,8 @@ export function CalendarView({ onStatsChange }: CalendarViewProps) {
 
             {/* TASK FORM MODAL */}
             {isModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4 animate-fade-in">
-                    <Card className="w-full max-w-md bg-card border-border shadow-lg p-6 relative">
+                <div className="fade-in fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4">
+                    <Card className="pop-in [--pop-origin:center] w-full max-w-md bg-card border-border shadow-lg p-6 relative">
                         <Button 
                             variant="ghost" 
                             size="icon" 

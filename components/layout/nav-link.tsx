@@ -49,10 +49,10 @@ export function NavLink({
             href={href}
             aria-current={isActive ? "page" : undefined}
             className={cn(
-                "flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                "relative z-10 flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors duration-150",
                 "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                 isActive
-                    ? "bg-brand-subtle text-brand"
+                    ? "text-brand"
                     : "text-text-muted hover:bg-surface-muted hover:text-text",
             )}
         >

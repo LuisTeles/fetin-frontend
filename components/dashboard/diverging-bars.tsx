@@ -7,6 +7,7 @@ import { ChartEmptyState } from "./chart-empty-state"
 import { Button } from "@/components/ui/button"
 import { useNivoTheme } from "@/lib/nivo-theme"
 import { useReducedMotion } from "@/lib/use-reduced-motion"
+import { SlidingIndicator } from "@/components/ui/sliding-indicator"
 import { statusPalette } from "@/lib/chart-palette"
 
 interface DivergingBarsProps {
@@ -63,19 +64,22 @@ export function DivergingBars({ data }: DivergingBarsProps) {
     return (
         <div className="space-y-3">
             {/* URL-driven period filter */}
-            <div className="flex items-center gap-1.5">
+            <SlidingIndicator className="flex w-fit items-center gap-1" watch={period}>
                 {PERIOD_OPTIONS.map((opt) => (
                     <Button
                         key={opt.value}
-                        variant={period === opt.value ? "default" : "outline"}
+                        variant="ghost"
                         size="sm"
-                        className="h-6 px-2 text-xs"
+                        data-active={period === opt.value}
+                        className={`relative z-10 h-6 px-2.5 text-xs num ${
+                            period === opt.value ? "text-brand hover:bg-transparent" : "text-muted-foreground"
+                        }`}
                         onClick={() => setPeriod(opt.value)}
                     >
                         {opt.label}
                     </Button>
                 ))}
-            </div>
+            </SlidingIndicator>
 
             <div className="h-72 w-full">
                 <ResponsiveBar

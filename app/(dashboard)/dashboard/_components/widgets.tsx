@@ -76,7 +76,7 @@ export async function HeatmapWidget({ userId }: WidgetProps) {
     const hasData = result.data.some((row) => row.data.some((cell) => cell.y > 0))
 
     return (
-        <Card>
+        <Card className="enter">
             <CardHeader className="border-b border-border/40 p-4">
                 <CardTitle className="text-sm font-bold">
                     Mapa de Calor de Atividade Semanal
@@ -109,7 +109,7 @@ export async function ProgressWidgets({ userId }: WidgetProps) {
     const { bulletData, divergingData } = result.data
 
     return (
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="stagger grid gap-4 md:grid-cols-2">
             <Card>
                 <CardHeader className="border-b border-border/40 p-4">
                     <CardTitle className="text-sm font-bold">
@@ -167,7 +167,7 @@ export async function ReadinessWidget({ userId }: WidgetProps) {
 
     if (result.data.length === 0) {
         return (
-            <Card>
+            <Card className="enter">
                 <CardHeader className="border-b border-border/40 p-4">
                     <CardTitle className="text-sm font-bold">Prontidão para Provas</CardTitle>
                 </CardHeader>
@@ -180,7 +180,7 @@ export async function ReadinessWidget({ userId }: WidgetProps) {
 
     // Soonest exams first — the backend already orders by date.
     return (
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <div className="stagger grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {result.data.slice(0, 3).map((exam) => (
                 <ReadinessCard key={exam.examId} exam={exam} />
             ))}
@@ -224,7 +224,7 @@ export async function RetentionCurveWidget({ userId }: WidgetProps) {
     }
 
     return (
-        <Card>
+        <Card className="enter">
             <CardHeader className="border-b border-border/40 p-4">
                 <CardTitle className="text-sm font-bold">Curva de Esquecimento</CardTitle>
                 <CardDescription className="text-pretty text-xs text-muted-foreground">

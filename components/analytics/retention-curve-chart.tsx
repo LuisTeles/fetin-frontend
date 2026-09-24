@@ -35,7 +35,7 @@ export function RetentionCurveChart({ series }: { series: CurveSeries[] }) {
     }))
 
     return (
-        <div className="h-72 w-full">
+        <div className="chart-reveal h-72 w-full">
             <ResponsiveLine
                 data={data}
                 theme={theme}

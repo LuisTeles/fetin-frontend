@@ -27,6 +27,7 @@ import {
   MoreHorizontal,
 } from "lucide-react"
 
+import { SlidingIndicator } from "@/components/ui/sliding-indicator"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -472,7 +473,7 @@ export default function AutoSchedulePage() {
 
       {/* Satisfying Non-Interruptible Animation Overlay */}
       {isAnimating && (
-        <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-md flex flex-col items-center justify-center p-6 space-y-6">
+        <div className="fade-in fixed inset-0 z-50 bg-background/80 backdrop-blur-md flex flex-col items-center justify-center p-6 space-y-6">
           <div className="p-4 rounded-full bg-brand-subtle text-brand animate-pulse border border-brand/30">
             <Zap className="h-12 w-12 fill-brand" />
           </div>
@@ -661,34 +662,36 @@ export default function AutoSchedulePage() {
           </Card>
 
           {/* Mode Switcher Tabs */}
-          <div className="flex border-b border-border text-xs">
+          <SlidingIndicator variant="underline" watch={viewTab} className="flex border-b border-border text-xs">
             <button
               onClick={() => setViewTab("days")}
-              className={`px-4 py-2 font-semibold border-b-2 transition-colors ${
+              data-active={viewTab === "days"}
+              className={`relative z-10 px-4 py-2 font-semibold border-b-2 border-transparent transition-colors duration-150 ${
                 viewTab === "days"
-                  ? "border-primary text-primary"
-                  : "border-transparent text-muted-foreground hover:text-foreground"
+                  ? "text-brand"
+                  : "text-muted-foreground hover:text-foreground"
               }`}
             >
               Agenda por Dia (Linha do Tempo 24h)
             </button>
             <button
               onClick={() => setViewTab("allocations")}
-              className={`px-4 py-2 font-semibold border-b-2 transition-colors ${
+              data-active={viewTab === "allocations"}
+              className={`relative z-10 px-4 py-2 font-semibold border-b-2 border-transparent transition-colors duration-150 ${
                 viewTab === "allocations"
-                  ? "border-primary text-primary"
-                  : "border-transparent text-muted-foreground hover:text-foreground"
+                  ? "text-brand"
+                  : "text-muted-foreground hover:text-foreground"
               }`}
             >
               Distribuição de Tópicos
             </button>
-          </div>
+          </SlidingIndicator>
 
           {/* TAB 1: Agenda por Dia (Linha do Tempo 24h Unificada) */}
           {viewTab === "days" && (
             <div className="space-y-4">
               {/* Day Number Pills Selector */}
-              <div className="flex overflow-x-auto gap-1.5 pb-2 max-w-full min-w-0">
+              <SlidingIndicator watch={activeDayNumber} indicatorClassName="border border-brand" className="flex overflow-x-auto gap-1.5 pb-2 max-w-full min-w-0">
                 {selectedSchedule.days.map((day) => {
                   const completedCount = day.studySessions?.filter((s) => s.status === "completed").length || 0
                   const totalCount = day.studySessions?.length || 0
@@ -697,9 +700,10 @@ export default function AutoSchedulePage() {
                     <button
                       key={day.id}
                       onClick={() => setActiveDayNumber(day.dayNumber)}
-                      className={`shrink-0 w-[100px] p-2.5 rounded-lg border text-left text-xs transition-all ${
+                      data-active={activeDayNumber === day.dayNumber}
+                      className={`relative z-10 shrink-0 w-[100px] p-2.5 rounded-lg border text-left text-xs transition-colors duration-150 ${
                         activeDayNumber === day.dayNumber
-                          ? "border-primary bg-primary/10 text-primary font-bold"
+                          ? "border-transparent text-brand font-bold"
                           : day.isAvailable
                           ? "border-border bg-card text-muted-foreground hover:text-foreground"
                           : "border-border bg-muted/40 text-muted-foreground opacity-60"
@@ -718,7 +722,7 @@ export default function AutoSchedulePage() {
                     </button>
                   )
                 })}
-              </div>
+              </SlidingIndicator>
 
               {/* Day Details Card: Unified 24h Timeline */}
               {activeDay && (
@@ -765,7 +769,7 @@ export default function AutoSchedulePage() {
                           return (
                             <div
                               key={`routine-${item.id}`}
-                              className={`p-3 rounded-lg border text-xs card-pop-in transition-all opacity-85 hover:opacity-100 ${catConfig.bgClass}`}
+                              className={`p-3 rounded-lg border text-xs enter transition-opacity opacity-85 hover:opacity-100 ${catConfig.bgClass}`}
                             >
                               <div className="flex items-center justify-between min-w-0">
                                 <div className="flex items-center gap-3 min-w-0">
@@ -801,7 +805,7 @@ export default function AutoSchedulePage() {
                         return (
                           <div
                             key={`session-${session.id}`}
-                            className={`p-3.5 rounded-lg border text-xs card-pop-in transition-all ${typeConfig.bgClass}`}
+                            className={`p-3.5 rounded-lg border text-xs enter ${typeConfig.bgClass}`}
                           >
                             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 min-w-0">
                               <div className="flex items-center gap-3 min-w-0">
@@ -888,7 +892,7 @@ export default function AutoSchedulePage() {
                       </div>
                       <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
                         <div
-                          className="bg-primary h-2 rounded-full transition-all duration-300"
+                          className="bg-primary h-2 rounded-full bar-fill"
                           style={{ width: `${progressPct}%` }}
                         />
                       </div>
