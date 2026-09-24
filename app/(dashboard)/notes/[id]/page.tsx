@@ -161,6 +161,10 @@ export default function SingleNotePage() {
         ...(note.incomingLinks ?? []).map((l) => l.sourceNote).filter(Boolean),
     ]
 
+    // The mention label sits inside `[...]` in the `@note:id[label]` syntax, so a literal
+    // bracket in the title would break the parser (regex `[^\]]+`) — swap brackets for parens.
+    const noteMentionLabel = (note.title ?? "Nota").replace(/\[/g, "(").replace(/\]/g, ")")
+
     return (
         <div className="space-y-6 max-w-4xl mx-auto pb-12">
             {/* ── Navigation Top Bar ── */}
@@ -190,7 +194,7 @@ export default function SingleNotePage() {
 
                     {note.topicId && !impersonateUserId && (
                         <Link
-                            href={`/flashcards?new=1&topicId=${note.topicId}&back=${encodeURIComponent(`@note:${note.id}[${note.title ?? "Nota"}]`)}`}
+                            href={`/flashcards?new=1&topicId=${note.topicId}&back=${encodeURIComponent(`@note:${note.id}[${noteMentionLabel}]`)}`}
                             className={cn(buttonVariants({ variant: "outline", size: "sm" }), "text-xs h-8")}
                         >
                             <Layers className="mr-1.5 h-3.5 w-3.5" /> Criar flashcard
