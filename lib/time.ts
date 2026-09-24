@@ -112,6 +112,13 @@ export function addDays(value: string, days: number): string {
     return new Date(Date.parse(`${dateOnlyString(value)}T00:00:00.000Z`) + days * MS_PER_DAY).toISOString().slice(0, 10)
 }
 
+/** Whole calendar days from `from` to `to` (date-only values); negative when `to` is earlier. */
+export function daysBetween(from: string, to: string): number {
+    const start = Date.parse(`${dateOnlyString(from)}T00:00:00.000Z`)
+    const end = Date.parse(`${dateOnlyString(to)}T00:00:00.000Z`)
+    return Math.round((end - start) / MS_PER_DAY)
+}
+
 /** 0 = Sunday .. 6 = Saturday of a calendar date. */
 export function weekdayOfDateString(value: string): number {
     return new Date(`${dateOnlyString(value)}T00:00:00.000Z`).getUTCDay()
