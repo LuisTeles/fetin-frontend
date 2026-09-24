@@ -7,7 +7,7 @@
  */
 export function markdownToPlainText(source: string): string {
     return source
-        .replace(/@(?:subject|topic|exam|note):[0-9a-f-]{36}\[([^\]]+)\]/gi, "$1")
+        .replace(/@(?:subject|topic|exam|note|card):[0-9a-f-]{36}\[([^\]]+)\]/gi, "$1")
         .replace(/```[\s\S]*?```/g, (block) => block.replace(/```\w*\n?/g, ""))
         .replace(/!\[([^\]]*)\]\([^)]*\)/g, "$1")
         .replace(/\[([^\]]+)\]\([^)]*\)/g, "$1")
