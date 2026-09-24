@@ -1,6 +1,6 @@
 "use client"
 
-import { Suspense, useCallback, useEffect, useState } from "react"
+import { Suspense, useCallback, useEffect, useRef, useState } from "react"
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
 import { ArrowLeft, CheckCircle2, Layers } from "lucide-react"
@@ -33,6 +33,7 @@ function ReviewInner() {
     const [index, setIndex] = useState(0)
     const [revealed, setRevealed] = useState(false)
     const [busy, setBusy] = useState(false)
+    const busyRef = useRef(false)
     const [tally, setTally] = useState({ total: 0, hits: 0 })
     const [notice, setNotice] = useState<string | null>(null)
     const [error, setError] = useState<string | null>(null)
@@ -51,7 +52,8 @@ function ReviewInner() {
     const current = queue?.[index]
 
     const grade = useCallback(async (g: FlashcardGrade) => {
-        if (!current || !revealed || busy) return
+        if (!current || !revealed || busyRef.current) return
+        busyRef.current = true
         setBusy(true)
         try {
             // Each grade is saved immediately, so leaving mid-review loses nothing.
@@ -65,12 +67,14 @@ function ReviewInner() {
         } catch (err: unknown) {
             setError(err instanceof Error ? err.message : "Erro ao registrar revisão.")
         } finally {
+            busyRef.current = false
             setBusy(false)
         }
-    }, [current, revealed, busy, sessionId])
+    }, [current, revealed, sessionId])
 
     useEffect(() => {
         function onKey(e: KeyboardEvent) {
+            if (e.repeat) return
             if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return
             if (e.code === "Space" && !revealed) { e.preventDefault(); setRevealed(true); return }
             const hit = GRADES.find((x) => x.key === e.key)
@@ -109,7 +113,7 @@ function ReviewInner() {
                     {notice && <p className="text-xs">{notice}</p>}
                     <div className="flex gap-2 pt-2">
                         <Link href="/flashcards" className={buttonVariants({ variant: "outline", size: "sm" })}>Voltar</Link>
-                        <Button size="sm" onClick={() => { setQueue(null); setIndex(0); setTally({ total: 0, hits: 0 }); void load() }}>Revisar mais</Button>
+                        <Button size="sm" onClick={() => { setQueue(null); setIndex(0); setTally({ total: 0, hits: 0 }); setNotice(null); void load() }}>Revisar mais</Button>
                     </div>
                 </CardContent></Card>
             </div>
