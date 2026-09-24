@@ -2,6 +2,7 @@ import { pluralize } from "@/lib/format"
 import { InfoTip } from "@/components/ui/info-tip"
 import { RangeFilter } from "./range-filter"
 import { CurveScopeToggle } from "./curve-scope-toggle"
+import { DashboardSection } from "./dashboard-section"
 import type {
     BulletDatum,
     DivergingDatum,
@@ -105,7 +106,10 @@ export async function HeatmapWidget({ userId }: WidgetProps) {
     )
 }
 
-export async function ProgressWidgets({ userId }: WidgetProps) {
+export async function ProgressWidgets({
+    userId,
+    show,
+}: WidgetProps & { show: { progress: boolean; diverging: boolean } }) {
     const result = await getAnalytics<{
         bulletData: BulletDatum[]
         divergingData: DivergingDatum[]
@@ -117,7 +121,9 @@ export async function ProgressWidgets({ userId }: WidgetProps) {
     const { bulletData, divergingData } = result.data
 
     return (
-        <div className="stagger grid gap-4 md:grid-cols-2">
+        <div className={`stagger grid gap-4 ${show.progress && show.diverging ? "md:grid-cols-2" : ""}`}>
+            {show.progress && (
+            <DashboardSection id="progress">
             <Card>
                 <CardHeader className="border-b border-border/40 p-4">
                     <CardTitle className="flex items-center gap-1 text-sm font-bold">
@@ -139,7 +145,11 @@ export async function ProgressWidgets({ userId }: WidgetProps) {
                     )}
                 </CardContent>
             </Card>
+            </DashboardSection>
+            )}
 
+            {show.diverging && (
+            <DashboardSection id="diverging">
             <Card>
                 <CardHeader className="border-b border-border/40 p-4">
                     <CardTitle className="flex items-center gap-1 text-sm font-bold">
@@ -161,6 +171,8 @@ export async function ProgressWidgets({ userId }: WidgetProps) {
                     )}
                 </CardContent>
             </Card>
+            </DashboardSection>
+            )}
         </div>
     )
 }

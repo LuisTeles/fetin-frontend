@@ -1,6 +1,11 @@
 import { Suspense } from "react"
+import { cookies } from "next/headers"
 
 import { parseRange } from "@/lib/dashboard-range"
+import { LAYOUT_COOKIE, parseLayout, visibleSections, type SectionId } from "@/lib/dashboard-layout"
+import { DashboardLayoutProvider } from "./_components/dashboard-layout-provider"
+import { DashboardSection } from "./_components/dashboard-section"
+import { DashboardToolbar } from "./_components/dashboard-toolbar"
 import { RefreshButton } from "./_components/refresh-button"
 import {
     ChartCardSkeleton,
@@ -45,58 +50,106 @@ export default async function DashboardPage({
     const range = parseRange(params.range)
     const curveScope = params.curves === "all" ? "all" : "upcoming"
 
+    // Layout preferences live in a cookie so the server can skip hidden sections entirely:
+    // a hidden widget is neither rendered nor fetched.
+    const layout = parseLayout((await cookies()).get(LAYOUT_COOKIE)?.value)
+    const shown = new Set<SectionId>(visibleSections(layout))
+    const has = (id: SectionId) => shown.has(id)
+
     return (
-        <section className="space-y-6">
-            <div className="flex items-start justify-between gap-4 border-b border-border/40 pb-4">
-                <div className="min-w-0">
-                    <h1 className="page-title text-balance">
-                        Diagnóstico de Estudos
-                    </h1>
-                    <p className="text-pretty text-xs text-muted-foreground">
-                        Visualize padrões de burnout, cronogramas negligenciados e tendências de
-                        desempenho.
+        <DashboardLayoutProvider initial={layout}>
+            <section className="space-y-6">
+                <div className="flex items-start justify-between gap-4 border-b border-border/40 pb-4">
+                    <div className="min-w-0">
+                        <h1 className="page-title text-balance">
+                            Diagnóstico de Estudos
+                        </h1>
+                        <p className="text-pretty text-xs text-muted-foreground">
+                            Visualize padrões de burnout, cronogramas negligenciados e tendências de
+                            desempenho.
+                        </p>
+                    </div>
+                    <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">
+                        <DashboardToolbar />
+                        <RefreshButton />
+                    </div>
+                </div>
+
+                {shown.size === 0 && (
+                    <p className="rounded-lg border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
+                        Todas as seções estão ocultas. Abra <strong>Personalizar</strong> para escolher o que ver.
                     </p>
-                </div>
-                <div className="flex shrink-0 items-center gap-2">
-                    <RefreshButton />
-                </div>
-            </div>
+                )}
 
-            {/* Every widget states its own fixed window; only Aderência has a selector (in its card). */}
-            <Suspense fallback={<KpiRowSkeleton />}>
-                <KpiWidget userId={userId} />
-            </Suspense>
+                {/* Every widget states its own fixed window; only Aderência has a selector (in its card). */}
+                {has("kpis") && (
+                    <DashboardSection id="kpis">
+                        <Suspense fallback={<KpiRowSkeleton />}>
+                            <KpiWidget userId={userId} />
+                        </Suspense>
+                    </DashboardSection>
+                )}
 
-            {/* Predictive first: what happens next outranks what already happened. */}
-            <Suspense fallback={<ChartGridSkeleton />}>
-                <ReadinessWidget userId={userId} />
-            </Suspense>
+                {/* Predictive first: what happens next outranks what already happened. */}
+                {has("readiness") && (
+                    <DashboardSection id="readiness">
+                        <Suspense fallback={<ChartGridSkeleton />}>
+                            <ReadinessWidget userId={userId} />
+                        </Suspense>
+                    </DashboardSection>
+                )}
 
-            <Suspense fallback={<ChartCardSkeleton height={320} />}>
-                <StudyQueueWidget userId={userId} />
-            </Suspense>
+                {has("queue") && (
+                    <DashboardSection id="queue">
+                        <Suspense fallback={<ChartCardSkeleton height={320} />}>
+                            <StudyQueueWidget userId={userId} />
+                        </Suspense>
+                    </DashboardSection>
+                )}
 
-            {/* Diagnostic: why the plan keeps failing. */}
-            <Suspense key={`${range}`} fallback={<ChartCardSkeleton height={420} />}>
-                <AdherenceWidget userId={userId} range={range} />
-            </Suspense>
+                {/* Diagnostic: why the plan keeps failing. */}
+                {has("adherence") && (
+                    <DashboardSection id="adherence">
+                        <Suspense key={`${range}`} fallback={<ChartCardSkeleton height={420} />}>
+                            <AdherenceWidget userId={userId} range={range} />
+                        </Suspense>
+                    </DashboardSection>
+                )}
 
-            {/* The product's premise, made visible. */}
-            <Suspense key={curveScope} fallback={<ChartCardSkeleton height={360} />}>
-                <RetentionCurveWidget userId={userId} scope={curveScope} />
-            </Suspense>
+                {/* The product's premise, made visible. */}
+                {has("curve") && (
+                    <DashboardSection id="curve">
+                        <Suspense key={curveScope} fallback={<ChartCardSkeleton height={360} />}>
+                            <RetentionCurveWidget userId={userId} scope={curveScope} />
+                        </Suspense>
+                    </DashboardSection>
+                )}
 
-            <Suspense fallback={<ChartCardSkeleton height={240} />}>
-                <EffectivenessWidget userId={userId} />
-            </Suspense>
+                {has("effectiveness") && (
+                    <DashboardSection id="effectiveness">
+                        <Suspense fallback={<ChartCardSkeleton height={240} />}>
+                            <EffectivenessWidget userId={userId} />
+                        </Suspense>
+                    </DashboardSection>
+                )}
 
-            <Suspense fallback={<ChartCardSkeleton height={288} />}>
-                <HeatmapWidget userId={userId} />
-            </Suspense>
+                {has("heatmap") && (
+                    <DashboardSection id="heatmap">
+                        <Suspense fallback={<ChartCardSkeleton height={288} />}>
+                            <HeatmapWidget userId={userId} />
+                        </Suspense>
+                    </DashboardSection>
+                )}
 
-            <Suspense fallback={<ChartGridSkeleton />}>
-                <ProgressWidgets userId={userId} />
-            </Suspense>
-        </section>
+                {(has("progress") || has("diverging")) && (
+                    <Suspense fallback={<ChartGridSkeleton />}>
+                        <ProgressWidgets
+                            userId={userId}
+                            show={{ progress: has("progress"), diverging: has("diverging") }}
+                        />
+                    </Suspense>
+                )}
+            </section>
+        </DashboardLayoutProvider>
     )
 }
