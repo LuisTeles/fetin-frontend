@@ -1,13 +1,13 @@
 "use client"
 
-import { BookOpen, GraduationCap, FileText, StickyNote } from "lucide-react"
+import { BookOpen, GraduationCap, FileText, StickyNote, Layers } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 // ─── Mention pattern ──────────────────────────────────────────────────────────
-// Matches: @subject:UUID[Label], @topic:UUID[Label], @exam:UUID[Label], @note:UUID[Label]
+// Matches: @subject:UUID[Label], @topic:UUID[Label], @exam:UUID[Label], @note:UUID[Label], @card:UUID[Label]
 // UUID is a standard UUID v4 pattern, label is anything in square brackets
 const MENTION_PATTERN =
-    /@(subject|topic|exam|note):([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\[([^\]]+)\]/gi
+    /@(subject|topic|exam|note|card):([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\[([^\]]+)\]/gi
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 
@@ -31,6 +31,11 @@ const TYPE_CONFIG = {
         icon: <StickyNote className="h-3 w-3" />,
         label: "Nota",
         pill: "bg-purple-500/15 text-purple-600 border-purple-500/30 dark:text-purple-400",
+    },
+    card: {
+        icon: <Layers className="h-3 w-3" />,
+        label: "Flashcard",
+        pill: "bg-teal-500/15 text-teal-600 border-teal-500/30 dark:text-teal-400",
     },
 } as const
 

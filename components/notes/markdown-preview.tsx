@@ -14,7 +14,7 @@ interface MarkdownPreviewProps {
 // ─── Wiki-link preprocessing ──────────────────────────────────────────────────
 // Pattern: @type:UUID[Label]
 const WIKI_PATTERN =
-    /@(?:subject|topic|exam|note):[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\[[^\]]+\]/gi
+    /@(?:subject|topic|exam|note|card):[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\[[^\]]+\]/gi
 
 /**
  * Splits content into segments: plain markdown strings and wiki-link tokens.

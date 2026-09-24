@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef, useCallback } from "react"
-import { BookOpen, GraduationCap, FileText, StickyNote, Loader2 } from "lucide-react"
+import { BookOpen, GraduationCap, FileText, StickyNote, Layers, Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { type MentionResult, type MentionEntityType, apiSearchMentionEntities } from "@/lib/api/entities"
 import type { Note } from "@/lib/api/notes"
@@ -32,6 +32,12 @@ const ENTITY_CONFIG: Record<MentionEntityType, { label: string; icon: React.Reac
         icon: <StickyNote className="h-3 w-3" />,
         color: "text-purple-500",
         bg: "bg-purple-500/10 border-purple-500/20",
+    },
+    card: {
+        label: "Flashcard",
+        icon: <Layers className="h-3 w-3" />,
+        color: "text-teal-500",
+        bg: "bg-teal-500/10 border-teal-500/20",
     },
 }
 
@@ -231,7 +237,7 @@ export function InlineMentionPopover({
     if (!mention.active) return null
 
     // Group results by type
-    const grouped = (["subject", "topic", "exam", "note"] as MentionEntityType[]).reduce(
+    const grouped = (["subject", "topic", "exam", "note", "card"] as MentionEntityType[]).reduce(
         (acc, type) => {
             const items = results.filter((r) => r.type === type)
             if (items.length > 0) acc[type] = items

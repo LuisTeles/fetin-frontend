@@ -1,4 +1,5 @@
 import { formatDateSafe } from "@/lib/format"
+import { apiGetFlashcards, flashcardLabel } from "@/lib/api/flashcards"
 
 // ─── Shared entity types for the Notes linking system ─────────────────────────
 
@@ -80,7 +81,7 @@ export async function apiGetExams(): Promise<ExamEntity[]> {
 
 // ─── Unified search for @ mention popover ─────────────────────────────────────
 
-export type MentionEntityType = "subject" | "topic" | "exam" | "note"
+export type MentionEntityType = "subject" | "topic" | "exam" | "note" | "card"
 
 export interface MentionResult {
     id: string
@@ -99,10 +100,11 @@ export async function apiSearchMentionEntities(
 ): Promise<MentionResult[]> {
     const q = query.toLowerCase().trim()
 
-    const [subjects, topics, exams] = await Promise.allSettled([
+    const [subjects, topics, exams, cards] = await Promise.allSettled([
         apiGetSubjects(),
         apiGetTopics(),
         apiGetExams(),
+        apiGetFlashcards(q ? { q } : undefined),
     ])
 
     const results: MentionResult[] = []
@@ -143,6 +145,13 @@ export async function apiSearchMentionEntities(
             if (!q || noteLabel.toLowerCase().includes(q)) {
                 results.push({ id: n.id, type: "note", label: noteLabel })
             }
+        }
+    }
+
+    // Flashcards (server-side search on front and back)
+    if (cards.status === "fulfilled") {
+        for (const c of cards.value.slice(0, 20)) {
+            results.push({ id: c.id, type: "card", label: flashcardLabel(c.front, 40), sublabel: c.topic.name })
         }
     }
 
