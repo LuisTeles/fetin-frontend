@@ -44,6 +44,7 @@ const LABEL: Record<string, string> = {
     new_content: "Conteúdo novo",
     spaced_review: "Revisão espaçada",
     pre_exam_review: "Revisão pré-prova",
+    flashcards: "Flashcards",
 }
 
 /** The ladder targets 50% recall at review; flag drift in either direction. */

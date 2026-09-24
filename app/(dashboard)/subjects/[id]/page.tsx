@@ -4,20 +4,22 @@ import { formatDateSafe } from "@/lib/format"
 import { DetailSkeleton } from "@/components/skeletons/detail-skeleton"
 import { use, useEffect, useState, FormEvent } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
-import { 
-    BookOpen, 
-    ArrowLeft, 
-    Settings, 
-    Plus, 
-    Trash2, 
-    CheckCircle2, 
-    AlertCircle, 
-    ListTodo, 
-    Save, 
-    GraduationCap, 
+import Link from "next/link"
+import {
+    BookOpen,
+    ArrowLeft,
+    Settings,
+    Plus,
+    Trash2,
+    CheckCircle2,
+    AlertCircle,
+    ListTodo,
+    Save,
+    GraduationCap,
     Clock,
     ChevronRight,
-    Loader2
+    Loader2,
+    Layers
 } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -496,14 +498,34 @@ export default function SubjectDetailPage({ params }: SubjectDetailPageProps) {
                                                             {parent.weight === "essential" ? "Essencial" : parent.weight === "review" ? "Revisão" : "Opcional"}
                                                         </Badge>
                                                     </div>
-                                                    <Button 
-                                                        variant="ghost" 
-                                                        size="icon" 
-                                                        className="w-7 h-7 text-muted-foreground hover:bg-danger/10 hover:text-danger cursor-pointer shrink-0"
-                                                        onClick={() => handleDeleteTopic(parent.id, parent.name)}
-                                                    >
-                                                        <Trash2 className="w-3.5 h-3.5" />
-                                                    </Button>
+                                                    <div className="flex items-center gap-1 shrink-0">
+                                                        {!impersonateUserId && (
+                                                            <>
+                                                                <Link
+                                                                    href={`/flashcards/review?topicId=${parent.id}`}
+                                                                    title="Revisar flashcards do tópico"
+                                                                    className="inline-flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground shrink-0"
+                                                                >
+                                                                    <Layers className="w-3.5 h-3.5" />
+                                                                </Link>
+                                                                <Link
+                                                                    href={`/flashcards?new=1&topicId=${parent.id}`}
+                                                                    title="Novo flashcard neste tópico"
+                                                                    className="inline-flex h-7 items-center rounded-md px-2 text-[10px] font-medium text-muted-foreground hover:bg-muted hover:text-foreground shrink-0"
+                                                                >
+                                                                    + card
+                                                                </Link>
+                                                            </>
+                                                        )}
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            className="w-7 h-7 text-muted-foreground hover:bg-danger/10 hover:text-danger cursor-pointer shrink-0"
+                                                            onClick={() => handleDeleteTopic(parent.id, parent.name)}
+                                                        >
+                                                            <Trash2 className="w-3.5 h-3.5" />
+                                                        </Button>
+                                                    </div>
                                                 </div>
 
                                                 {/* Subtopics Listing (2nd level) */}
@@ -532,14 +554,34 @@ export default function SubjectDetailPage({ params }: SubjectDetailPageProps) {
                                                                         {child.weight === "essential" ? "Essencial" : child.weight === "review" ? "Revisão" : "Opcional"}
                                                                     </Badge>
                                                                 </div>
-                                                                <Button 
-                                                                    variant="ghost" 
-                                                                    size="icon" 
-                                                                    className="w-6.5 h-6.5 text-muted-foreground hover:bg-danger/10 hover:text-danger cursor-pointer shrink-0"
-                                                                    onClick={() => handleDeleteTopic(child.id, child.name)}
-                                                                >
-                                                                    <Trash2 className="w-3 h-3" />
-                                                                </Button>
+                                                                <div className="flex items-center gap-1 shrink-0">
+                                                                    {!impersonateUserId && (
+                                                                        <>
+                                                                            <Link
+                                                                                href={`/flashcards/review?topicId=${child.id}`}
+                                                                                title="Revisar flashcards do tópico"
+                                                                                className="inline-flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground shrink-0"
+                                                                            >
+                                                                                <Layers className="w-3.5 h-3.5" />
+                                                                            </Link>
+                                                                            <Link
+                                                                                href={`/flashcards?new=1&topicId=${child.id}`}
+                                                                                title="Novo flashcard neste tópico"
+                                                                                className="inline-flex h-7 items-center rounded-md px-2 text-[10px] font-medium text-muted-foreground hover:bg-muted hover:text-foreground shrink-0"
+                                                                            >
+                                                                                + card
+                                                                            </Link>
+                                                                        </>
+                                                                    )}
+                                                                    <Button
+                                                                        variant="ghost"
+                                                                        size="icon"
+                                                                        className="w-6.5 h-6.5 text-muted-foreground hover:bg-danger/10 hover:text-danger cursor-pointer shrink-0"
+                                                                        onClick={() => handleDeleteTopic(child.id, child.name)}
+                                                                    >
+                                                                        <Trash2 className="w-3 h-3" />
+                                                                    </Button>
+                                                                </div>
                                                             </div>
                                                         ))}
                                                     </div>

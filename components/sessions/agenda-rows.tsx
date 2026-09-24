@@ -1,8 +1,8 @@
 import Link from "next/link"
-import { Check, GraduationCap, SkipForward } from "lucide-react"
+import { Check, GraduationCap, Layers, SkipForward } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import type { StudySessionType } from "@/lib/api/schedules"
 import { formatDateShort, formatMinutes, pluralize } from "@/lib/format"
 import { sessionActions, type AgendaExam, type AgendaSession } from "@/lib/session-agenda"
@@ -59,6 +59,14 @@ export function SessionRow({
 
             {actions.length > 0 && (
                 <div className="flex shrink-0 gap-1.5 self-end sm:self-auto">
+                    {session.sessionType === "spaced_review" && actions.includes("completed") && (
+                        <Link
+                            href={`/flashcards/review?topicId=${session.topicId}&sessionId=${session.id}`}
+                            className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
+                        >
+                            <Layers /> Revisar com cards
+                        </Link>
+                    )}
                     {actions.includes("skipped") && (
                         <Button size="sm" variant="ghost" disabled={busy} onClick={() => onStatus(session.id, "skipped")}>
                             <SkipForward /> Pular

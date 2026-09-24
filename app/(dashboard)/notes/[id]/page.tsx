@@ -4,7 +4,7 @@ import { formatExamLabel } from "@/lib/api/entities"
 import { formatDateTime } from "@/lib/format"
 import { DetailSkeleton } from "@/components/skeletons/detail-skeleton"
 import { useState, useEffect, useCallback } from "react"
-import { useParams, useRouter } from "next/navigation"
+import { useParams, useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import {
     ArrowLeft,
@@ -20,8 +20,9 @@ import {
     Loader2,
     Share2,
     Eye,
+    Layers,
 } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { TagBadge } from "@/components/notes/tag-badge"
 import { MarkdownPreview } from "@/components/notes/markdown-preview"
@@ -40,7 +41,9 @@ import { cn } from "@/lib/utils"
 export default function SingleNotePage() {
     const params = useParams()
     const router = useRouter()
+    const searchParams = useSearchParams()
     const noteId = params?.id as string
+    const impersonateUserId = searchParams.get("userId")
 
     const [note, setNote] = useState<Note | null>(null)
     const [tags, setTags] = useState<Tag[]>([])
@@ -184,6 +187,15 @@ export default function SingleNotePage() {
                             </>
                         )}
                     </Button>
+
+                    {note.topicId && !impersonateUserId && (
+                        <Link
+                            href={`/flashcards?new=1&topicId=${note.topicId}&back=${encodeURIComponent(`@note:${note.id}[${note.title ?? "Nota"}]`)}`}
+                            className={cn(buttonVariants({ variant: "outline", size: "sm" }), "text-xs h-8")}
+                        >
+                            <Layers className="mr-1.5 h-3.5 w-3.5" /> Criar flashcard
+                        </Link>
+                    )}
 
                     <Button
                         variant="outline"

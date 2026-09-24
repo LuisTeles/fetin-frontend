@@ -4,7 +4,8 @@ import { formatDateSafe, pluralize } from "@/lib/format"
 import { ListSkeleton } from "@/components/skeletons/list-skeleton"
 import { useEffect, useState } from "react"
 import { useSearchParams } from "next/navigation"
-import { Calendar, Search, Trash2, Edit2, AlertTriangle, BookOpen, Clock, BadgeAlert } from "lucide-react"
+import Link from "next/link"
+import { Calendar, Search, Trash2, Edit2, AlertTriangle, BookOpen, Clock, BadgeAlert, Layers } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
@@ -253,6 +254,13 @@ export function ExamList({ onStatsChange }: ExamListProps) {
                                     {!isImpersonating && (
                                         <div className="flex items-center justify-between sm:justify-end gap-3 border-t border-border/40 pt-3 sm:border-0 sm:pt-0 shrink-0">
                                             <div className="flex items-center gap-1 md:opacity-40 md:group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
+                                                <Link
+                                                    href={`/flashcards/review?examId=${exam.id}`}
+                                                    title="Revisar flashcards da prova"
+                                                    className="inline-flex h-6 w-6 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"
+                                                >
+                                                    <Layers className="h-3 w-3" />
+                                                </Link>
                                                 <Button
                                                     onClick={() => {
                                                         setShowForm(false)
