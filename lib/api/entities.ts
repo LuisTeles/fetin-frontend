@@ -39,8 +39,9 @@ export function formatExamLabel(exam: { examDate?: string; subject?: { name: str
 
 // ─── API helpers ───────────────────────────────────────────────────────────────
 
-export async function apiGetSubjects(): Promise<SubjectEntity[]> {
-    const res = await fetch("/api/subjects", { cache: "no-store" })
+export async function apiGetSubjects(userId?: string | null): Promise<SubjectEntity[]> {
+    const qs = userId ? `?${new URLSearchParams({ userId }).toString()}` : ""
+    const res = await fetch(`/api/subjects${qs}`, { cache: "no-store" })
     if (!res.ok) {
         const err = await res.json().catch(() => ({}))
         throw new Error(err.message ?? "Erro ao carregar disciplinas.")
@@ -61,6 +62,13 @@ export async function apiGetTopics(subjectId?: string, userId?: string | null): 
     }
     const data = await res.json()
     return (data.topics ?? []) as TopicEntity[]
+}
+
+/** Every topic of the user: GET /topics requires a subjectId, so fetch per subject. */
+export async function apiGetAllTopics(userId?: string | null): Promise<TopicEntity[]> {
+    const subjects = await apiGetSubjects(userId)
+    const lists = await Promise.all(subjects.map((s) => apiGetTopics(s.id, userId)))
+    return lists.flat()
 }
 
 export async function apiGetExams(): Promise<ExamEntity[]> {
@@ -105,7 +113,7 @@ export async function apiSearchMentionEntities(
 
     const [subjects, topics, exams, cards] = await Promise.allSettled([
         apiGetSubjects(),
-        apiGetTopics(),
+        apiGetAllTopics(),
         apiGetExams(),
         apiGetFlashcards(q ? { q } : undefined),
     ])

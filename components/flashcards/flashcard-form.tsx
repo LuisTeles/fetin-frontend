@@ -8,7 +8,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { TagSelectorDropdown } from "@/components/notes/tag-selector-dropdown"
 import { MarkdownField } from "@/components/flashcards/markdown-field"
 import { nativeSelectClass } from "@/components/flashcards/native-select"
-import { apiGetExams, apiGetSubjects, apiGetTopics, formatExamLabel, type ExamEntity, type SubjectEntity, type TopicEntity } from "@/lib/api/entities"
+import { apiGetAllTopics, apiGetExams, apiGetSubjects, formatExamLabel, type ExamEntity, type SubjectEntity, type TopicEntity } from "@/lib/api/entities"
 import type { Tag } from "@/lib/api/notes"
 import { apiCreateFlashcard, apiUpdateFlashcard, type Flashcard } from "@/lib/api/flashcards"
 import { cn } from "@/lib/utils"
@@ -37,7 +37,7 @@ export function FlashcardForm({ card, tags, defaults, onSuccess, onCancel }: Fla
     const [error, setError] = useState<string | null>(null)
 
     useEffect(() => {
-        Promise.all([apiGetSubjects(), apiGetTopics(), apiGetExams()])
+        Promise.all([apiGetSubjects(), apiGetAllTopics(), apiGetExams()])
             .then(([s, t, e]) => { setSubjects(s); setTopics(t); setExams(e) })
             .catch((err: unknown) => setError(err instanceof Error ? err.message : "Erro ao carregar tópicos."))
     }, [])

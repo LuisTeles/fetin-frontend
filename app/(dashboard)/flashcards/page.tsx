@@ -12,7 +12,7 @@ import { FlashcardForm } from "@/components/flashcards/flashcard-form"
 import { FlashcardTile } from "@/components/flashcards/flashcard-tile"
 import { nativeSelectClass } from "@/components/flashcards/native-select"
 import { apiGetTags, type Tag } from "@/lib/api/notes"
-import { apiGetTopics, type TopicEntity } from "@/lib/api/entities"
+import { apiGetAllTopics, type TopicEntity } from "@/lib/api/entities"
 import { apiGetDueFlashcards, apiGetFlashcards, type Flashcard } from "@/lib/api/flashcards"
 
 function FlashcardsPageInner() {
@@ -59,7 +59,7 @@ function FlashcardsPageInner() {
     useEffect(() => { const t = setTimeout(load, 250); return () => clearTimeout(t) }, [load])
     useEffect(() => {
         apiGetTags(userId).then(setTags).catch(() => setTags([]))
-        apiGetTopics(undefined, userId).then(setTopics).catch(() => setTopics([]))
+        apiGetAllTopics(userId).then(setTopics).catch(() => setTopics([]))
     }, [userId])
 
     const withUser = (path: string) => (userId ? `${path}${path.includes("?") ? "&" : "?"}userId=${userId}` : path)

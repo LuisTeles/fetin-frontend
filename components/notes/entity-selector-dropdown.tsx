@@ -8,7 +8,7 @@ import {
     type TopicEntity,
     type ExamEntity,
     apiGetSubjects,
-    apiGetTopics,
+    apiGetAllTopics,
     apiGetExams,
     formatExamLabel,
 } from "@/lib/api/entities"
@@ -83,7 +83,7 @@ export function EntitySelectorDropdown({
                 setSubjects(data)
             },
             topic: async () => {
-                const data = await apiGetTopics()
+                const data = await apiGetAllTopics()
                 setTopics(data)
             },
             exam: async () => {
