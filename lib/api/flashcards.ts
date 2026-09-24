@@ -71,14 +71,13 @@ export interface FlashcardQuery {
     tagId?: string
     q?: string
     includeArchived?: boolean
-    limit?: number
     /** Admin impersonation (read-only). */
     userId?: string | null
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function qs(params: FlashcardQuery = {}): string {
+function qs(params: (FlashcardQuery & { limit?: number }) = {}): string {
     const sp = new URLSearchParams()
     for (const [k, v] of Object.entries(params)) {
         if (v !== undefined && v !== null && v !== "" && v !== false) sp.set(k, String(v))
@@ -107,7 +106,9 @@ export async function apiGetFlashcards(params?: FlashcardQuery): Promise<Flashca
     return data.flashcards ?? []
 }
 
-export async function apiGetDueFlashcards(params?: Pick<FlashcardQuery, "topicId" | "examId" | "limit" | "userId">): Promise<Flashcard[]> {
+export async function apiGetDueFlashcards(
+    params?: Pick<FlashcardQuery, "topicId" | "examId" | "userId"> & { limit?: number }
+): Promise<Flashcard[]> {
     const data = await request<{ flashcards: Flashcard[] }>(`/api/flashcards/due${qs(params)}`, undefined, "Erro ao carregar revisões.")
     return data.flashcards ?? []
 }
