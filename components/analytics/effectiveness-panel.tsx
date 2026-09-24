@@ -1,4 +1,5 @@
 import { formatPercent } from "@/lib/format"
+import { InfoTip } from "@/components/ui/info-tip"
 import {
     Card,
     CardContent,
@@ -30,7 +31,11 @@ export interface EffectivenessBucket {
 }
 
 export interface EffectivenessSummary {
+    /** Reviews only: a topic's first study is a "first contact", not a review. */
     totalReviews: number
+    firstContacts: number
+    /** Share of reviews with recall within ±15 points of the 50% target; null with no reviews. */
+    nearTarget: { reviews: number; share: number | null }
     bySessionType: EffectivenessBucket[]
     causalityCaveat: true
 }
@@ -50,7 +55,7 @@ function timingVerdict(sessionType: string, recall: number): string | null {
 }
 
 export function EffectivenessPanel({ data }: { data: EffectivenessSummary }) {
-    if (data.totalReviews === 0) {
+    if (data.totalReviews === 0 && data.firstContacts === 0) {
         return (
             <Card>
                 <CardHeader className="border-b border-border/40 p-4">
@@ -71,10 +76,21 @@ export function EffectivenessPanel({ data }: { data: EffectivenessSummary }) {
             <CardHeader className="border-b border-border/40 p-4">
                 <CardTitle className="text-sm font-bold">Eficácia das Revisões</CardTitle>
                 <CardDescription className="text-pretty text-xs text-muted-foreground">
-                    Em que ponto da curva você revisa, por tipo de sessão —{" "}
+                    Em que ponto da curva você revisa, por tipo de sessão (todo o histórico) —{" "}
                     <span className="tabular-nums">{data.totalReviews}</span>{" "}
                     {data.totalReviews === 1 ? "revisão registrada" : "revisões registradas"}. O alvo do método é revisar por volta de 50% de retenção.
                 </CardDescription>
+                <p className="mt-1 text-xs text-foreground">
+                    <span className="font-medium">% de revisões perto de 50%:</span>{" "}
+                    <span className="tabular-nums">
+                        {data.nearTarget.share === null ? "—" : formatPercent(data.nearTarget.share)}
+                    </span>
+                    {data.nearTarget.share !== null && (
+                        <span className="text-muted-foreground">
+                            {" "}({data.nearTarget.reviews} de {data.totalReviews}, entre 35% e 65% de retenção)
+                        </span>
+                    )}
+                </p>
             </CardHeader>
 
             <CardContent className="p-0">
@@ -93,6 +109,20 @@ export function EffectivenessPanel({ data }: { data: EffectivenessSummary }) {
                             </tr>
                         </thead>
                         <tbody>
+                            <tr className="border-b border-border/20">
+                                <td className="p-3 font-medium text-foreground">
+                                    <span className="inline-flex items-center gap-1">
+                                        Primeiro contato
+                                        <InfoTip id="eff-tip-first">
+                                            Estudo inicial não tem retenção anterior para medir. A retenção só faz sentido em revisões.
+                                        </InfoTip>
+                                    </span>
+                                </td>
+                                <td className="p-3 text-right tabular-nums text-muted-foreground">{data.firstContacts}</td>
+                                <td className="p-3 text-right text-muted-foreground">—</td>
+                                <td className="p-3 text-muted-foreground">—</td>
+                                <td className="p-3 text-right text-muted-foreground">—</td>
+                            </tr>
                             {data.bySessionType.map((b) => {
                                 const verdict = timingVerdict(b.sessionType, b.avgRetentionAtReview)
                                 return (

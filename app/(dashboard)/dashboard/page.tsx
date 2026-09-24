@@ -1,7 +1,6 @@
 import { Suspense } from "react"
 
 import { parseRange } from "@/lib/dashboard-range"
-import { RangeFilter } from "./_components/range-filter"
 import { RefreshButton } from "./_components/refresh-button"
 import {
     ChartCardSkeleton,
@@ -44,6 +43,7 @@ export default async function DashboardPage({
     const rawUserId = params.userId
     const userId = Array.isArray(rawUserId) ? rawUserId[0] : rawUserId
     const range = parseRange(params.range)
+    const curveScope = params.curves === "all" ? "all" : "upcoming"
 
     return (
         <section className="space-y-6">
@@ -58,11 +58,11 @@ export default async function DashboardPage({
                     </p>
                 </div>
                 <div className="flex shrink-0 items-center gap-2">
-                    <RangeFilter />
                     <RefreshButton />
                 </div>
             </div>
 
+            {/* Every widget states its own fixed window; only Aderência has a selector (in its card). */}
             <Suspense fallback={<KpiRowSkeleton />}>
                 <KpiWidget userId={userId} />
             </Suspense>
@@ -77,13 +77,13 @@ export default async function DashboardPage({
             </Suspense>
 
             {/* Diagnostic: why the plan keeps failing. */}
-            <Suspense key={range} fallback={<ChartCardSkeleton height={420} />}>
+            <Suspense key={`${range}`} fallback={<ChartCardSkeleton height={420} />}>
                 <AdherenceWidget userId={userId} range={range} />
             </Suspense>
 
             {/* The product's premise, made visible. */}
-            <Suspense fallback={<ChartCardSkeleton height={360} />}>
-                <RetentionCurveWidget userId={userId} />
+            <Suspense key={curveScope} fallback={<ChartCardSkeleton height={360} />}>
+                <RetentionCurveWidget userId={userId} scope={curveScope} />
             </Suspense>
 
             <Suspense fallback={<ChartCardSkeleton height={240} />}>

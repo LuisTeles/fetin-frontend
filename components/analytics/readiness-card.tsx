@@ -1,4 +1,6 @@
+import Link from "next/link"
 import { formatDate, formatPercent, pluralize } from "@/lib/format"
+import { InfoTip } from "@/components/ui/info-tip"
 import {
     Card,
     CardContent,
@@ -26,6 +28,11 @@ export interface ExamReadiness {
     projected: number
     abandoned: number
     current: number
+    /** Topics linked to the exam; 0 means there is nothing to estimate. */
+    topicCount: number
+    hasActiveSchedule: boolean
+    /** D7: the exam's date or topics changed after the plan was generated. */
+    scheduleStale: boolean
     topics: { topicId: string; topicName: string; projected: number; weightValue: number }[]
 }
 
@@ -73,6 +80,7 @@ function ComparisonBar({
 export function ReadinessCard({ exam }: { exam: ExamReadiness }) {
     const tone = toneFor(exam.projected)
     const gain = exam.projected - exam.abandoned
+    const noTopics = exam.topicCount === 0
 
     return (
         <Card>
@@ -88,6 +96,35 @@ export function ReadinessCard({ exam }: { exam: ExamReadiness }) {
             </CardHeader>
 
             <CardContent className="space-y-4 p-4">
+                {exam.scheduleStale && (
+                    <div
+                        role="status"
+                        className="flex flex-col gap-1 rounded-md border border-amber-500/40 bg-amber-500/10 p-3 text-xs text-amber-700 dark:text-amber-300"
+                    >
+                        <span className="flex items-center gap-1 font-semibold">
+                            Cronograma desatualizado
+                            <InfoTip id={`stale-tip-${exam.examId}`}>
+                                A data ou os tópicos da prova mudaram depois que este cronograma foi gerado. Gere um novo para atualizar a previsão.
+                            </InfoTip>
+                        </span>
+                        <span>
+                            A previsão abaixo usa o plano antigo.{" "}
+                            <Link href="/auto-schedule" className="font-medium underline">
+                                Regenerar cronograma
+                            </Link>
+                        </span>
+                    </div>
+                )}
+
+                {noTopics ? (
+                    <div className="space-y-1">
+                        <p className="text-2xl font-bold tracking-tight text-muted-foreground">Sem tópicos</p>
+                        <p className="text-pretty text-xs text-muted-foreground">
+                            Vincule tópicos a esta prova para estimar a retenção no dia dela.
+                        </p>
+                    </div>
+                ) : (
+                <>
                 <div className="flex items-baseline gap-2">
                     <span
                         className="text-4xl font-bold tracking-tight tabular-nums"
@@ -95,25 +132,32 @@ export function ReadinessCard({ exam }: { exam: ExamReadiness }) {
                     >
                         {formatPercent(exam.projected)}
                     </span>
-                    <span className="text-xs font-medium text-muted-foreground">
-                        de retenção projetada · {tone.label}
+                    <span className="flex items-center gap-1 text-xs font-medium text-muted-foreground">
+                        Retenção esperada no dia da prova · {tone.label}
+                        <InfoTip id={`ready-tip-${exam.examId}`}>
+                            Estimativa do quanto você lembrará de cada tópico no dia da prova se cumprir as sessões planejadas. É uma estimativa, não uma nota.
+                        </InfoTip>
                     </span>
                 </div>
 
                 <div className="space-y-3">
                     <ComparisonBar
-                        label="Seguindo o cronograma"
+                        label="Se cumprir o plano"
                         value={exam.projected}
                         barColor="var(--status-good)"
                     />
                     <ComparisonBar
-                        label="Parando de estudar hoje"
+                        label="Se parar hoje"
                         value={exam.abandoned}
                         barColor="color-mix(in oklab, var(--muted-foreground) 50%, transparent)"
                     />
                 </div>
 
-                <p className="text-pretty text-xs text-muted-foreground">
+                <p className="flex items-start gap-1 text-pretty text-xs text-muted-foreground">
+                    <InfoTip id={`scen-tip-${exam.examId}`}>
+                        Mesma estimativa em dois cenários: cumprindo todas as sessões restantes ou não estudando mais.
+                    </InfoTip>
+                    <span>
                     {gain > 0.01 ? (
                         <>
                             Cumprir o cronograma vale{" "}
@@ -128,7 +172,10 @@ export function ReadinessCard({ exam }: { exam: ExamReadiness }) {
                             retenção. Gere ou ajuste o cronograma.
                         </>
                     )}
+                    </span>
                 </p>
+                </>
+                )}
             </CardContent>
         </Card>
     )

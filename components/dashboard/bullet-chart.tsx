@@ -33,7 +33,11 @@ export function BulletChart({ data }: BulletChartProps) {
         const pct = d.measures[0]
         // Validated status steps, chosen per surface (see lib/chart-palette.ts).
         const color = statusForScore(pct / 100, isDark)
-        const formattedTitle = d.id.length > 25 ? `${d.id.slice(0, 23)}...` : d.id
+        const name = d.id.length > 22 ? `${d.id.slice(0, 20)}...` : d.id
+        // Every subject keeps its row. 0% is a real, empty bar and says so; a subject with no
+        // sessions in an active plan says that instead of pretending to be at 0%.
+        const label = d.planned === 0 ? "sem cronograma ativo" : `${pct}% (${d.completed}/${d.planned})`
+        const formattedTitle = `${name} · ${label}`
         return {
             ...d,
             id: formattedTitle,
@@ -67,6 +71,7 @@ export function BulletChart({ data }: BulletChartProps) {
                             Progresso:{" "}
                             <span style={{ color }}>{v0 ?? v1}%</span>
                         </p>
+                        <p className="text-muted-foreground">Sessões concluídas ÷ sessões previstas no plano.</p>
                     </div>
                 )}
                 animate={!reducedMotion}

@@ -1,6 +1,7 @@
 import { CountUp } from "@/components/ui/count-up"
 import { formatPercent } from "@/lib/format"
 import { weekdayLabels } from "@/lib/format"
+import { InfoTip } from "@/components/ui/info-tip"
 import {
     Card,
     CardContent,
@@ -92,14 +93,22 @@ function RateRow({ label, bucket }: { label: string; bucket: AdherenceBucket }) 
     )
 }
 
-export function AdherencePanel({ data }: { data: AdherenceSummary }) {
+export function AdherencePanel({
+    data,
+    rangeFilter,
+}: {
+    data: AdherenceSummary
+    /** The 14/28/56/90 selector: it lives in this card because it only drives this card (F-08). */
+    rangeFilter?: React.ReactNode
+}) {
     const labels = weekdayLabels()
 
     if (data.overall.total === 0) {
         return (
             <Card>
-                <CardHeader className="border-b border-border/40 p-4">
+                <CardHeader className="flex flex-row items-start justify-between gap-3 border-b border-border/40 p-4">
                     <CardTitle className="text-sm font-bold">Aderência ao Cronograma</CardTitle>
+                    {rangeFilter}
                 </CardHeader>
                 <CardContent className="p-4">
                     <p className="text-pretty py-8 text-center text-xs text-muted-foreground">
@@ -114,7 +123,15 @@ export function AdherencePanel({ data }: { data: AdherenceSummary }) {
     return (
         <Card className="enter">
             <CardHeader className="border-b border-border/40 p-4">
-                <CardTitle className="text-sm font-bold">Aderência ao Cronograma</CardTitle>
+                <div className="flex items-start justify-between gap-3">
+                    <CardTitle className="flex items-center gap-1 text-sm font-bold">
+                        Aderência ao Cronograma
+                        <InfoTip id="adh-tip">
+                            Sessões concluídas ÷ sessões planejadas em dias que já passaram. Sessões futuras não contam como falha.
+                        </InfoTip>
+                    </CardTitle>
+                    {rangeFilter}
+                </div>
                 <CardDescription className="text-pretty text-xs text-muted-foreground">
                     Do que foi planejado, quanto realmente aconteceu — nos últimos{" "}
                     <span className="tabular-nums">{data.windowDays}</span>{" "}

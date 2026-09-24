@@ -1,4 +1,7 @@
 import { pluralize } from "@/lib/format"
+import { InfoTip } from "@/components/ui/info-tip"
+import { RangeFilter } from "./range-filter"
+import { CurveScopeToggle } from "./curve-scope-toggle"
 import type {
     BulletDatum,
     DivergingDatum,
@@ -79,12 +82,16 @@ export async function HeatmapWidget({ userId }: WidgetProps) {
     return (
         <Card className="enter">
             <CardHeader className="border-b border-border/40 p-4">
-                <CardTitle className="text-sm font-bold">
+                <CardTitle className="flex items-center gap-1 text-sm font-bold">
                     Mapa de Calor de Atividade Semanal
+                    <InfoTip id="heat-tip">
+                        Minutos concluídos por hora e dia da semana no seu fuso horário.
+                    </InfoTip>
                 </CardTitle>
                 <CardDescription className="text-xs text-muted-foreground">
-                    Distribuição de minutos estudados por hora do dia e dia da semana (últimas 8
-                    semanas). Identifica blocos de alta intensidade e vazios de procrastinação.
+                    Distribuição de minutos estudados por hora do dia e dia da semana · 8 semanas ·
+                    horário de Brasília. Identifica blocos de alta intensidade e vazios de
+                    procrastinação.
                 </CardDescription>
             </CardHeader>
             <CardContent className="p-4">
@@ -113,12 +120,15 @@ export async function ProgressWidgets({ userId }: WidgetProps) {
         <div className="stagger grid gap-4 md:grid-cols-2">
             <Card>
                 <CardHeader className="border-b border-border/40 p-4">
-                    <CardTitle className="text-sm font-bold">
-                        Meta vs. Realidade por Disciplina
+                    <CardTitle className="flex items-center gap-1 text-sm font-bold">
+                        Progresso do plano por disciplina
+                        <InfoTip id="prog-tip">
+                            Sessões concluídas sobre as sessões previstas no cronograma de cada disciplina.
+                        </InfoTip>
                     </CardTitle>
                     <CardDescription className="text-xs text-muted-foreground">
-                        Sessões concluídas versus total alocado. Barras curtas revelam disciplinas
-                        negligenciadas.
+                        % · cronogramas ativos. Barras curtas revelam disciplinas negligenciadas;
+                        0% é uma barra vazia, não uma disciplina ausente.
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="p-4">
@@ -132,12 +142,15 @@ export async function ProgressWidgets({ userId }: WidgetProps) {
 
             <Card>
                 <CardHeader className="border-b border-border/40 p-4">
-                    <CardTitle className="text-sm font-bold">
-                        Consistência de Hábitos (Divergente)
+                    <CardTitle className="flex items-center gap-1 text-sm font-bold">
+                        Planejado × Estudado por dia
+                        <InfoTip id="div-tip" align="right">
+                            Diferença entre os minutos concluídos e os minutos das sessões planejadas naquele dia. O dia de hoje aparece como &quot;em andamento&quot;.
+                        </InfoTip>
                     </CardTitle>
                     <CardDescription className="text-xs text-muted-foreground">
-                        Minutos concluídos menos minutos planejados, por dia. Valores negativos
-                        expõem rotinas voláteis.
+                        min · últimos 14 dias. Valores negativos mostram sessões planejadas que não
+                        foram concluídas.
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="p-4">
@@ -170,7 +183,7 @@ export async function ReadinessWidget({ userId }: WidgetProps) {
         return (
             <Card className="enter">
                 <CardHeader className="border-b border-border/40 p-4">
-                    <CardTitle className="text-sm font-bold">Prontidão para Provas</CardTitle>
+                    <CardTitle className="text-sm font-bold">Prontidão para Provas · até a prova</CardTitle>
                 </CardHeader>
                 <CardContent className="p-4">
                     <EmptyState message="Nenhuma prova futura cadastrada. Agende uma prova para ver a projeção de retenção." />
@@ -205,7 +218,7 @@ export async function AdherenceWidget({ userId, range }: RangedWidgetProps) {
     if (!result.ok) {
         return result.sessionExpired ? <SessionExpired /> : <WidgetError message={result.error} />
     }
-    return <AdherencePanel data={result.data} />
+    return <AdherencePanel data={result.data} rangeFilter={<RangeFilter />} />
 }
 
 interface TopicCurve {
@@ -218,8 +231,14 @@ interface TopicCurve {
     nextReviewAt: string | null
 }
 
-export async function RetentionCurveWidget({ userId }: WidgetProps) {
-    const result = await getAnalytics<TopicCurve[]>("/analytics/retention-curve?limit=4", userId)
+export async function RetentionCurveWidget({
+    userId,
+    scope,
+}: WidgetProps & { scope: "upcoming" | "all" }) {
+    const result = await getAnalytics<TopicCurve[]>(
+        `/analytics/retention-curve?limit=4&scope=${scope}`,
+        userId,
+    )
     if (!result.ok) {
         return result.sessionExpired ? <SessionExpired /> : <WidgetError message={result.error} />
     }
@@ -227,17 +246,22 @@ export async function RetentionCurveWidget({ userId }: WidgetProps) {
     return (
         <Card className="enter">
             <CardHeader className="border-b border-border/40 p-4">
-                <CardTitle className="text-sm font-bold">Curva de Esquecimento</CardTitle>
+                <div className="flex flex-wrap items-start justify-between gap-2">
+                    <CardTitle className="text-sm font-bold">Curva de Esquecimento</CardTitle>
+                    <CurveScopeToggle />
+                </div>
                 <CardDescription className="text-pretty text-xs text-muted-foreground">
-                    Retenção estimada ao longo do tempo, reconstruída do histórico de revisões.
-                    Cada revisão achata a curva — é o método do produto, visível.
+                    Retenção estimada ao longo do tempo (todo o histórico), reconstruída das
+                    revisões. Mostra os 4 tópicos de menor retenção
+                    {scope === "upcoming" ? " entre os que uma prova futura exige" : ""}. Cada
+                    revisão achata a curva — é o método do produto, visível.
                 </CardDescription>
             </CardHeader>
             <CardContent className="p-4">
                 {result.data.length > 0 ? (
                     <RetentionCurveChart series={result.data} />
                 ) : (
-                    <EmptyState message="Sem histórico de revisões ainda. Conclua sessões para que a curva apareça." />
+                    <EmptyState message={scope === "upcoming" ? "Nenhum tópico de prova futura tem histórico de revisões ainda. Conclua sessões ou veja Todos os tópicos." : "Sem histórico de revisões ainda. Conclua sessões para que a curva apareça."} />
                 )}
             </CardContent>
         </Card>

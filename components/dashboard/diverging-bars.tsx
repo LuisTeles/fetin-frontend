@@ -47,10 +47,13 @@ export function DivergingBars({ data }: DivergingBarsProps) {
         )
     }
 
+    // Today is not over, so its delta is not a failure: it gets its own neutral series and label.
     const chartData = filtered.map((d) => ({
-        label: d.label,
-        "Acima do Plano": d.delta > 0 ? d.delta : 0,
-        "Abaixo do Plano": d.delta < 0 ? d.delta : 0,
+        label: d.inProgress ? `${d.label} · hoje` : d.label,
+        inProgress: d.inProgress ? 1 : 0,
+        "Acima do Plano": !d.inProgress && d.delta > 0 ? d.delta : 0,
+        "Abaixo do Plano": !d.inProgress && d.delta < 0 ? d.delta : 0,
+        "Em andamento": d.inProgress ? d.delta : 0,
         completed: d.completed,
         planned: d.planned,
         delta: d.delta,
@@ -85,7 +88,7 @@ export function DivergingBars({ data }: DivergingBarsProps) {
                 <ResponsiveBar
                     data={chartData}
                     theme={theme}
-                    keys={["Acima do Plano", "Abaixo do Plano"]}
+                    keys={["Acima do Plano", "Abaixo do Plano", "Em andamento"]}
                     indexBy="label"
                     margin={{ top: 20, right: 20, bottom: 60, left: 56 }}
                     padding={0.3}
@@ -94,7 +97,9 @@ export function DivergingBars({ data }: DivergingBarsProps) {
                     colors={({ id }) =>
                         id === "Acima do Plano"
                             ? statusPalette(isDark).good
-                            : statusPalette(isDark).critical
+                            : id === "Em andamento"
+                              ? "var(--muted-foreground)"
+                              : statusPalette(isDark).critical
                     }
                     borderRadius={3}
                     axisLeft={{
@@ -117,6 +122,9 @@ export function DivergingBars({ data }: DivergingBarsProps) {
                         return (
                             <div className="rounded-md border bg-popover px-3 py-1.5 text-xs shadow-md space-y-0.5">
                                 <p className="font-semibold text-popover-foreground">{item.label}</p>
+                                {item.inProgress === 1 && (
+                                    <p className="text-muted-foreground">Em andamento — o dia de hoje ainda não acabou.</p>
+                                )}
                                 <p className="text-muted-foreground">
                                     Diferença:{" "}
                                     <span
