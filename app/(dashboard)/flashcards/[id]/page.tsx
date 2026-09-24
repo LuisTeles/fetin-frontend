@@ -46,6 +46,19 @@ function FlashcardDetailInner() {
         try { await fn(); await load() } catch (err: unknown) { setError(err instanceof Error ? err.message : "Erro.") } finally { setBusy(false) }
     }
 
+    async function handleDelete() {
+        if (!card) return
+        if (!window.confirm("Excluir este flashcard?")) return
+        setBusy(true)
+        try {
+            await apiDeleteFlashcard(card.id)
+            router.push("/flashcards")
+        } catch (err: unknown) {
+            setError(err instanceof Error ? err.message : "Erro ao excluir flashcard.")
+            setBusy(false)
+        }
+    }
+
     if (error && !card) return <p className="text-sm text-destructive">{error}</p>
     if (!card) return <p className="text-sm text-muted-foreground">Carregando…</p>
 
@@ -70,11 +83,7 @@ function FlashcardDetailInner() {
                         <Button size="sm" variant="outline" disabled={busy} onClick={() => act(() => apiUpdateFlashcard(card.id, { isArchived: !card.isArchived }))}>
                             {card.isArchived ? <><ArchiveRestore className="mr-1.5 h-3.5 w-3.5" />Desarquivar</> : <><Archive className="mr-1.5 h-3.5 w-3.5" />Arquivar</>}
                         </Button>
-                        <Button size="sm" variant="outline" disabled={busy} onClick={async () => {
-                            if (!window.confirm("Excluir este flashcard?")) return
-                            await apiDeleteFlashcard(card.id)
-                            router.push("/flashcards")
-                        }}><Trash2 className="mr-1.5 h-3.5 w-3.5" />Excluir</Button>
+                        <Button size="sm" variant="outline" disabled={busy} onClick={handleDelete}><Trash2 className="mr-1.5 h-3.5 w-3.5" />Excluir</Button>
                     </div>
                 )}
             </div>
