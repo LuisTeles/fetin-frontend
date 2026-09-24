@@ -62,6 +62,7 @@ export default async function DashboardLayout({
                     <SlidingIndicator>
                     <ul className="relative z-10 space-y-0.5">
                         <li><NavLink href="/dashboard" icon="dashboard">Dashboard</NavLink></li>
+                        <li><NavLink href="/sessions" icon="sessions">Sessões</NavLink></li>
                         <li><NavLink href="/me" icon="profile">Meu perfil</NavLink></li>
                         <li><NavLink href="/exams" icon="exams">Provas</NavLink></li>
                         <li><NavLink href="/subjects" icon="subjects">Disciplinas</NavLink></li>

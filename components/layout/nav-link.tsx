@@ -8,6 +8,7 @@ import {
     Clock,
     GraduationCap,
     LayoutDashboard,
+    ListChecks,
     ShieldCheck,
     Sparkles,
     StickyNote,
@@ -19,6 +20,7 @@ import { cn } from "@/lib/utils"
 
 const ICONS: Record<string, LucideIcon> = {
     dashboard: LayoutDashboard,
+    sessions: ListChecks,
     profile: User,
     exams: GraduationCap,
     subjects: BookOpen,
