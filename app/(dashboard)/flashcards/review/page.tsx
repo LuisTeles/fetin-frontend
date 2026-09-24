@@ -8,7 +8,7 @@ import { Button, buttonVariants } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { EmptyState } from "@/components/ui/empty-state"
 import { MarkdownPreview } from "@/components/notes/markdown-preview"
-import { apiGetDueFlashcards, apiReviewFlashcard, type Flashcard, type FlashcardGrade, type TopicRollup } from "@/lib/api/flashcards"
+import { apiGetDueFlashcards, apiGetFlashcards, apiReviewFlashcard, FlashcardApiError, type Flashcard, type FlashcardGrade, type TopicRollup } from "@/lib/api/flashcards"
 
 const GRADES: { grade: FlashcardGrade; label: string; key: string; variant: "destructive" | "outline" | "default" | "secondary" }[] = [
     { grade: "again", label: "Errei", key: "1", variant: "destructive" },
@@ -23,15 +23,41 @@ function rollupMessage(r: TopicRollup): string {
     return "Tópico já avançou hoje; esta revisão foi registrada."
 }
 
+/** RN-FLC-05: the rollup needs min(5, active cards) distinct cards graded in a day. */
+const ROLLUP_MAX_CARDS = 5
+
+/**
+ * A spaced-review session links to the topic's rollup (RN-FLC-07), but card SM-2 intervals
+ * drift from the topic ladder, so only 1-4 cards may be due that day. Top the queue up with
+ * the topic's soonest-due active cards so the rollup can fire; due cards stay first.
+ */
+function topUpForSession(due: Flashcard[], topicCards: Flashcard[]): Flashcard[] {
+    const target = Math.min(ROLLUP_MAX_CARDS, topicCards.length)
+    if (due.length >= target) return due
+    const inQueue = new Set(due.map((c) => c.id))
+    const extra = topicCards
+        .filter((c) => !inQueue.has(c.id))
+        .sort((a, b) => new Date(a.dueAt).getTime() - new Date(b.dueAt).getTime())
+    return [...due, ...extra.slice(0, target - due.length)]
+}
+
 function ReviewInner() {
     const sp = useSearchParams()
     const topicId = sp.get("topicId") ?? undefined
     const examId = sp.get("examId") ?? undefined
     const [sessionId, setSessionId] = useState(sp.get("sessionId"))
+    const openedWithSession = sp.get("sessionId") !== null
+    // Read by load() without making it a dependency: completing the session mid-review must
+    // not reload the queue.
+    const sessionRef = useRef(sessionId)
+    useEffect(() => { sessionRef.current = sessionId }, [sessionId])
 
     const [queue, setQueue] = useState<Flashcard[] | null>(null)
     const [index, setIndex] = useState(0)
     const [revealed, setRevealed] = useState(false)
+    // Mirrors `revealed` synchronously, so a key pressed before the re-render cannot grade
+    // the card that was just graded.
+    const revealedRef = useRef(false)
     const [busy, setBusy] = useState(false)
     const busyRef = useRef(false)
     const [tally, setTally] = useState({ total: 0, hits: 0 })
@@ -40,7 +66,10 @@ function ReviewInner() {
 
     const load = useCallback(async () => {
         try {
-            setQueue(await apiGetDueFlashcards({ topicId, examId, limit: 100 }))
+            const due = await apiGetDueFlashcards({ topicId, examId, limit: 100 })
+            // Active cards only (the list default).
+            const topicCards = sessionRef.current && topicId ? await apiGetFlashcards({ topicId }) : null
+            setQueue(topicCards ? topUpForSession(due, topicCards) : due)
             setError(null)
         } catch (err: unknown) {
             setError(err instanceof Error ? err.message : "Erro ao carregar revisões.")
@@ -51,38 +80,59 @@ function ReviewInner() {
 
     const current = queue?.[index]
 
+    const reveal = useCallback(() => {
+        revealedRef.current = true
+        setRevealed(true)
+    }, [])
+
+    // Hide the answer and move on; the ref flips first so no stale handler can re-grade.
+    const advance = useCallback(() => {
+        revealedRef.current = false
+        setRevealed(false)
+        setIndex((i) => i + 1)
+    }, [])
+
     const grade = useCallback(async (g: FlashcardGrade) => {
-        if (!current || !revealed || busyRef.current) return
+        if (!current || !revealedRef.current || busyRef.current) return
         busyRef.current = true
         setBusy(true)
         try {
             // Each grade is saved immediately, so leaving mid-review loses nothing.
             const res = await apiReviewFlashcard(current.id, g, sessionId)
+            advance()
             setTally((t) => ({ total: t.total + 1, hits: t.hits + (g === "good" || g === "easy" ? 1 : 0) }))
             if (res.rollup) setNotice(rollupMessage(res.rollup) + (res.sessionCompleted ? " Sessão concluída." : ""))
+            else if (res.sessionCompleted) setNotice("Sessão concluída: o tópico já tinha sido revisado hoje.")
             if (res.sessionCompleted) setSessionId(null)
-            setIndex((i) => i + 1)
-            setRevealed(false)
             setError(null)
         } catch (err: unknown) {
-            setError(err instanceof Error ? err.message : "Erro ao registrar revisão.")
+            const message = err instanceof Error ? err.message : "Erro ao registrar revisão."
+            // Deleted (404) or archived (409) elsewhere: skip it instead of getting stuck.
+            if (err instanceof FlashcardApiError && (err.status === 404 || err.status === 409)) advance()
+            setError(message)
         } finally {
             busyRef.current = false
             setBusy(false)
         }
-    }, [current, revealed, sessionId])
+    }, [current, sessionId, advance])
 
     useEffect(() => {
         function onKey(e: KeyboardEvent) {
-            if (e.repeat) return
-            if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return
-            if (e.code === "Space" && !revealed) { e.preventDefault(); setRevealed(true); return }
+            if (e.repeat || e.ctrlKey || e.metaKey || e.altKey) return
+            const t = e.target
+            if (
+                t instanceof HTMLInputElement ||
+                t instanceof HTMLTextAreaElement ||
+                t instanceof HTMLSelectElement ||
+                (t instanceof HTMLElement && t.isContentEditable)
+            ) return
+            if (e.code === "Space" && !revealedRef.current) { e.preventDefault(); reveal(); return }
             const hit = GRADES.find((x) => x.key === e.key)
             if (hit) void grade(hit.grade)
         }
         window.addEventListener("keydown", onKey)
         return () => window.removeEventListener("keydown", onKey)
-    }, [grade, revealed])
+    }, [grade, reveal])
 
     const back = (
         <Link href="/flashcards" className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground">
@@ -111,9 +161,15 @@ function ReviewInner() {
                     <p className="text-sm font-semibold">Revisão concluída</p>
                     <p className="text-xs text-muted-foreground">{tally.total} {tally.total === 1 ? "card" : "cards"} · {pct}% de acerto</p>
                     {notice && <p className="text-xs">{notice}</p>}
+                    {openedWithSession && sessionId && (
+                        <p className="text-xs text-amber-600 dark:text-amber-400">
+                            A sessão de estudo ainda está pendente — revise mais cards do tópico ou conclua-a em Sessões.
+                        </p>
+                    )}
+                    {error && <p className="text-xs text-destructive">{error}</p>}
                     <div className="flex gap-2 pt-2">
                         <Link href="/flashcards" className={buttonVariants({ variant: "outline", size: "sm" })}>Voltar</Link>
-                        <Button size="sm" onClick={() => { setQueue(null); setIndex(0); setTally({ total: 0, hits: 0 }); setNotice(null); void load() }}>Revisar mais</Button>
+                        <Button size="sm" onClick={() => { setQueue(null); setIndex(0); revealedRef.current = false; setRevealed(false); setTally({ total: 0, hits: 0 }); setNotice(null); setError(null); void load() }}>Revisar mais</Button>
                     </div>
                 </CardContent></Card>
             </div>
@@ -132,7 +188,7 @@ function ReviewInner() {
                 </CardContent>
             </Card>
             {!revealed ? (
-                <Button className="w-full" onClick={() => setRevealed(true)}>Mostrar resposta <kbd className="ml-2 text-[10px] opacity-70">Espaço</kbd></Button>
+                <Button className="w-full" onClick={reveal}>Mostrar resposta <kbd className="ml-2 text-[10px] opacity-70">Espaço</kbd></Button>
             ) : (
                 <div className="grid grid-cols-4 gap-2">
                     {GRADES.map((g) => (

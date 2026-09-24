@@ -86,6 +86,17 @@ function qs(params: (FlashcardQuery & { limit?: number }) = {}): string {
     return s ? `?${s}` : ""
 }
 
+/** An API failure that keeps the HTTP status, so callers can tell 404/409 from the rest. */
+export class FlashcardApiError extends Error {
+    readonly status: number
+
+    constructor(message: string, status: number) {
+        super(message)
+        this.name = "FlashcardApiError"
+        this.status = status
+    }
+}
+
 async function request<T>(url: string, init: RequestInit | undefined, fallback: string): Promise<T> {
     const res = await fetch(url, {
         cache: "no-store",
@@ -94,7 +105,7 @@ async function request<T>(url: string, init: RequestInit | undefined, fallback: 
     })
     if (!res.ok) {
         const err = await res.json().catch(() => ({}))
-        throw new Error(err.message ?? fallback)
+        throw new FlashcardApiError(err.message ?? fallback, res.status)
     }
     return (await res.json()) as T
 }

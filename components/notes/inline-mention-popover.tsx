@@ -94,7 +94,10 @@ function insertMention(
     result: MentionResult,
     cursorPos: number,
 ): { newText: string; newCursor: number } {
-    const mention = `@${result.type}:${result.id}[${result.label}]`
+    // A "]" in the label would end the mention early (card fronts like "[a, b]"), so brackets
+    // become parentheses for every mention type.
+    const label = result.label.replace(/\[/g, "(").replace(/\]/g, ")")
+    const mention = `@${result.type}:${result.id}[${label}]`
     const before = text.slice(0, mentionState.startIndex)
     const after = text.slice(cursorPos)
     const newText = before + mention + " " + after
