@@ -10,11 +10,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { EmptyState } from "@/components/ui/empty-state"
 import { FlashcardForm } from "@/components/flashcards/flashcard-form"
 import { FlashcardTile } from "@/components/flashcards/flashcard-tile"
+import { nativeSelectClass } from "@/components/flashcards/native-select"
 import { apiGetTags, type Tag } from "@/lib/api/notes"
 import { apiGetTopics, type TopicEntity } from "@/lib/api/entities"
 import { apiGetDueFlashcards, apiGetFlashcards, type Flashcard } from "@/lib/api/flashcards"
-
-const SELECT = "rounded-md border border-input bg-background px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-ring"
 
 function FlashcardsPageInner() {
     const router = useRouter()
@@ -59,9 +58,9 @@ function FlashcardsPageInner() {
 
     useEffect(() => { const t = setTimeout(load, 250); return () => clearTimeout(t) }, [load])
     useEffect(() => {
-        apiGetTags().then(setTags).catch(() => setTags([]))
-        apiGetTopics().then(setTopics).catch(() => setTopics([]))
-    }, [])
+        apiGetTags(userId).then(setTags).catch(() => setTags([]))
+        apiGetTopics(undefined, userId).then(setTopics).catch(() => setTopics([]))
+    }, [userId])
 
     const withUser = (path: string) => (userId ? `${path}${path.includes("?") ? "&" : "?"}userId=${userId}` : path)
 
@@ -120,11 +119,11 @@ function FlashcardsPageInner() {
                     <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
                     <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar na frente e no verso" className="h-9 w-64 pl-8 text-xs" />
                 </div>
-                <select value={topicId} onChange={(e) => setTopicId(e.target.value)} className={SELECT} aria-label="Filtrar por tópico">
+                <select value={topicId} onChange={(e) => setTopicId(e.target.value)} className={nativeSelectClass} aria-label="Filtrar por tópico">
                     <option value="">Todos os tópicos</option>
                     {topics.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
                 </select>
-                <select value={tagId} onChange={(e) => setTagId(e.target.value)} className={SELECT} aria-label="Filtrar por tag">
+                <select value={tagId} onChange={(e) => setTagId(e.target.value)} className={nativeSelectClass} aria-label="Filtrar por tag">
                     <option value="">Todas as tags</option>
                     {tags.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
                 </select>

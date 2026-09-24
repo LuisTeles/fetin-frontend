@@ -100,8 +100,9 @@ export interface NoteQueryParams {
 
 // ─── API helpers (client-side fetch to Next.js proxy) ──────────────────────────
 
-export async function apiGetTags(): Promise<Tag[]> {
-    const res = await fetch("/api/tags", { cache: "no-store" })
+export async function apiGetTags(userId?: string | null): Promise<Tag[]> {
+    const qs = userId ? `?${new URLSearchParams({ userId }).toString()}` : ""
+    const res = await fetch(`/api/tags${qs}`, { cache: "no-store" })
     if (!res.ok) {
         const err = await res.json().catch(() => ({}))
         throw new Error(err.message ?? "Erro ao carregar tags.")

@@ -49,8 +49,11 @@ export async function apiGetSubjects(): Promise<SubjectEntity[]> {
     return (data.subjects ?? []) as SubjectEntity[]
 }
 
-export async function apiGetTopics(subjectId?: string): Promise<TopicEntity[]> {
-    const qs = subjectId ? `?subjectId=${encodeURIComponent(subjectId)}` : ""
+export async function apiGetTopics(subjectId?: string, userId?: string | null): Promise<TopicEntity[]> {
+    const params = new URLSearchParams()
+    if (subjectId) params.set("subjectId", subjectId)
+    if (userId) params.set("userId", userId)
+    const qs = params.toString() ? `?${params.toString()}` : ""
     const res = await fetch(`/api/topics${qs}`, { cache: "no-store" })
     if (!res.ok) {
         const err = await res.json().catch(() => ({}))

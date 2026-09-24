@@ -7,11 +7,13 @@ import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { TagSelectorDropdown } from "@/components/notes/tag-selector-dropdown"
 import { MarkdownField } from "@/components/flashcards/markdown-field"
+import { nativeSelectClass } from "@/components/flashcards/native-select"
 import { apiGetExams, apiGetSubjects, apiGetTopics, formatExamLabel, type ExamEntity, type SubjectEntity, type TopicEntity } from "@/lib/api/entities"
 import type { Tag } from "@/lib/api/notes"
 import { apiCreateFlashcard, apiUpdateFlashcard, type Flashcard } from "@/lib/api/flashcards"
+import { cn } from "@/lib/utils"
 
-const SELECT = "w-full rounded-md border border-input bg-background px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-ring"
+const SELECT = cn(nativeSelectClass, "w-full")
 
 interface FlashcardFormProps {
     card?: Flashcard
