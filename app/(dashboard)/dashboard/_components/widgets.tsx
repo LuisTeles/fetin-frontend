@@ -145,12 +145,12 @@ export async function ProgressWidgets({ userId }: WidgetProps) {
                     <CardTitle className="flex items-center gap-1 text-sm font-bold">
                         Planejado × Estudado por dia
                         <InfoTip id="div-tip" align="right">
-                            Diferença entre os minutos concluídos e os minutos das sessões planejadas naquele dia. O dia de hoje aparece como &quot;em andamento&quot;.
+                            Diferença entre os minutos concluídos naquele dia e os minutos das sessões planejadas para ele. Positivo: você estudou além do plano (ex.: recuperou sessões atrasadas). Negativo: sessões planejadas que não foram concluídas. O dia de hoje aparece como &quot;em andamento&quot;.
                         </InfoTip>
                     </CardTitle>
                     <CardDescription className="text-xs text-muted-foreground">
-                        min · últimos 14 dias. Valores negativos mostram sessões planejadas que não
-                        foram concluídas.
+                        min · últimos 14 dias. Barras positivas: estudou além do plano; negativas:
+                        sessões planejadas que não foram concluídas.
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="p-4">

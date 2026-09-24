@@ -28,7 +28,7 @@ export interface CurveSeries {
     current?: number
 }
 
-type ChartSeries = { id: string; data: { x: string; y: number }[] }
+type ChartSeries = { id: string; data: { x: string; y: number | null }[] }
 
 export function RetentionCurveChart({ series }: { series: CurveSeries[] }) {
     const { theme, isDark } = useNivoTheme()
@@ -38,10 +38,18 @@ export function RetentionCurveChart({ series }: { series: CurveSeries[] }) {
     // Below this the memory is due for review — the line the curve should never sink under.
     const REVIEW_THRESHOLD = 0.5
 
-    const data = series.map((s) => ({
-        id: s.topicName,
-        data: s.points.map((p) => ({ x: p.date.slice(0, 10), y: p.retention })),
-    }))
+    // Every series must list the SAME x values in chronological order. A "point" scale orders its
+    // categories by first appearance, so topics that start on different days used to append
+    // earlier dates after later ones (lines running backwards, a stretched axis). Build one sorted
+    // date grid and give each topic a gap (null) where it has no sample yet.
+    const allDates = [...new Set(series.flatMap((s) => s.points.map((p) => p.date.slice(0, 10))))].sort()
+    const data: ChartSeries[] = series.map((s) => {
+        const byDate = new Map(s.points.map((p) => [p.date.slice(0, 10), p.retention]))
+        return {
+            id: s.topicName,
+            data: allDates.map((x) => ({ x, y: byDate.get(x) ?? null })),
+        }
+    })
 
     // One dot per review, sitting on the curve at the review date (or the nearest sample).
     const reviewDates = new Map(
@@ -50,7 +58,9 @@ export function RetentionCurveChart({ series }: { series: CurveSeries[] }) {
     const ReviewMarkers = ({ series: lineSeries, xScale, yScale }: LineCustomSvgLayerProps<ChartSeries>) => (
         <g>
             {lineSeries.map((line) => {
-                const pts: { x: string; y: number }[] = line.data.map((d) => d.data as { x: string; y: number })
+                const pts: { x: string; y: number }[] = line.data
+                    .map((d) => d.data as { x: string; y: number | null })
+                    .filter((d): d is { x: string; y: number } => d.y !== null)
                 return (reviewDates.get(String(line.id)) ?? []).map((date: string, i: number) => {
                     const p = pts.find((q) => q.x === date) ?? pts.find((q) => q.x >= date) ?? pts[pts.length - 1]
                     if (!p) return null
@@ -106,9 +116,7 @@ export function RetentionCurveChart({ series }: { series: CurveSeries[] }) {
                         tickRotation: -35,
                         format: (v) => formatDayMonth(String(v)),
                         // A tick per sample would be unreadable; show roughly six.
-                        tickValues: data[0]?.data
-                            .filter((_, i) => i % Math.ceil((data[0]?.data.length || 1) / 6) === 0)
-                            .map((d) => d.x),
+                        tickValues: allDates.filter((_, i) => i % Math.ceil(allDates.length / 6 || 1) === 0),
                         legendOffset: 40,
                     }}
                     axisLeft={{
