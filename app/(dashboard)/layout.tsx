@@ -68,6 +68,7 @@ export default async function DashboardLayout({
                         <li><NavLink href="/subjects" icon="subjects">Disciplinas</NavLink></li>
                         <li><NavLink href="/calendar" icon="calendar">Calendário</NavLink></li>
                         <li><NavLink href="/notes" icon="notes">Notas Rápidas</NavLink></li>
+                        <li><NavLink href="/flashcards" icon="flashcards">Flashcards</NavLink></li>
                         <li><NavLink href="/auto-schedule" icon="schedule">Calendário Automático</NavLink></li>
                         <li><NavLink href="/availability" icon="availability">Disponibilidade</NavLink></li>
                         {isAdmin && (
