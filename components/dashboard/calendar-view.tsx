@@ -442,7 +442,7 @@ export function CalendarView({ onStatsChange }: CalendarViewProps) {
                                                 window.location.href = `/exams?id=${exam.id}`
                                             }}
                                             className="text-[9px] px-1 py-0.5 rounded-sm bg-event-exam/10 text-foreground font-semibold truncate hover:bg-event-exam/20 flex items-center gap-0.5 border-l-2 border-event-exam cursor-pointer"
-                                            title={`Prova: ${exam.subject_name} (${pct}% concluído)`}
+                                            title={`Prova: ${exam.subject_name} (${pct}% dos tópicos marcados como concluídos)`}
                                         >
                                             <BookOpen className="w-2.5 h-2.5 shrink-0 text-event-exam" />
                                             <span className="truncate">Prova: {exam.subject_name}</span>

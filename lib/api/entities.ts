@@ -25,11 +25,15 @@ export interface ExamEntity {
     subject?: { name: string }
 }
 
-/** "Matemática — 24/09/2026"; never renders "Invalid Date". */
+/**
+ * "Prova de Cálculo I · 04/10/2026". Never renders "Invalid Date": a missing/unparseable date
+ * drops the date part, a missing subject drops the subject.
+ */
 export function formatExamLabel(exam: { examDate?: string; subject?: { name: string } }): string {
-    const date = formatDateSafe(exam.examDate, "")
-    if (exam.subject?.name) return date ? `${exam.subject.name} — ${date}` : exam.subject.name
-    return date ? `Prova ${date}` : "Prova (sem data)"
+  const date = formatDateSafe(exam.examDate, "")
+  const subject = exam.subject?.name
+  if (subject) return date ? `Prova de ${subject} · ${date}` : `Prova de ${subject}`
+  return date ? `Prova · ${date}` : "Prova (sem data)"
 }
 
 // ─── API helpers ───────────────────────────────────────────────────────────────

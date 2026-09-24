@@ -49,6 +49,8 @@ export interface NoteTopic {
 export interface NoteExam {
     id: string
     examDate: string
+    /** Subject of the exam, so the badge can say which exam it is. */
+    subject?: { name: string }
 }
 
 export interface Note {

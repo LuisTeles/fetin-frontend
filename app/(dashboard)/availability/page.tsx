@@ -1,6 +1,7 @@
 "use client"
 
 import { CountUp } from "@/components/ui/count-up"
+import { InfoTip } from "@/components/ui/info-tip"
 import { useEffect, useState } from "react"
 import { useSearchParams } from "next/navigation"
 import {
@@ -316,14 +317,17 @@ export default function AvailabilityPage() {
       <div className="stagger grid gap-3 grid-cols-1 sm:grid-cols-3">
         <Card>
           <CardHeader className="p-4 pb-1">
-            <CardDescription className="kpi-label">
-              Total de Horas para Estudos
+            <CardDescription className="kpi-label flex items-center gap-1">
+              Horas livres por semana
+              <InfoTip id="avail-tip-week">
+                Tempo livre depois de descontar sono, trabalho e aulas. Sem rotina cadastrada, assumimos apenas o sono das 23:00 às 07:00.
+              </InfoTip>
             </CardDescription>
           </CardHeader>
           <CardContent className="p-4 pt-0 flex items-center justify-between">
             <div>
               <CountUp className="text-2xl font-semibold tracking-tight num text-primary" value={totalHours} suffix=" hrs" />
-              <p className="text-[11px] text-muted-foreground">disponíveis nesta semana</p>
+              <p className="text-[11px] text-muted-foreground">h/semana · tempo livre depois de descontar sono, trabalho e aulas</p>
             </div>
             <div className="rounded-md bg-primary/10 p-2 text-primary">
               <Zap className="h-5 w-5" />
@@ -333,14 +337,20 @@ export default function AvailabilityPage() {
 
         <Card>
           <CardHeader className="p-4 pb-1">
-            <CardDescription className="kpi-label">
-              Média Diária Disponível
+            <CardDescription className="kpi-label flex items-center gap-1">
+              Média de horas livres por dia
+              <InfoTip id="avail-tip-day">Horas livres por semana ÷ 7.</InfoTip>
             </CardDescription>
           </CardHeader>
           <CardContent className="p-4 pt-0 flex items-center justify-between">
             <div>
               <CountUp className="text-2xl font-semibold tracking-tight num" value={Math.round((totalHours / 7) * 10) / 10} suffix=" hrs" />
-              <p className="text-[11px] text-muted-foreground">por dia para cronogramas</p>
+              <p className="text-[11px] text-muted-foreground">h/dia (máx. 24)</p>
+              {totalHours / 7 > 16 && (
+                <p className="mt-1 text-[11px] font-medium text-amber-600 dark:text-amber-400">
+                  Cadastre seu sono e sua rotina para um plano realista.
+                </p>
+              )}
             </div>
             <div className="rounded-md bg-muted p-2 text-muted-foreground">
               <Calendar className="h-5 w-5" />
