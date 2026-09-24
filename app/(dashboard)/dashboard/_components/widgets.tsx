@@ -235,21 +235,7 @@ export async function RetentionCurveWidget({ userId }: WidgetProps) {
             </CardHeader>
             <CardContent className="p-4">
                 {result.data.length > 0 ? (
-                    <>
-                        <RetentionCurveChart series={result.data} />
-                        <ul className="mt-3 space-y-1 border-t border-border/40 pt-3 text-xs text-muted-foreground">
-                            {result.data.map((c) => (
-                                <li key={c.topicId} className="flex flex-wrap gap-x-2">
-                                    <span className="truncate font-medium text-foreground">{c.topicName}</span>
-                                    <span className="tabular-nums">
-                                        {pluralize(c.reviews.length, "revisão", "revisões")}
-                                    </span>
-                                    <span aria-hidden="true">·</span>
-                                    <span className="tabular-nums">agora {Math.round(c.current * 100)}%</span>
-                                </li>
-                            ))}
-                        </ul>
-                    </>
+                    <RetentionCurveChart series={result.data} />
                 ) : (
                     <EmptyState message="Sem histórico de revisões ainda. Conclua sessões para que a curva apareça." />
                 )}
