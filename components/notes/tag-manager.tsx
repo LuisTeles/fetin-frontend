@@ -115,7 +115,7 @@ export function TagManager() {
             )}
 
             {/* ─── Create form ──────────────────────────────────────────── */}
-            <div className="rounded-lg border border-border/60 bg-card p-4 space-y-3">
+            <div className="rounded-lg border border-border bg-card p-4 space-y-3">
                 <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                     Nova Tag
                 </p>
@@ -267,7 +267,7 @@ export function TagManager() {
                                                 type="button"
                                                 onClick={() => setDeletingId(tag.id)}
                                                 aria-label={`Excluir tag ${tag.name}`}
-                                                className="rounded p-1.5 text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors cursor-pointer"
+                                                className="rounded p-1.5 text-muted-foreground hover:bg-danger/10 hover:text-danger transition-colors cursor-pointer"
                                             >
                                                 <Trash2 className="h-3 w-3" />
                                             </button>

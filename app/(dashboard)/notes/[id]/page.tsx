@@ -161,7 +161,7 @@ export default function SingleNotePage() {
     return (
         <div className="space-y-6 max-w-4xl mx-auto pb-12">
             {/* ── Navigation Top Bar ── */}
-            <div className="flex items-center justify-between border-b border-border/60 pb-3">
+            <div className="flex items-center justify-between border-b border-border pb-3">
                 <Link href="/notes" className="inline-flex items-center gap-1.5 rounded-md text-xs font-medium text-muted-foreground hover:text-foreground transition-colors">
                     <ArrowLeft className="h-3.5 w-3.5" />
                     Voltar para Notas
@@ -194,7 +194,7 @@ export default function SingleNotePage() {
                     >
                         {note.isArchived ? (
                             <>
-                                <ArchiveRestore className="mr-1.5 h-3.5 w-3.5 text-amber-500" /> Desarquivar
+                                <ArchiveRestore className="mr-1.5 h-3.5 w-3.5 text-warning" /> Desarquivar
                             </>
                         ) : (
                             <>
@@ -208,7 +208,7 @@ export default function SingleNotePage() {
                             variant="outline"
                             size="sm"
                             onClick={() => setIsDeleting(true)}
-                            className="text-xs h-8 text-destructive hover:bg-destructive/10 cursor-pointer"
+                            className="text-xs h-8 text-muted-foreground hover:bg-danger/10 hover:text-danger cursor-pointer"
                         >
                             <Trash2 className="h-3.5 w-3.5" />
                         </Button>
@@ -259,7 +259,7 @@ export default function SingleNotePage() {
                         {/* Status badges */}
                         <div className="flex flex-wrap items-center gap-2">
                             {note.isArchived && (
-                                <span className="rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30 px-2.5 py-0.5 text-[10px] font-medium">
+                                <span className="rounded-full bg-warning/15 text-warning border border-warning/30 px-2.5 py-0.5 text-[10px] font-medium">
                                     Arquivada
                                 </span>
                             )}
@@ -272,7 +272,7 @@ export default function SingleNotePage() {
                         </div>
 
                         {/* Title */}
-                        <h1 className="text-2xl font-bold tracking-tight text-foreground leading-tight">
+                        <h1 className="page-title">
                             {displayTitle}
                         </h1>
 
@@ -300,7 +300,7 @@ export default function SingleNotePage() {
                     </div>
 
                     {/* Markdown Content (Full view) */}
-                    <Card className="p-6 md:p-8 bg-card border-border/80 shadow-xs">
+                    <Card className="p-6 md:p-8 bg-card border-border/80">
                         <MarkdownPreview content={note.content} className="prose-base" />
                     </Card>
 

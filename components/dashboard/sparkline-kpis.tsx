@@ -9,7 +9,7 @@ import { useNivoTheme } from "@/lib/nivo-theme"
 // ─── Mini Sparkline (axis-free, per spec) ─────────────────────────────────────
 
 function Sparkline({ data, color }: { data: number[]; color: string }) {
-    const { theme } = useNivoTheme()
+    const { theme, brand } = useNivoTheme()
     const chartData = [
         {
             id: "trend",
@@ -26,7 +26,7 @@ function Sparkline({ data, color }: { data: number[]; color: string }) {
                 axisBottom={null}
                 axisLeft={null}
                 enablePoints={false}
-                colors={[color]}
+                colors={[color === "brand" ? brand : color]}
                 lineWidth={2}
                 curve="monotoneX"
                 enableArea={true}
@@ -52,16 +52,16 @@ interface KpiCardProps {
 }
 
 const healthColor: Record<KpiCardProps["health"], string> = {
-    good: "text-emerald-500",
-    warn: "text-amber-500",
-    bad: "text-red-500",
+    good: "text-success",
+    warn: "text-warning",
+    bad: "text-danger",
     neutral: "text-muted-foreground",
 }
 
 const healthDot: Record<KpiCardProps["health"], string> = {
-    good: "bg-emerald-500",
-    warn: "bg-amber-500",
-    bad: "bg-red-500",
+    good: "bg-success",
+    warn: "bg-warning",
+    bad: "bg-danger",
     neutral: "bg-muted-foreground",
 }
 
@@ -70,10 +70,10 @@ function KpiCard({ label, value, trend, delta, color, icon, health }: KpiCardPro
     const TrendIcon = isUp ? TrendingUp : TrendingDown
 
     return (
-        <Card className="border-border/60 bg-card shadow-xs overflow-hidden">
+        <Card className="overflow-hidden">
             <CardHeader className="p-4 pb-0">
                 <div className="flex items-center justify-between">
-                    <CardDescription className="text-[10px] uppercase font-semibold tracking-wider text-muted-foreground">
+                    <CardDescription className="kpi-label">
                         {label}
                     </CardDescription>
                     <div className="flex items-center gap-1.5">
@@ -88,7 +88,7 @@ function KpiCard({ label, value, trend, delta, color, icon, health }: KpiCardPro
             </CardHeader>
             <CardContent className="p-4 pt-2">
                 <div className="flex items-end justify-between gap-2">
-                    <span className="text-2xl font-bold tracking-tight tabular-nums">{value}</span>
+                    <span className="text-2xl font-semibold tracking-tight num">{value}</span>
                     {delta !== null && delta !== undefined && (
                         <span className={`flex items-center gap-0.5 text-xs font-medium ${healthColor[health]}`}>
                             <TrendIcon className="h-3 w-3" />
@@ -133,7 +133,7 @@ export function SparklineKpiCards({ data }: SparklineKpisProps) {
                 value={`${data.totalHoursThisWeek}h`}
                 trend={data.totalHoursTrend}
                 delta={hoursDelta}
-                color="#6366f1"
+                color="brand"
                 icon={<Clock className="h-3.5 w-3.5" />}
                 health={hoursHealth}
             />

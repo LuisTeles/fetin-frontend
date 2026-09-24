@@ -75,7 +75,7 @@ export function ReadinessCard({ exam }: { exam: ExamReadiness }) {
     const gain = exam.projected - exam.abandoned
 
     return (
-        <Card className="border-border/60 bg-card shadow-xs">
+        <Card>
             <CardHeader className="border-b border-border/40 p-4">
                 <CardTitle className="text-sm font-bold text-balance">
                     {exam.subjectName}

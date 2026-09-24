@@ -174,7 +174,7 @@ export function TaskForm({ task, defaultDate, onSuccess, onCancel }: TaskFormPro
                         value={category}
                         onChange={(e) => setCategory(e.target.value as any)}
                         disabled={isLoading}
-                        className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-xs transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                        className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
                     >
                         {CATEGORY_PRESETS.map((cat) => (
                             <option key={cat.value} value={cat.value}>

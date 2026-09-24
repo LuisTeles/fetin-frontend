@@ -118,8 +118,8 @@ export function DivergingBars({ data }: DivergingBarsProps) {
                                     <span
                                         className={
                                             delta >= 0
-                                                ? "text-emerald-500 font-bold"
-                                                : "text-red-500 font-bold"
+                                                ? "text-success font-bold"
+                                                : "text-danger font-bold"
                                         }
                                     >
                                         {delta > 0 ? "+" : ""}

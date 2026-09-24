@@ -13,7 +13,7 @@ export function KpiRowSkeleton() {
     return (
         <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
             {Array.from({ length: 4 }).map((_, i) => (
-                <Card key={i} className="border-border/60">
+                <Card key={i}>
                     <CardHeader className="p-4 pb-0">
                         <Skeleton className="h-3 w-24" />
                     </CardHeader>
@@ -29,7 +29,7 @@ export function KpiRowSkeleton() {
 
 export function ChartCardSkeleton({ height = 208 }: { height?: number }) {
     return (
-        <Card className="border-border/60">
+        <Card>
             <CardHeader className="border-b border-border/40 p-4">
                 <Skeleton className="h-4 w-40" />
                 <Skeleton className="mt-1 h-3 w-64" />

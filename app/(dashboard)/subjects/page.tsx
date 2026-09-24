@@ -98,7 +98,7 @@ export default function SubjectsPage() {
         <section className="space-y-6">
             {/* Header Area */}
             <div className="flex flex-col gap-1.5 border-b border-border/40 pb-4">
-                <h1 className="text-xl font-bold tracking-tight text-foreground">Minhas Disciplinas</h1>
+                <h1 className="page-title">Minhas Disciplinas</h1>
                 <p className="text-xs text-muted-foreground">
                     Gerencie suas matérias, ajuste os pesos de prioridade de estudo e configure os tópicos.
                 </p>
@@ -123,7 +123,7 @@ export default function SubjectsPage() {
                             setShowForm(!showForm)
                         }}
                         size="sm"
-                        className="h-9 gap-1 shadow-xs shrink-0 cursor-pointer"
+                        className="h-9 gap-1 shrink-0 cursor-pointer"
                     >
                         <Plus className="h-4 w-4" />
                         Nova Disciplina
@@ -133,7 +133,7 @@ export default function SubjectsPage() {
 
             {/* Inline creation/edit form */}
             {!isImpersonating && (showForm || editingSubject) && (
-                <Card className="border-border/60 bg-muted/5 animate-in fade-in slide-in-from-top-2 duration-200">
+                <Card className="bg-muted/5 animate-in fade-in slide-in-from-top-2 duration-200">
                     <CardHeader className="p-4 pb-2">
                         <CardTitle className="text-xs font-bold uppercase tracking-wider">
                             {editingSubject ? "Editar Disciplina" : "Nova Disciplina"}
@@ -173,7 +173,7 @@ export default function SubjectsPage() {
                         return (
                             <Card 
                                 key={subject.id} 
-                                className="border-border/60 bg-card shadow-xs hover:border-foreground/20 hover:shadow-sm transition-all cursor-pointer flex flex-col justify-between"
+                                className="hover:border-foreground/20 hover:shadow-sm transition-all cursor-pointer flex flex-col justify-between"
                                 onClick={() => router.push(`/subjects/${subject.id}${impersonateUserId ? `?userId=${impersonateUserId}` : ""}`)}
                             >
                                 <CardHeader className="p-4 pb-2 flex flex-row items-start justify-between gap-4">
@@ -202,7 +202,7 @@ export default function SubjectsPage() {
                                             <Button
                                                 variant="ghost"
                                                 size="icon"
-                                                className="w-7 h-7 text-red-500 hover:bg-red-500/10 cursor-pointer"
+                                                className="w-7 h-7 text-muted-foreground hover:bg-danger/10 hover:text-danger cursor-pointer"
                                                 onClick={(e) => handleDelete(subject.id, subject.name, e)}
                                             >
                                                 <Trash2 className="w-3.5 h-3.5" />
@@ -227,7 +227,7 @@ export default function SubjectsPage() {
                                     <Button 
                                         variant="outline" 
                                         size="sm" 
-                                        className="w-full text-xs font-semibold gap-1 hover:bg-muted cursor-pointer flex items-center justify-center mt-2 border-border/60"
+                                        className="w-full text-xs font-semibold gap-1 hover:bg-muted cursor-pointer flex items-center justify-center mt-2 border-border"
                                     >
                                         Ver Tópicos & Configuração
                                         <ArrowRight className="w-3.5 h-3.5" />

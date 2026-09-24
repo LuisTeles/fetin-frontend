@@ -50,7 +50,7 @@ export function NoteCard({ note, onEdit, onDelete, onArchiveToggle }: NoteCardPr
     return (
         <article
             className={cn(
-                "group relative rounded-lg border border-border/60 bg-card p-3.5 shadow-xs transition-all card-pop-in note-card-hover flex flex-col justify-between cursor-pointer",
+                "group relative rounded-lg border border-border bg-card p-3.5 transition-all card-pop-in note-card-hover flex flex-col justify-between cursor-pointer",
                 note.isArchived && "opacity-60",
             )}
         >

@@ -71,7 +71,7 @@ export function SignupForm() {
     }
 
     return (
-        <Card className="border-border/60 bg-card/95 shadow-lg backdrop-blur">
+        <Card>
             <CardHeader>
                 <CardTitle>Criar conta</CardTitle>
                 <CardDescription>

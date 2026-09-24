@@ -286,7 +286,7 @@ export default function SubjectDetailPage({ params }: SubjectDetailPageProps) {
                         <ArrowLeft className="w-4 h-4" />
                     </Button>
                     <div>
-                        <h1 className="text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
+                        <h1 className="page-title flex items-center gap-2">
                             <BookOpen className="w-5 h-5 text-primary" />
                             {subject.name}
                         </h1>
@@ -299,7 +299,7 @@ export default function SubjectDetailPage({ params }: SubjectDetailPageProps) {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Configuration form column (1/3 width on wide screen) */}
                 <div className="lg:col-span-1 space-y-6">
-                    <Card className="border-border/60 bg-card shadow-xs">
+                    <Card>
                         <CardHeader className="p-4 border-b border-border/40">
                             <CardTitle className="text-sm font-bold flex items-center gap-1.5">
                                 <Settings className="w-4 h-4 text-muted-foreground" />
@@ -348,7 +348,7 @@ export default function SubjectDetailPage({ params }: SubjectDetailPageProps) {
                     </Card>
 
                     {/* Exams card */}
-                    <Card className="border-border/60 bg-card shadow-xs">
+                    <Card>
                         <CardHeader className="p-4 border-b border-border/40">
                             <CardTitle className="text-sm font-bold flex items-center gap-1.5">
                                 <GraduationCap className="w-4 h-4 text-muted-foreground" />
@@ -368,14 +368,14 @@ export default function SubjectDetailPage({ params }: SubjectDetailPageProps) {
                                         className="p-3 border rounded-lg bg-muted/10 hover:bg-muted/30 cursor-pointer transition-all flex justify-between items-center gap-2 border-border/40"
                                     >
                                         <div className="space-y-0.5">
-                                            <p className="text-xs font-bold text-rose-500 flex items-center gap-0.5">
+                                            <p className="text-xs font-bold text-danger flex items-center gap-0.5">
                                                 <Clock className="w-3 h-3" />
                                                 {new Date(exam.exam_date + "T00:00:00").toLocaleDateString("pt-BR")}
                                             </p>
                                             <p className="text-[10px] text-muted-foreground">{exam.topics.length} tópicos associados</p>
                                         </div>
                                         {exam.pending_topics_count > 0 ? (
-                                            <Badge variant="outline" className="text-[9px] scale-90 border-amber-500/20 text-amber-500 bg-amber-500/5">
+                                            <Badge variant="outline" className="text-[9px] scale-90 border-warning/20 text-warning bg-warning/5">
                                                 {exam.pending_topics_count} pendentes
                                             </Badge>
                                         ) : (
@@ -393,7 +393,7 @@ export default function SubjectDetailPage({ params }: SubjectDetailPageProps) {
                 {/* Topics Tree Column (2/3 width on wide screen) */}
                 <div className="lg:col-span-2 space-y-6">
                     {/* Add Topic Card */}
-                    <Card className="border-border/60 bg-card shadow-xs">
+                    <Card>
                         <CardHeader className="p-4 border-b border-border/40">
                             <CardTitle className="text-sm font-bold flex items-center gap-1.5">
                                 <Plus className="w-4 h-4 text-muted-foreground" />
@@ -418,7 +418,7 @@ export default function SubjectDetailPage({ params }: SubjectDetailPageProps) {
                                         id="tWeight"
                                         value={newTopicWeight}
                                         onChange={(e) => setNewTopicWeight(e.target.value as any)}
-                                        className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring"
+                                        className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm transition-colors focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring"
                                     >
                                         <option value="essential">Essencial (Prova)</option>
                                         <option value="review">Revisão (Importante)</option>
@@ -431,7 +431,7 @@ export default function SubjectDetailPage({ params }: SubjectDetailPageProps) {
                                         id="tParent"
                                         value={newTopicParentId}
                                         onChange={(e) => setNewTopicParentId(e.target.value)}
-                                        className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring"
+                                        className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm transition-colors focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring"
                                     >
                                         <option value="">Nenhum (Tópico Principal)</option>
                                         {parentTopics.map(p => (
@@ -454,7 +454,7 @@ export default function SubjectDetailPage({ params }: SubjectDetailPageProps) {
                     </Card>
 
                     {/* Topics List Card */}
-                    <Card className="border-border/60 bg-card shadow-xs">
+                    <Card>
                         <CardHeader className="p-4 border-b border-border/40">
                             <CardTitle className="text-sm font-bold flex items-center gap-1.5">
                                 <ListTodo className="w-4 h-4 text-muted-foreground" />
@@ -489,9 +489,9 @@ export default function SubjectDetailPage({ params }: SubjectDetailPageProps) {
                                                         </span>
                                                         <Badge variant="outline" className={`text-[9px] py-0 px-1.5 uppercase font-semibold shrink-0 scale-90 ${
                                                             parent.weight === "essential" 
-                                                                ? "border-red-500/20 text-red-500 bg-red-500/5 font-bold" 
+                                                                ? "border-danger/20 text-danger bg-danger/5 font-bold" 
                                                                 : parent.weight === "review" 
-                                                                    ? "border-amber-500/20 text-amber-500 bg-amber-500/5" 
+                                                                    ? "border-warning/20 text-warning bg-warning/5" 
                                                                     : "border-gray-500/20 text-gray-500 bg-gray-500/5"
                                                         }`}>
                                                             {parent.weight === "essential" ? "Essencial" : parent.weight === "review" ? "Revisão" : "Opcional"}
@@ -500,7 +500,7 @@ export default function SubjectDetailPage({ params }: SubjectDetailPageProps) {
                                                     <Button 
                                                         variant="ghost" 
                                                         size="icon" 
-                                                        className="w-7 h-7 text-red-500 hover:bg-red-500/10 cursor-pointer shrink-0"
+                                                        className="w-7 h-7 text-muted-foreground hover:bg-danger/10 hover:text-danger cursor-pointer shrink-0"
                                                         onClick={() => handleDeleteTopic(parent.id, parent.name)}
                                                     >
                                                         <Trash2 className="w-3.5 h-3.5" />
@@ -525,9 +525,9 @@ export default function SubjectDetailPage({ params }: SubjectDetailPageProps) {
                                                                     </span>
                                                                     <Badge variant="outline" className={`text-[8px] py-0 px-1 uppercase shrink-0 scale-90 ${
                                                                         child.weight === "essential" 
-                                                                            ? "border-red-500/20 text-red-500 bg-red-500/5 font-bold" 
+                                                                            ? "border-danger/20 text-danger bg-danger/5 font-bold" 
                                                                             : child.weight === "review" 
-                                                                                ? "border-amber-500/20 text-amber-500 bg-amber-500/5" 
+                                                                                ? "border-warning/20 text-warning bg-warning/5" 
                                                                                 : "border-gray-500/20 text-gray-500 bg-gray-500/5"
                                                                     }`}>
                                                                         {child.weight === "essential" ? "Essencial" : child.weight === "review" ? "Revisão" : "Opcional"}
@@ -536,7 +536,7 @@ export default function SubjectDetailPage({ params }: SubjectDetailPageProps) {
                                                                 <Button 
                                                                     variant="ghost" 
                                                                     size="icon" 
-                                                                    className="w-6.5 h-6.5 text-red-500 hover:bg-red-500/10 cursor-pointer shrink-0"
+                                                                    className="w-6.5 h-6.5 text-muted-foreground hover:bg-danger/10 hover:text-danger cursor-pointer shrink-0"
                                                                     onClick={() => handleDeleteTopic(child.id, child.name)}
                                                                 >
                                                                     <Trash2 className="w-3 h-3" />

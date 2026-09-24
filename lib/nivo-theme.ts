@@ -21,14 +21,19 @@ export function useNivoTheme() {
         return () => observer.disconnect()
     }, [])
 
-    const textColor = isDark ? "#f3f4f6" : "#1f2937"       // Bright white-gray in dark mode
-    const subtextColor = isDark ? "#d1d5db" : "#4b5563"    // Clear light-gray for ticks in dark mode
+    // Mirrors --text / --text-muted / --border in globals.css (Nivo needs concrete colours).
+    const textColor = isDark ? "#f3f4f6" : "#1f2937"
+    const subtextColor = isDark ? "#d1d5db" : "#4b5563"
     const borderColor = isDark ? "#374151" : "#e5e7eb"
     const gridColor = isDark ? "#27272a" : "#f4f4f5"
+    // Mirrors --brand (indigo). Primary chart series.
+    const brand = isDark ? "#818cf8" : "#4f46e5"
+    const fontFamily = "var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif"
 
     const theme = {
         background: "transparent",
         text: {
+            fontFamily,
             fontSize: 11,
             fill: textColor,
             outlineWidth: 0,
@@ -43,6 +48,7 @@ export function useNivoTheme() {
             },
             legend: {
                 text: {
+                    fontFamily,
                     fontSize: 11,
                     fill: textColor,
                 },
@@ -53,6 +59,7 @@ export function useNivoTheme() {
                     strokeWidth: 1,
                 },
                 text: {
+                    fontFamily,
                     fontSize: 11,
                     fill: subtextColor,
                     fontWeight: 500,
@@ -67,6 +74,7 @@ export function useNivoTheme() {
         },
         legends: {
             text: {
+                fontFamily,
                 fontSize: 11,
                 fill: textColor,
             },
@@ -75,13 +83,14 @@ export function useNivoTheme() {
             container: {
                 background: isDark ? "#18181b" : "#ffffff",
                 color: isDark ? "#f4f4f5" : "#09090b",
+                fontFamily,
                 fontSize: 12,
-                borderRadius: "6px",
+                borderRadius: "8px",
                 border: `1px solid ${borderColor}`,
                 boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.3)",
             },
         },
     }
 
-    return { theme, isDark, textColor, subtextColor }
+    return { theme, isDark, textColor, subtextColor, brand }
 }

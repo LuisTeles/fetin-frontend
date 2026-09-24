@@ -38,7 +38,7 @@ const WEIGHT_LABEL: Record<StudyQueueItem["weight"], string> = {
 export function StudyQueue({ items }: { items: StudyQueueItem[] }) {
     if (items.length === 0) {
         return (
-            <Card className="border-border/60 bg-card shadow-xs">
+            <Card>
                 <CardHeader className="border-b border-border/40 p-4">
                     <CardTitle className="text-sm font-bold">Fila de Estudo</CardTitle>
                 </CardHeader>
@@ -57,7 +57,7 @@ export function StudyQueue({ items }: { items: StudyQueueItem[] }) {
     const maxRisk = Math.max(...items.map((i) => i.risk), 0.0001)
 
     return (
-        <Card className="border-border/60 bg-card shadow-xs">
+        <Card>
             <CardHeader className="border-b border-border/40 p-4">
                 <CardTitle className="text-sm font-bold">Fila de Estudo</CardTitle>
                 <CardDescription className="text-xs text-muted-foreground">

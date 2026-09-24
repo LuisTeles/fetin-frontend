@@ -150,7 +150,7 @@ export function NoteForm({ note, tags, notes = [], onSuccess, onCancel, compact 
 
     const charPercent = Math.round((charCount / MAX_CHARS) * 100)
     const charColor =
-        charPercent > 90 ? "text-destructive" : charPercent > 70 ? "text-amber-500" : "text-muted-foreground"
+        charPercent > 90 ? "text-destructive" : charPercent > 70 ? "text-warning" : "text-muted-foreground"
 
     return (
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">

@@ -68,13 +68,13 @@ export default function AdminUsersPage() {
     return (
         <section className="space-y-6">
             <div className="flex flex-col gap-1.5 border-b border-border/40 pb-4">
-                <h1 className="text-xl font-bold tracking-tight text-foreground">Painel Administrativo</h1>
+                <h1 className="page-title">Painel Administrativo</h1>
                 <p className="text-xs text-muted-foreground">
                     Gerencie os usuários cadastrados e visualize seus respectivos painéis acadêmicos em modo de leitura.
                 </p>
             </div>
 
-            <Card className="border-border/60 bg-card shadow-xs">
+            <Card>
                 <CardHeader className="p-4 border-b border-border/40 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div>
                         <CardTitle className="text-sm font-bold">Usuários Cadastrados ({filteredUsers.length})</CardTitle>

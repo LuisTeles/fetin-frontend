@@ -439,8 +439,8 @@ export default function AutoSchedulePage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-border/40 pb-4">
         <div>
-          <h1 className="text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
-            <Zap className="h-5 w-5 text-amber-500 fill-amber-500" /> Calendário Automático de Estudos
+          <h1 className="page-title flex items-center gap-2">
+            <Zap className="h-5 w-5 text-brand fill-brand" /> Calendário Automático de Estudos
           </h1>
           <p className="text-xs text-muted-foreground mt-1">
             Gere o seu plano de estudos otimizado com um único clique. O sistema analisa sua rotina, prioridades e curva de esquecimento.
@@ -473,8 +473,8 @@ export default function AutoSchedulePage() {
       {/* Satisfying Non-Interruptible Animation Overlay */}
       {isAnimating && (
         <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-md flex flex-col items-center justify-center p-6 space-y-6">
-          <div className="p-4 rounded-full bg-amber-500/10 text-amber-500 animate-pulse border border-amber-500/30 shadow-lg">
-            <Zap className="h-12 w-12 fill-amber-500" />
+          <div className="p-4 rounded-full bg-brand-subtle text-brand animate-pulse border border-brand/30">
+            <Zap className="h-12 w-12 fill-brand" />
           </div>
 
           <div className="text-center max-w-md space-y-2">
@@ -489,7 +489,7 @@ export default function AutoSchedulePage() {
           {/* Progress Bar */}
           <div className="w-full max-w-xs bg-muted rounded-full h-2.5 overflow-hidden border border-border">
             <div
-              className="bg-amber-500 h-2.5 rounded-full transition-all duration-500 ease-out"
+              className="bg-brand h-2.5 rounded-full transition-all duration-500 ease-out"
               style={{ width: `${animProgress}%` }}
             />
           </div>
@@ -501,10 +501,10 @@ export default function AutoSchedulePage() {
       )}
 
       {/* Form: Generate Automatic Schedule */}
-      <Card className="border-border/60 bg-gradient-to-br from-card via-card to-amber-500/5 shadow-xs">
+      <Card>
         <CardHeader className="p-4 border-b border-border/40">
           <CardTitle className="text-sm font-bold flex items-center gap-2">
-            <Sparkles className="h-4 w-4 text-amber-500" /> Configuração do Agendamento Inteligente
+            <Sparkles className="h-4 w-4 text-brand" /> Configuração do Agendamento Inteligente
           </CardTitle>
           <CardDescription className="text-xs">
             Informe suas preferências de estudo para disparar a geração automática.
@@ -570,9 +570,9 @@ export default function AutoSchedulePage() {
             <Button
               type="submit"
               disabled={isLoading || isAnimating || exams.length === 0}
-              className="bg-amber-500 hover:bg-amber-600 text-black font-bold text-xs gap-1.5 shadow-sm h-9"
+              className="gap-1.5 h-9"
             >
-              <Zap className="h-4 w-4 fill-black" /> Gerar
+              <Zap className="h-4 w-4" /> Gerar
             </Button>
           </form>
         </CardContent>
@@ -582,7 +582,7 @@ export default function AutoSchedulePage() {
       {selectedSchedule ? (
         <div className="space-y-4">
           {/* Summary Card */}
-          <Card className="border-border/60">
+          <Card>
             <CardHeader className="p-4 border-b border-border/40 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
               <div>
                 <div className="flex items-center gap-2">
@@ -621,7 +621,7 @@ export default function AutoSchedulePage() {
             <CardContent className="p-4 grid grid-cols-2 sm:grid-cols-4 gap-3">
               <div className="p-3 rounded-lg border bg-muted/30">
                 <span className="text-xs text-muted-foreground">Total de Sessões</span>
-                <p className="text-xl font-bold tracking-tight text-foreground">
+                <p className="page-title">
                   {selectedSchedule.days.reduce((sum, d) => sum + (d.studySessions?.length || 0), 0)}
                 </p>
               </div>
@@ -636,7 +636,7 @@ export default function AutoSchedulePage() {
               </div>
               <div className="p-3 rounded-lg border bg-muted/30">
                 <span className="text-xs text-muted-foreground">Tópicos Abrangidos</span>
-                <p className="text-xl font-bold tracking-tight text-foreground">
+                <p className="page-title">
                   {selectedSchedule.topicAllocations?.length || 0}
                 </p>
               </div>
@@ -699,7 +699,7 @@ export default function AutoSchedulePage() {
                       onClick={() => setActiveDayNumber(day.dayNumber)}
                       className={`shrink-0 w-[100px] p-2.5 rounded-lg border text-left text-xs transition-all ${
                         activeDayNumber === day.dayNumber
-                          ? "border-primary bg-primary/10 text-primary font-bold shadow-xs"
+                          ? "border-primary bg-primary/10 text-primary font-bold"
                           : day.isAvailable
                           ? "border-border bg-card text-muted-foreground hover:text-foreground"
                           : "border-border bg-muted/40 text-muted-foreground opacity-60"
@@ -722,7 +722,7 @@ export default function AutoSchedulePage() {
 
               {/* Day Details Card: Unified 24h Timeline */}
               {activeDay && (
-                <Card className="border-border/60">
+                <Card>
                   <CardHeader className="p-4 border-b border-border/40 flex flex-row items-center justify-between">
                     <div>
                       <CardTitle className="text-sm font-bold flex items-center gap-2">
@@ -801,7 +801,7 @@ export default function AutoSchedulePage() {
                         return (
                           <div
                             key={`session-${session.id}`}
-                            className={`p-3.5 rounded-lg border text-xs card-pop-in transition-all shadow-xs ${typeConfig.bgClass}`}
+                            className={`p-3.5 rounded-lg border text-xs card-pop-in transition-all ${typeConfig.bgClass}`}
                           >
                             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 min-w-0">
                               <div className="flex items-center gap-3 min-w-0">
@@ -865,7 +865,7 @@ export default function AutoSchedulePage() {
 
           {/* TAB 2: Distribuição por Tópico */}
           {viewTab === "allocations" && (
-            <Card className="border-border/60">
+            <Card>
               <CardHeader className="p-4 border-b border-border/40">
                 <CardTitle className="text-sm font-bold">Distribuição das Sessões por Tópico</CardTitle>
                 <CardDescription className="text-xs">
@@ -901,7 +901,7 @@ export default function AutoSchedulePage() {
         </div>
       ) : (
         !isLoading && (
-          <Card className="border-border/60 bg-card text-center p-8 space-y-3">
+          <Card className="bg-card text-center p-8 space-y-3">
             <div className="mx-auto w-12 h-12 rounded-full bg-muted flex items-center justify-center text-muted-foreground">
               <CalendarIcon className="h-6 w-6" />
             </div>

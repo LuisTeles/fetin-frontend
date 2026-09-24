@@ -42,10 +42,10 @@ export function RangeFilter() {
                         scroll={false}
                         aria-current={isActive ? "page" : undefined}
                         className={[
-                            "rounded-md px-2 py-1 text-xs tabular-nums transition-colors",
+                            "rounded-lg px-2.5 py-1 text-xs num transition-colors",
                             "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                             isActive
-                                ? "bg-primary text-primary-foreground font-medium"
+                                ? "bg-brand-subtle text-brand font-medium"
                                 : "text-muted-foreground hover:bg-muted hover:text-foreground",
                         ].join(" ")}
                     >

@@ -262,7 +262,7 @@ export default function AvailabilityPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-border/40 pb-4">
         <div>
-          <h1 className="text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
+          <h1 className="page-title flex items-center gap-2">
             <Clock className="h-5 w-5 text-primary" /> Disponibilidade e Rotina Semanal
           </h1>
           <p className="text-xs text-muted-foreground mt-1">
@@ -289,8 +289,8 @@ export default function AvailabilityPage() {
       )}
 
       {successMessage && (
-        <Alert className="border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300">
-          <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+        <Alert className="border-success/40 bg-success/10">
+          <CheckCircle2 className="h-4 w-4 text-success" />
           <AlertTitle>Sucesso</AlertTitle>
           <AlertDescription>{successMessage}</AlertDescription>
         </Alert>
@@ -298,15 +298,15 @@ export default function AvailabilityPage() {
 
       {/* Overview Metric Cards */}
       <div className="grid gap-3 grid-cols-1 sm:grid-cols-3">
-        <Card className="border-border/60 bg-card shadow-xs">
+        <Card>
           <CardHeader className="p-4 pb-1">
-            <CardDescription className="text-[10px] uppercase font-semibold tracking-wider text-muted-foreground">
+            <CardDescription className="kpi-label">
               Total de Horas para Estudos
             </CardDescription>
           </CardHeader>
           <CardContent className="p-4 pt-0 flex items-center justify-between">
             <div>
-              <span className="text-2xl font-bold tracking-tight text-primary">{totalHours} hrs</span>
+              <span className="text-2xl font-semibold tracking-tight num text-primary">{totalHours} hrs</span>
               <p className="text-[11px] text-muted-foreground">disponíveis nesta semana</p>
             </div>
             <div className="rounded-md bg-primary/10 p-2 text-primary">
@@ -315,15 +315,15 @@ export default function AvailabilityPage() {
           </CardContent>
         </Card>
 
-        <Card className="border-border/60 bg-card shadow-xs">
+        <Card>
           <CardHeader className="p-4 pb-1">
-            <CardDescription className="text-[10px] uppercase font-semibold tracking-wider text-muted-foreground">
+            <CardDescription className="kpi-label">
               Média Diária Disponível
             </CardDescription>
           </CardHeader>
           <CardContent className="p-4 pt-0 flex items-center justify-between">
             <div>
-              <span className="text-2xl font-bold tracking-tight">{Math.round((totalHours / 7) * 10) / 10} hrs</span>
+              <span className="text-2xl font-semibold tracking-tight num">{Math.round((totalHours / 7) * 10) / 10} hrs</span>
               <p className="text-[11px] text-muted-foreground">por dia para cronogramas</p>
             </div>
             <div className="rounded-md bg-muted p-2 text-muted-foreground">
@@ -332,15 +332,15 @@ export default function AvailabilityPage() {
           </CardContent>
         </Card>
 
-        <Card className="border-border/60 bg-card shadow-xs">
+        <Card>
           <CardHeader className="p-4 pb-1">
-            <CardDescription className="text-[10px] uppercase font-semibold tracking-wider text-muted-foreground">
+            <CardDescription className="kpi-label">
               Bloqueios de Rotina
             </CardDescription>
           </CardHeader>
           <CardContent className="p-4 pt-0 flex items-center justify-between">
             <div>
-              <span className="text-2xl font-bold tracking-tight">{routineBlocks.length}</span>
+              <span className="text-2xl font-semibold tracking-tight num">{routineBlocks.length}</span>
               <p className="text-[11px] text-muted-foreground">atividades cadastradas</p>
             </div>
             <div className="rounded-md bg-muted p-2 text-muted-foreground">
@@ -351,10 +351,10 @@ export default function AvailabilityPage() {
       </div>
 
       {/* Preset Quick Templates */}
-      <Card className="border-border/60 bg-muted/30">
+      <Card className="bg-muted/30">
         <CardHeader className="p-4 pb-2">
           <CardTitle className="text-sm font-bold flex items-center gap-1.5">
-            <Sparkles className="h-4 w-4 text-amber-500" /> Modelos Rápidos de Rotina
+            <Sparkles className="h-4 w-4 text-warning" /> Modelos Rápidos de Rotina
           </CardTitle>
           <CardDescription className="text-xs">
             Aplique um modelo pré-definido para preencher rapidamente a sua semana com compromissos padrão.
@@ -423,7 +423,7 @@ export default function AvailabilityPage() {
         {/* Day Content: Blockers + Free Study Windows */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Left Column: Routine Blockers */}
-          <Card className="border-border/60">
+          <Card>
             <CardHeader className="p-4 border-b border-border/40 flex flex-row items-center justify-between">
               <div>
                 <CardTitle className="text-sm font-bold">
@@ -448,7 +448,7 @@ export default function AvailabilityPage() {
                   return (
                     <div
                       key={block.id}
-                      className="flex items-center justify-between p-3 rounded-lg border border-border/60 bg-card text-xs hover:border-border transition-colors"
+                      className="flex items-center justify-between p-3 rounded-lg border border-border bg-card text-xs hover:border-border transition-colors"
                     >
                       <div className="flex items-center gap-3">
                         <div className={`p-2 rounded-md border ${catConfig.colorClass}`}>
@@ -476,7 +476,7 @@ export default function AvailabilityPage() {
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-7 w-7 text-destructive hover:text-destructive"
+                          className="h-7 w-7 text-muted-foreground hover:bg-danger/10 hover:text-danger"
                           onClick={() => block.id && handleDelete(block.id)}
                         >
                           <Trash2 className="h-3.5 w-3.5" />
@@ -490,10 +490,10 @@ export default function AvailabilityPage() {
           </Card>
 
           {/* Right Column: Calculated Free Study Windows */}
-          <Card className="border-border/60 bg-card">
+          <Card className="bg-card">
             <CardHeader className="p-4 border-b border-border/40">
               <CardTitle className="text-sm font-bold flex items-center gap-2">
-                <Zap className="h-4 w-4 text-emerald-500" /> Janelas Livres para Estudo
+                <Zap className="h-4 w-4 text-success" /> Janelas Livres para Estudo
               </CardTitle>
               <CardDescription className="text-xs">
                 Geradas automaticamente por inversão (mínimo 30min por janela — RN-AVL-04)
@@ -513,15 +513,15 @@ export default function AvailabilityPage() {
                   return (
                     <div
                       key={win.id}
-                      className="flex items-center justify-between p-3 rounded-lg border border-emerald-500/30 bg-emerald-500/5 text-xs"
+                      className="flex items-center justify-between p-3 rounded-lg border border-success/30 bg-success/5 text-xs"
                     >
                       <div className="flex items-center gap-2">
-                        <div className="h-2 w-2 rounded-full bg-emerald-500" />
+                        <div className="h-2 w-2 rounded-full bg-success" />
                         <span className="font-semibold text-foreground">
                           {win.startTime} — {win.endTime}
                         </span>
                       </div>
-                      <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30 text-[11px]">
+                      <Badge variant="outline" className="bg-success/10 text-success border-success/30 text-[11px]">
                         {timeLabel} de estudo
                       </Badge>
                     </div>

@@ -96,7 +96,7 @@ export function AdherencePanel({ data }: { data: AdherenceSummary }) {
 
     if (data.overall.total === 0) {
         return (
-            <Card className="border-border/60 bg-card shadow-xs">
+            <Card>
                 <CardHeader className="border-b border-border/40 p-4">
                     <CardTitle className="text-sm font-bold">Aderência ao Cronograma</CardTitle>
                 </CardHeader>
@@ -111,7 +111,7 @@ export function AdherencePanel({ data }: { data: AdherenceSummary }) {
     }
 
     return (
-        <Card className="border-border/60 bg-card shadow-xs">
+        <Card>
             <CardHeader className="border-b border-border/40 p-4">
                 <CardTitle className="text-sm font-bold">Aderência ao Cronograma</CardTitle>
                 <CardDescription className="text-pretty text-xs text-muted-foreground">
@@ -124,7 +124,7 @@ export function AdherencePanel({ data }: { data: AdherenceSummary }) {
             <CardContent className="space-y-6 p-4">
                 <div className="flex flex-wrap items-baseline gap-x-6 gap-y-1">
                     <div className="flex items-baseline gap-2">
-                        <span className="text-3xl font-bold tracking-tight tabular-nums text-foreground">
+                        <span className="text-3xl font-semibold tracking-tight num text-foreground">
                             {data.overall.rate === null ? "—" : formatPercent(data.overall.rate)}
                         </span>
                         <span className="text-xs text-muted-foreground">de aderência geral</span>

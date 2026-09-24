@@ -73,9 +73,9 @@ export function SessionExpired() {
         <div
             role="status"
             aria-live="polite"
-            className="flex flex-wrap items-center gap-3 rounded-lg border border-amber-500/40 bg-amber-500/10 p-4 text-sm"
+            className="flex flex-wrap items-center gap-3 rounded-lg border border-warning/40 bg-warning/10 p-4 text-sm"
         >
-            <AlertCircle className="h-4 w-4 shrink-0 text-amber-600" aria-hidden="true" />
+            <AlertCircle className="h-4 w-4 shrink-0 text-warning" aria-hidden="true" />
             <span className="text-foreground">
                 {failed
                     ? "Sua sessão expirou. Entre novamente para continuar."

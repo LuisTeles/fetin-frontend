@@ -52,7 +52,7 @@ function timingVerdict(sessionType: string, recall: number): string | null {
 export function EffectivenessPanel({ data }: { data: EffectivenessSummary }) {
     if (data.totalReviews === 0) {
         return (
-            <Card className="border-border/60 bg-card shadow-xs">
+            <Card>
                 <CardHeader className="border-b border-border/40 p-4">
                     <CardTitle className="text-sm font-bold">Eficácia das Revisões</CardTitle>
                 </CardHeader>
@@ -67,7 +67,7 @@ export function EffectivenessPanel({ data }: { data: EffectivenessSummary }) {
     }
 
     return (
-        <Card className="border-border/60 bg-card shadow-xs">
+        <Card>
             <CardHeader className="border-b border-border/40 p-4">
                 <CardTitle className="text-sm font-bold">Eficácia das Revisões</CardTitle>
                 <CardDescription className="text-pretty text-xs text-muted-foreground">

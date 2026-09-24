@@ -57,7 +57,7 @@ export function TagSelectorDropdown({
                 aria-expanded={open}
                 aria-haspopup="listbox"
                 className={cn(
-                    "flex min-h-[2rem] w-full flex-wrap items-center gap-1 rounded-md border border-input bg-background px-2.5 py-1.5 text-xs text-muted-foreground shadow-xs transition-all hover:border-ring focus:outline-none focus:ring-1 focus:ring-ring cursor-pointer",
+                    "flex min-h-[2rem] w-full flex-wrap items-center gap-1 rounded-md border border-input bg-background px-2.5 py-1.5 text-xs text-muted-foreground transition-all hover:border-ring focus:outline-none focus:ring-1 focus:ring-ring cursor-pointer",
                     disabled && "cursor-not-allowed opacity-50",
                 )}
             >

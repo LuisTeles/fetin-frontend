@@ -147,7 +147,7 @@ export function ExamList({ onStatsChange }: ExamListProps) {
                             setShowForm(!showForm)
                         }}
                         size="sm"
-                        className="h-9 gap-1 shadow-xs"
+                        className="h-9 gap-1"
                     >
                         <Calendar className="h-4 w-4" />
                         Agendar Prova
@@ -196,7 +196,7 @@ export function ExamList({ onStatsChange }: ExamListProps) {
                         const hasNoTopics = exam.topics.length === 0
 
                         return (
-                            <Card key={exam.id} className="group overflow-hidden border border-border/60 hover:border-foreground/20 hover:bg-muted/10 transition-all duration-200 shadow-xs">
+                            <Card key={exam.id} className="group overflow-hidden border border-border hover:border-foreground/20 hover:bg-muted/10 transition-all duration-200">
                                 <CardContent className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-4">
                                     <div className="flex items-start gap-3 min-w-0">
                                         <div className="flex h-9 w-9 items-center justify-center rounded-md bg-muted text-foreground group-hover:bg-foreground group-hover:text-background transition-colors duration-200 shrink-0">
@@ -231,7 +231,7 @@ export function ExamList({ onStatsChange }: ExamListProps) {
                                             {/* Topic Badges or Warning */}
                                             <div className="pt-1">
                                                 {hasNoTopics ? (
-                                                    <div className="inline-flex items-center gap-1 rounded bg-yellow-50 border border-yellow-200 text-yellow-700 px-2 py-0.5 text-[10px] font-medium animate-pulse">
+                                                    <div className="inline-flex items-center gap-1 rounded bg-warning/10 border border-warning/30 text-warning px-2 py-0.5 text-[10px] font-medium animate-pulse">
                                                         <AlertTriangle className="h-3 w-3" />
                                                         Nenhum tópico vinculado (Impossibilita geração de cronograma)
                                                     </div>
@@ -258,7 +258,7 @@ export function ExamList({ onStatsChange }: ExamListProps) {
                                     {/* Action Buttons */}
                                     {!isImpersonating && (
                                         <div className="flex items-center justify-between sm:justify-end gap-3 border-t border-border/40 pt-3 sm:border-0 sm:pt-0 shrink-0">
-                                            <div className="flex items-center gap-1 opacity-80 group-hover:opacity-100 transition-opacity">
+                                            <div className="flex items-center gap-1 md:opacity-40 md:group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
                                                 <Button
                                                     onClick={() => {
                                                         setShowForm(false)
@@ -266,7 +266,7 @@ export function ExamList({ onStatsChange }: ExamListProps) {
                                                     }}
                                                     variant="ghost"
                                                     size="icon-xs"
-                                                    className="hover:bg-muted hover:text-foreground"
+                                                    className="text-muted-foreground hover:bg-muted hover:text-foreground"
                                                     title="Editar Prova"
                                                 >
                                                     <Edit2 className="h-3 w-3" />
@@ -275,7 +275,7 @@ export function ExamList({ onStatsChange }: ExamListProps) {
                                                     onClick={() => handleDelete(exam.id, exam.exam_date, exam.subject_name)}
                                                     variant="ghost"
                                                     size="icon-xs"
-                                                    className="hover:bg-destructive/10 hover:text-destructive text-muted-foreground"
+                                                    className="text-muted-foreground hover:bg-danger/10 hover:text-danger"
                                                     title="Excluir Prova"
                                                 >
                                                     <Trash2 className="h-3 w-3" />

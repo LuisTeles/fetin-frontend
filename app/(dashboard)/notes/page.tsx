@@ -139,7 +139,7 @@ export default function NotesPage() {
             <div className="flex flex-col gap-1.5 border-b border-border/40 pb-4">
                 <div className="flex items-center justify-between gap-2">
                     <div>
-                        <h1 className="text-xl font-bold tracking-tight text-foreground">Notas Rápidas</h1>
+                        <h1 className="page-title">Notas Rápidas</h1>
                         <p className="text-xs text-muted-foreground mt-0.5">
                             Capture insights e vincule-os às suas disciplinas, tópicos e provas.
                         </p>
@@ -168,40 +168,40 @@ export default function NotesPage() {
 
             {/* ── Stats row ── */}
             <div className="grid gap-3 grid-cols-2 sm:grid-cols-3">
-                <Card className="border-border/60 bg-card shadow-xs">
+                <Card>
                     <CardHeader className="p-3 pb-0.5">
-                        <CardDescription className="text-[10px] uppercase font-semibold tracking-wider">
+                        <CardDescription className="kpi-label">
                             Notas Ativas
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="p-3 pt-0 flex items-center justify-between">
-                        <span className="text-2xl font-bold">{activeCount}</span>
+                        <span className="text-2xl font-semibold tracking-tight num">{activeCount}</span>
                         <div className="rounded-md bg-muted p-1.5 text-muted-foreground">
                             <StickyNote className="h-4 w-4" />
                         </div>
                     </CardContent>
                 </Card>
-                <Card className="border-border/60 bg-card shadow-xs">
+                <Card>
                     <CardHeader className="p-3 pb-0.5">
-                        <CardDescription className="text-[10px] uppercase font-semibold tracking-wider">
+                        <CardDescription className="kpi-label">
                             Tags Criadas
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="p-3 pt-0 flex items-center justify-between">
-                        <span className="text-2xl font-bold">{tags.length}</span>
+                        <span className="text-2xl font-semibold tracking-tight num">{tags.length}</span>
                         <div className="rounded-md bg-muted p-1.5 text-muted-foreground">
                             <TagIcon className="h-4 w-4" />
                         </div>
                     </CardContent>
                 </Card>
-                <Card className="border-border/60 bg-card shadow-xs col-span-2 sm:col-span-1">
+                <Card className="col-span-2 sm:col-span-1">
                     <CardHeader className="p-3 pb-0.5">
-                        <CardDescription className="text-[10px] uppercase font-semibold tracking-wider">
+                        <CardDescription className="kpi-label">
                             Arquivadas
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="p-3 pt-0 flex items-center justify-between">
-                        <span className="text-2xl font-bold">{archivedCount}</span>
+                        <span className="text-2xl font-semibold tracking-tight num">{archivedCount}</span>
                         <div className="rounded-md bg-muted p-1.5 text-muted-foreground">
                             <Archive className="h-4 w-4" />
                         </div>
@@ -217,7 +217,7 @@ export default function NotesPage() {
 
             {/* ── Create / Edit / Tag Manager panel ── */}
             {(view === "create" || view === "edit" || view === "tags") && (
-                <Card className="border-border/60 bg-card shadow-xs">
+                <Card>
                     <CardHeader className="p-4 border-b border-border/40">
                         <div className="flex items-center justify-between">
                             <CardTitle className="text-sm font-bold">

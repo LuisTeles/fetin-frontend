@@ -1,13 +1,12 @@
 import { cookies } from "next/headers"
-import Link from "next/link"
 import { redirect } from "next/navigation"
 
-import { Badge } from "@/components/ui/badge"
-import { Separator } from "@/components/ui/separator"
 import { ACCESS_TOKEN_COOKIE, REFRESH_TOKEN_COOKIE } from "@/lib/api-config"
 import { ImpersonationBanner } from "@/components/auth/impersonation-banner"
 import { ThemeToggle } from "@/components/ui/theme-toggle"
 import { GlobalNoteFab } from "@/components/notes/global-note-fab"
+import { NavLink } from "@/components/layout/nav-link"
+import { UserAvatar } from "@/components/layout/user-avatar"
 
 export default async function DashboardLayout({
     children,
@@ -37,79 +36,43 @@ export default async function DashboardLayout({
     }
 
     return (
-        <div className="min-h-screen bg-muted/40 flex flex-col">
+        <div className="min-h-screen bg-background flex flex-col">
             <ImpersonationBanner />
 
-            <header className="border-b bg-background">
-                <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-4 py-4 md:px-6">
+            <header className="border-b bg-surface">
+                <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-4 py-3 md:px-6">
                     <div>
-                        <p className="text-lg font-semibold">Fetin Dashboard</p>
-                        <p className="text-sm text-muted-foreground">MVP de integracao com backend de usuarios</p>
+                        <p className="text-lg font-semibold tracking-tight">Fetin Dashboard</p>
+                        {/* Tagline opcional: <p className="text-sm text-text-muted">…</p> */}
                     </div>
                     <div className="flex items-center gap-2">
                         <ThemeToggle />
-                        <Badge variant="outline">Auth Test</Badge>
+                        <UserAvatar />
                     </div>
                 </div>
             </header>
 
-            <div className="mx-auto grid w-full max-w-7xl grid-cols-1 gap-4 px-4 py-4 md:px-6 md:grid-cols-[220px_1fr] flex-1">
-                <nav className="rounded-lg border bg-background p-2 h-fit">
-                    <ul className="space-y-1 text-sm">
-                        <li>
-                            <Link className="block rounded-md px-3 py-2 hover:bg-muted" href="/dashboard">
-                                Dashboard
-                            </Link>
-                        </li>
-                        <li>
-                            <Link className="block rounded-md px-3 py-2 hover:bg-muted" href="/me">
-                                Meu perfil
-                            </Link>
-                        </li>
-                        <li>
-                            <Link className="block rounded-md px-3 py-2 hover:bg-muted" href="/exams">
-                                Provas
-                            </Link>
-                        </li>
-                        <li>
-                            <Link className="block rounded-md px-3 py-2 hover:bg-muted" href="/subjects">
-                                Disciplinas
-                            </Link>
-                        </li>
-                        <li>
-                            <Link className="block rounded-md px-3 py-2 hover:bg-muted" href="/calendar">
-                                Calendário
-                            </Link>
-                        </li>
-                        <li>
-                            <Link className="block rounded-md px-3 py-2 hover:bg-muted font-medium" href="/notes">
-                                Notas Rápidas
-                            </Link>
-                        </li>
-                        <li>
-                            <Link className="block rounded-md px-3 py-2 hover:bg-muted font-medium text-primary flex items-center justify-between" href="/auto-schedule">
-                                <span>Calendário Automático</span>
-                            </Link>
-                        </li>
-                        <li>
-                            <Link className="block rounded-md px-3 py-2 hover:bg-muted font-medium" href="/availability">
-                                Disponibilidade
-                            </Link>
-                        </li>
+            <div className="mx-auto grid w-full max-w-7xl grid-cols-1 gap-6 px-4 py-6 md:px-6 md:grid-cols-[220px_1fr] flex-1">
+                <nav
+                    aria-label="Navegação principal"
+                    className="h-fit rounded-xl border bg-surface p-2 shadow-[var(--shadow-card)] md:sticky md:top-12 md:self-start"
+                >
+                    <ul className="space-y-0.5">
+                        <li><NavLink href="/dashboard" icon="dashboard">Dashboard</NavLink></li>
+                        <li><NavLink href="/me" icon="profile">Meu perfil</NavLink></li>
+                        <li><NavLink href="/exams" icon="exams">Provas</NavLink></li>
+                        <li><NavLink href="/subjects" icon="subjects">Disciplinas</NavLink></li>
+                        <li><NavLink href="/calendar" icon="calendar">Calendário</NavLink></li>
+                        <li><NavLink href="/notes" icon="notes">Notas Rápidas</NavLink></li>
+                        <li><NavLink href="/auto-schedule" icon="schedule">Calendário Automático</NavLink></li>
+                        <li><NavLink href="/availability" icon="availability">Disponibilidade</NavLink></li>
                         {isAdmin && (
-                            <li>
-                                <Link className="block rounded-md px-3 py-2 hover:bg-muted text-yellow-600 font-medium" href="/admin/users">
-                                    Painel Admin
-                                </Link>
-                            </li>
+                            <li><NavLink href="/admin/users" icon="admin">Painel Admin</NavLink></li>
                         )}
                     </ul>
                 </nav>
 
-                <main className="rounded-lg border bg-background p-4 h-fit min-w-0">
-                    <Separator className="mb-4" />
-                    {children}
-                </main>
+                <main className="min-w-0">{children}</main>
             </div>
 
             <GlobalNoteFab />

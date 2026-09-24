@@ -336,7 +336,7 @@ export function ExamForm({ exam, onSuccess, onCancel }: ExamFormProps) {
                             <p className="text-xs text-muted-foreground mb-1">
                                 Selecione os tópicos que cairão nesta prova:
                             </p>
-                            <div className="grid gap-2 max-h-40 overflow-y-auto border border-border/60 rounded-md p-2 bg-muted/10">
+                            <div className="grid gap-2 max-h-40 overflow-y-auto border border-border rounded-md p-2 bg-muted/10">
                                 {topics.map((topic) => {
                                     const isSelected = selectedTopicIds.includes(topic.id)
                                     return (
@@ -352,9 +352,9 @@ export function ExamForm({ exam, onSuccess, onCancel }: ExamFormProps) {
                                             <span>{topic.name}</span>
                                             <div className="flex items-center gap-1.5">
                                                 <span className={`text-[9px] uppercase font-mono px-1 rounded-sm border ${
-                                                    topic.weight === "essential" ? "border-red-200 bg-red-50 text-red-700" :
-                                                    topic.weight === "review" ? "border-amber-200 bg-amber-50 text-amber-700" :
-                                                    "border-blue-200 bg-blue-50 text-blue-700"
+                                                    topic.weight === "essential" ? "border-danger/30 bg-danger/10 text-danger" :
+                                                    topic.weight === "review" ? "border-warning/30 bg-warning/10 text-warning" :
+                                                    "border-info/30 bg-info/10 text-info"
                                                 }`}>
                                                     {topic.weight === "essential" ? "Essencial" :
                                                      topic.weight === "review" ? "Revisar" : "Opcional"}
@@ -371,7 +371,7 @@ export function ExamForm({ exam, onSuccess, onCancel }: ExamFormProps) {
                             </div>
 
                             {/* Optional: Add topic quick creation even if topics exist */}
-                            <div className="flex items-center justify-between border-t border-dashed border-border/60 pt-2">
+                            <div className="flex items-center justify-between border-t border-dashed border-border pt-2">
                                 <span className="text-[10px] text-muted-foreground">
                                     {selectedTopicIds.length} de {topics.length} selecionados
                                 </span>

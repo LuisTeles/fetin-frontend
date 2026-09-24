@@ -354,7 +354,7 @@ export function CalendarView({ onStatsChange }: CalendarViewProps) {
         const todayStr = new Date().toISOString().split("T")[0]
 
         return (
-            <div className="grid grid-cols-7 gap-1 border border-border/60 rounded-md bg-muted/20 overflow-hidden">
+            <div className="grid grid-cols-7 gap-1 border border-border rounded-md bg-muted/20 overflow-hidden">
                 {/* Week Headers */}
                 {["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"].map(day => (
                     <div key={day} className="p-2 text-center text-xs font-bold text-muted-foreground bg-muted/40 border-b">
@@ -510,7 +510,7 @@ export function CalendarView({ onStatsChange }: CalendarViewProps) {
         const todayStr = new Date().toISOString().split("T")[0]
 
         return (
-            <div className="grid grid-cols-1 sm:grid-cols-7 gap-2 border border-border/60 rounded-md p-2 bg-muted/5">
+            <div className="grid grid-cols-1 sm:grid-cols-7 gap-2 border border-border rounded-md p-2 bg-muted/5">
                 {weekDays.map((wDay, index) => {
                     const { dayTasks, dayExams, daySessions, dayRoutineBlocks } = getEventsForDay(wDay.dateStr)
                     const isToday = wDay.dateStr === todayStr
@@ -519,7 +519,7 @@ export function CalendarView({ onStatsChange }: CalendarViewProps) {
                         <div 
                             key={index}
                             className={`flex flex-col gap-2 rounded-md p-3 border min-h-[350px] transition-colors ${
-                                isToday ? "bg-muted/15 border-foreground/30 ring-1 ring-inset ring-foreground/10" : "bg-card border-border/60"
+                                isToday ? "bg-muted/15 border-foreground/30 ring-1 ring-inset ring-foreground/10" : "bg-card border-border"
                             }`}
                         >
                             {/* Day Header */}
@@ -568,7 +568,7 @@ export function CalendarView({ onStatsChange }: CalendarViewProps) {
                                     <div 
                                         key={block.id || `${block.title}-${block.startTime}`}
                                         onClick={() => window.location.href = '/availability'}
-                                        className="p-2 rounded-md bg-amber-500/10 border-l-4 border-amber-500 text-xs flex flex-col gap-1 text-amber-800 dark:text-amber-300 hover:bg-amber-500/20 cursor-pointer shadow-xs"
+                                        className="p-2 rounded-md bg-amber-500/10 border-l-4 border-amber-500 text-xs flex flex-col gap-1 text-amber-800 dark:text-amber-300 hover:bg-amber-500/20 cursor-pointer"
                                     >
                                         <div className="font-bold flex items-center justify-between">
                                             <span className="truncate">{block.title}</span>
@@ -588,7 +588,7 @@ export function CalendarView({ onStatsChange }: CalendarViewProps) {
                                     <div 
                                         key={task.id}
                                         onClick={() => openEditModal(task)}
-                                        className="p-2 rounded-md border-l-4 text-xs bg-background hover:bg-muted/10 cursor-pointer flex flex-col gap-1 shadow-xs border border-border/40"
+                                        className="p-2 rounded-md border-l-4 text-xs bg-background hover:bg-muted/10 cursor-pointer flex flex-col gap-1 border border-border/40"
                                         style={{ borderLeftColor: task.color }}
                                     >
                                         <div className="font-bold flex items-center justify-between gap-1">
@@ -607,7 +607,7 @@ export function CalendarView({ onStatsChange }: CalendarViewProps) {
                                             </span>
                                             <button 
                                                 onClick={(e) => handleDeleteTask(task.id, e)}
-                                                className="text-red-500 hover:bg-red-500/10 p-0.5 rounded-sm"
+                                                className="text-muted-foreground hover:bg-danger/10 hover:text-danger p-0.5 rounded-sm"
                                             >
                                                 <Trash2 className="w-3 h-3" />
                                             </button>
@@ -656,7 +656,7 @@ export function CalendarView({ onStatsChange }: CalendarViewProps) {
         const formattedDate = currentDate.toLocaleDateString("pt-BR", { day: "numeric", month: "long" })
 
         return (
-            <div className="border border-border/60 rounded-md p-4 bg-card space-y-4">
+            <div className="border border-border rounded-md p-4 bg-card space-y-4">
                 {/* Day title info */}
                 <div className="flex justify-between items-center border-b pb-3">
                     <div>
@@ -737,7 +737,7 @@ export function CalendarView({ onStatsChange }: CalendarViewProps) {
                                         <Button 
                                             variant="ghost" 
                                             size="icon" 
-                                            className="w-7 h-7 text-red-500 hover:bg-red-500/10 cursor-pointer"
+                                            className="w-7 h-7 text-muted-foreground hover:bg-danger/10 hover:text-danger cursor-pointer"
                                             onClick={(e) => handleDeleteTask(task.id, e)}
                                         >
                                             <Trash2 className="w-3.5 h-3.5" />
@@ -834,7 +834,7 @@ export function CalendarView({ onStatsChange }: CalendarViewProps) {
     return (
         <div className="space-y-6">
             {/* INSTRUCTIONS PANEL */}
-            <Alert className="bg-muted/30 border-border/60">
+            <Alert className="bg-muted/30 border-border">
                 <Info className="h-4 w-4 shrink-0 text-muted-foreground" />
                 <AlertTitle className="text-xs font-bold flex items-center gap-1">
                     Instruções do Calendário
@@ -872,7 +872,7 @@ export function CalendarView({ onStatsChange }: CalendarViewProps) {
 
                 <div className="flex items-center gap-2.5 flex-wrap">
                     {/* Routine Blocks Filter Toggle */}
-                    <div className="flex items-center gap-1.5 border-r pr-3 border-border/60">
+                    <div className="flex items-center gap-1.5 border-r pr-3 border-border">
                         <Filter className="w-3.5 h-3.5 text-muted-foreground" />
                         <label className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5 cursor-pointer select-none">
                             <input 
@@ -886,7 +886,7 @@ export function CalendarView({ onStatsChange }: CalendarViewProps) {
                     </div>
 
                     {/* Study Sessions Filter Toggle */}
-                    <div className="flex items-center gap-1.5 border-r pr-3 border-border/60">
+                    <div className="flex items-center gap-1.5 border-r pr-3 border-border">
                         <label className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5 cursor-pointer select-none">
                             <input 
                                 type="checkbox" 

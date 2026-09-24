@@ -61,7 +61,7 @@ export function ProfilePanel() {
 
     if (!user) {
         return (
-            <Card className="border-border/60 shadow-xs">
+            <Card>
                 <CardHeader className="p-4 pb-2 animate-pulse">
                     <div className="h-5 w-32 bg-muted rounded"></div>
                     <div className="h-3 w-48 bg-muted rounded mt-2"></div>
@@ -85,7 +85,7 @@ export function ProfilePanel() {
         .toUpperCase()
 
     return (
-        <Card className="border-border/60 bg-card overflow-hidden shadow-xs hover:border-foreground/20 transition-all duration-200">
+        <Card className="bg-card overflow-hidden hover:border-foreground/20 transition-all duration-200">
             <CardHeader className="p-4 pb-2 border-b border-border/40 bg-muted/10">
                 <div className="flex items-center gap-3">
                     <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground font-mono text-sm font-bold tracking-wider">

@@ -126,7 +126,7 @@ export function SubjectList({ onStatsChange }: SubjectListProps) {
                             setShowForm(!showForm)
                         }}
                         size="sm"
-                        className="h-9 gap-1 shadow-xs"
+                        className="h-9 gap-1"
                     >
                         <Plus className="h-4 w-4" />
                         Nova Disciplina
@@ -172,7 +172,7 @@ export function SubjectList({ onStatsChange }: SubjectListProps) {
             ) : (
                 <div className="grid gap-2">
                     {filteredSubjects.map((subject) => (
-                        <Card key={subject.id} className="group overflow-hidden border border-border/60 hover:border-foreground/20 hover:bg-muted/10 transition-all duration-200 shadow-xs">
+                        <Card key={subject.id} className="group overflow-hidden border border-border hover:border-foreground/20 hover:bg-muted/10 transition-all duration-200">
                             <CardContent className="flex items-center justify-between p-3">
                                 <div className="flex items-center gap-3 min-w-0">
                                     <div className="flex h-7 w-7 items-center justify-center rounded-md bg-muted text-foreground group-hover:bg-foreground group-hover:text-background transition-colors duration-200">
@@ -194,7 +194,7 @@ export function SubjectList({ onStatsChange }: SubjectListProps) {
                                     </Badge>
                                     
                                     {!isImpersonating && (
-                                        <div className="flex items-center gap-1 opacity-80 group-hover:opacity-100 transition-opacity">
+                                        <div className="flex items-center gap-1 md:opacity-40 md:group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
                                             <Button
                                                 onClick={() => {
                                                     setShowForm(false)
@@ -202,7 +202,7 @@ export function SubjectList({ onStatsChange }: SubjectListProps) {
                                                 }}
                                                 variant="ghost"
                                                 size="icon-xs"
-                                                className="hover:bg-muted hover:text-foreground"
+                                                className="text-muted-foreground hover:bg-muted hover:text-foreground"
                                                 title="Editar"
                                             >
                                                 <Edit2 className="h-3 w-3" />
@@ -211,7 +211,7 @@ export function SubjectList({ onStatsChange }: SubjectListProps) {
                                                 onClick={() => handleDelete(subject.id, subject.name)}
                                                 variant="ghost"
                                                 size="icon-xs"
-                                                className="hover:bg-destructive/10 hover:text-destructive text-muted-foreground"
+                                                className="text-muted-foreground hover:bg-danger/10 hover:text-danger"
                                                 title="Excluir"
                                             >
                                                 <Trash2 className="h-3 w-3" />

@@ -97,7 +97,7 @@ export function ColorPalettePicker({ value, onChange, disabled }: ColorPalettePi
                                 onChange(v)
                             }
                         }}
-                        className="flex h-8 w-28 rounded-md border border-input bg-background px-3 py-1 text-xs shadow-xs focus:outline-none focus:ring-1 focus:ring-ring"
+                        className="flex h-8 w-28 rounded-md border border-input bg-background px-3 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-ring"
                     />
                     <span className="text-[10px] text-muted-foreground">ex: #F472B6</span>
                 </div>

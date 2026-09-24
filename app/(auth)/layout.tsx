@@ -1,3 +1,5 @@
+import { GraduationCap } from "lucide-react"
+
 import { ThemeToggle } from "@/components/ui/theme-toggle"
 
 export default function AuthLayout({
@@ -6,9 +8,15 @@ export default function AuthLayout({
     children: React.ReactNode
 }) {
     return (
-        <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[radial-gradient(circle_at_20%_20%,oklch(0.96_0_0),transparent_40%),radial-gradient(circle_at_80%_80%,oklch(0.94_0_0),transparent_40%),oklch(0.98_0_0)] dark:bg-neutral-950 p-4">
+        <div className="relative flex min-h-screen flex-col items-center justify-center gap-6 bg-background p-4">
             <div className="absolute top-4 right-4 z-50">
                 <ThemeToggle />
+            </div>
+            <div className="flex items-center gap-2.5">
+                <span className="flex size-9 items-center justify-center rounded-lg bg-brand text-brand-foreground">
+                    <GraduationCap className="size-5" />
+                </span>
+                <span className="text-xl font-semibold tracking-tight">Fetin</span>
             </div>
             <div className="w-full max-w-sm">{children}</div>
         </div>

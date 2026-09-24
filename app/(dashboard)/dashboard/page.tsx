@@ -49,7 +49,7 @@ export default async function DashboardPage({
         <section className="space-y-6">
             <div className="flex items-start justify-between gap-4 border-b border-border/40 pb-4">
                 <div className="min-w-0">
-                    <h1 className="text-balance text-xl font-bold tracking-tight text-foreground">
+                    <h1 className="page-title text-balance">
                         Diagnóstico de Estudos
                     </h1>
                     <p className="text-pretty text-xs text-muted-foreground">

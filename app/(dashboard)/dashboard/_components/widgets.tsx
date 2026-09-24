@@ -76,7 +76,7 @@ export async function HeatmapWidget({ userId }: WidgetProps) {
     const hasData = result.data.some((row) => row.data.some((cell) => cell.y > 0))
 
     return (
-        <Card className="border-border/60 bg-card shadow-xs">
+        <Card>
             <CardHeader className="border-b border-border/40 p-4">
                 <CardTitle className="text-sm font-bold">
                     Mapa de Calor de Atividade Semanal
@@ -110,7 +110,7 @@ export async function ProgressWidgets({ userId }: WidgetProps) {
 
     return (
         <div className="grid gap-4 md:grid-cols-2">
-            <Card className="border-border/60 bg-card shadow-xs">
+            <Card>
                 <CardHeader className="border-b border-border/40 p-4">
                     <CardTitle className="text-sm font-bold">
                         Meta vs. Realidade por Disciplina
@@ -129,7 +129,7 @@ export async function ProgressWidgets({ userId }: WidgetProps) {
                 </CardContent>
             </Card>
 
-            <Card className="border-border/60 bg-card shadow-xs">
+            <Card>
                 <CardHeader className="border-b border-border/40 p-4">
                     <CardTitle className="text-sm font-bold">
                         Consistência de Hábitos (Divergente)
@@ -167,7 +167,7 @@ export async function ReadinessWidget({ userId }: WidgetProps) {
 
     if (result.data.length === 0) {
         return (
-            <Card className="border-border/60 bg-card shadow-xs">
+            <Card>
                 <CardHeader className="border-b border-border/40 p-4">
                     <CardTitle className="text-sm font-bold">Prontidão para Provas</CardTitle>
                 </CardHeader>
@@ -224,7 +224,7 @@ export async function RetentionCurveWidget({ userId }: WidgetProps) {
     }
 
     return (
-        <Card className="border-border/60 bg-card shadow-xs">
+        <Card>
             <CardHeader className="border-b border-border/40 p-4">
                 <CardTitle className="text-sm font-bold">Curva de Esquecimento</CardTitle>
                 <CardDescription className="text-pretty text-xs text-muted-foreground">
