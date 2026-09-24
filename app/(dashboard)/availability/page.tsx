@@ -63,6 +63,8 @@ export default function AvailabilityPage() {
 
   const [routineBlocks, setRoutineBlocks] = useState<RoutineBlock[]>([])
   const [studyWindows, setStudyWindows] = useState<StudyWindow[]>([])
+  // D5: no routine registered, so a 23:00-07:00 sleep block is being assumed.
+  const [usingDefaultSleep, setUsingDefaultSleep] = useState<boolean>(false)
   const [totalHours, setTotalHours] = useState<number>(0)
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
@@ -88,6 +90,7 @@ export default function AvailabilityPage() {
       const data = await fetchAvailabilitySchedule(impersonateUserId)
       setRoutineBlocks(data.routineBlocks || [])
       setStudyWindows(data.studyWindows || [])
+      setUsingDefaultSleep(Boolean(data.usingDefaultSleepBlock))
       setTotalHours(data.totalStudyHours || 0)
     } catch (err: any) {
       setError(err.message || "Erro ao carregar dados da rotina.")
@@ -156,6 +159,7 @@ export default function AvailabilityPage() {
         )
         setRoutineBlocks(updated.routineBlocks || [])
         setStudyWindows(updated.studyWindows || [])
+        setUsingDefaultSleep(Boolean(updated.usingDefaultSleepBlock))
         setTotalHours(updated.totalStudyHours || 0)
         setSuccessMessage("Compromisso atualizado com sucesso!")
       } else {
@@ -176,6 +180,7 @@ export default function AvailabilityPage() {
         if (currentData) {
           setRoutineBlocks(currentData.routineBlocks || [])
           setStudyWindows(currentData.studyWindows || [])
+          setUsingDefaultSleep(Boolean(currentData.usingDefaultSleepBlock))
           setTotalHours(currentData.totalStudyHours || 0)
         }
         setSuccessMessage("Compromisso(s) de rotina adicionado(s) com sucesso!")
@@ -196,6 +201,7 @@ export default function AvailabilityPage() {
       const updated = await deleteRoutineBlock(id, impersonateUserId)
       setRoutineBlocks(updated.routineBlocks || [])
       setStudyWindows(updated.studyWindows || [])
+      setUsingDefaultSleep(Boolean(updated.usingDefaultSleepBlock))
       setTotalHours(updated.totalStudyHours || 0)
       setSuccessMessage("Compromisso removido da rotina!")
     } catch (err: any) {
@@ -220,8 +226,7 @@ export default function AvailabilityPage() {
           blocks.push({ title: "Trabalho Comercial", category: "WORK", dayOfWeek: d, startTime: "08:00", endTime: "17:00" })
         }
         for (let d = 0; d <= 6; d++) {
-          blocks.push({ title: "Sono Noturno", category: "SLEEP", dayOfWeek: d, startTime: "00:00", endTime: "07:00" })
-          blocks.push({ title: "Sono Noturno", category: "SLEEP", dayOfWeek: d, startTime: "23:00", endTime: "23:59" })
+          blocks.push({ title: "Sono Noturno", category: "SLEEP", dayOfWeek: d, startTime: "23:00", endTime: "07:00" })
         }
       } else if (presetType === "COLLEGE_STUDENT") {
         // Mon-Fri College 08:00-12:00, Internship 14:00-18:00, Sleep 23:00-07:00
@@ -230,14 +235,14 @@ export default function AvailabilityPage() {
           blocks.push({ title: "Estágio", category: "WORK", dayOfWeek: d, startTime: "14:00", endTime: "18:00" })
         }
         for (let d = 0; d <= 6; d++) {
-          blocks.push({ title: "Sono", category: "SLEEP", dayOfWeek: d, startTime: "00:00", endTime: "07:00" })
-          blocks.push({ title: "Sono", category: "SLEEP", dayOfWeek: d, startTime: "23:00", endTime: "23:59" })
+          blocks.push({ title: "Sono", category: "SLEEP", dayOfWeek: d, startTime: "23:00", endTime: "07:00" })
         }
       }
 
       const updated = await syncRoutineBlocks(blocks, impersonateUserId)
       setRoutineBlocks(updated.routineBlocks || [])
       setStudyWindows(updated.studyWindows || [])
+      setUsingDefaultSleep(Boolean(updated.usingDefaultSleepBlock))
       setTotalHours(updated.totalStudyHours || 0)
       setSuccessMessage(
         presetType === "CLEAR_ALL"
@@ -294,6 +299,16 @@ export default function AvailabilityPage() {
           <CheckCircle2 className="h-4 w-4 text-success" />
           <AlertTitle>Sucesso</AlertTitle>
           <AlertDescription>{successMessage}</AlertDescription>
+        </Alert>
+      )}
+
+      {usingDefaultSleep && (
+        <Alert className="border-amber-500/40 bg-amber-500/10">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Rotina não cadastrada</AlertTitle>
+          <AlertDescription>
+            Sem uma rotina, assumimos que você dorme das 23:00 às 07:00 e está livre no resto do dia. Adicione seus compromissos (sono, trabalho, aulas) para que o cronograma use o tempo realmente livre.
+          </AlertDescription>
         </Alert>
       )}
 

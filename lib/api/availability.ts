@@ -6,20 +6,22 @@ export interface RoutineBlock {
   category: RoutineCategory;
   dayOfWeek: number; // 0 = Sun, 1 = Mon, ..., 6 = Sat
   startTime: string; // "HH:mm"
-  endTime: string;   // "HH:mm"
+  endTime: string;   // "HH:mm". Earlier than startTime = overnight block (spills onto the next day).
 }
 
 export interface StudyWindow {
   id: string;
   dayOfWeek: number;
   startTime: string;
-  endTime: string;
+  endTime: string; // a window that runs to midnight ends at "24:00"
   durationMinutes: number;
 }
 
 export interface AvailabilityScheduleData {
   routineBlocks: RoutineBlock[];
   studyWindows: StudyWindow[];
+  /** D5: no routine registered, so a 23:00-07:00 sleep block is being assumed. */
+  usingDefaultSleepBlock?: boolean;
   totalStudyMinutes: number;
   totalStudyHours: number;
   message?: string;

@@ -1,5 +1,6 @@
 "use client"
 
+import Link from "next/link"
 import { formatDateSafe, pluralize } from "@/lib/format"
 import { useEffect, useState } from "react"
 import { useSearchParams } from "next/navigation"
@@ -35,6 +36,7 @@ import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { buildUnifiedTimeline } from "@/lib/schedule-timeline"
 
 import {
   fetchExamsList,
@@ -47,8 +49,6 @@ import {
   deleteSchedule,
   Exam,
   Schedule,
-  ScheduleDay,
-  StudySession,
   StudySessionType,
 } from "@/lib/api/schedules"
 
@@ -118,110 +118,14 @@ const ROUTINE_CATEGORY_CONFIG: Record<
   },
 }
 
-type TimelineItem =
-  | {
-      kind: "routine"
-      id: string
-      title: string
-      category: RoutineCategory
-      startTime: string
-      endTime: string
-      startMins: number
-    }
-  | {
-      kind: "session"
-      id: string
-      session: StudySession
-      startTime: string
-      endTime: string
-      startMins: number
-    }
-
-function timeToMins(t: string): number {
-  if (!t) return 0
-  const parts = t.split(":")
-  return Number(parts[0]) * 60 + Number(parts[1] || 0)
-}
-
-function minsToTime(m: number): string {
-  const h = Math.floor(m / 60)
-  const min = m % 60
-  return `${h.toString().padStart(2, "0")}:${min.toString().padStart(2, "0")}`
-}
-
-function buildUnifiedTimeline(
-  day: ScheduleDay,
-  routineBlocks: RoutineBlock[]
-): TimelineItem[] {
-  const dateObj = new Date(`${day.studyDate.split("T")[0]}T00:00:00.000Z`)
-  const dayOfWeek = dateObj.getUTCDay()
-
-  const dayRoutine = routineBlocks.filter((b) => b.dayOfWeek === dayOfWeek)
-
-  const items: TimelineItem[] = dayRoutine.map((b) => ({
-    kind: "routine",
-    id: b.id || Math.random().toString(),
-    title: b.title,
-    category: b.category,
-    startTime: b.startTime,
-    endTime: b.endTime,
-    startMins: timeToMins(b.startTime),
-  }))
-
-  // Merged routine blockers to calculate free windows
-  const mergedBlocks = dayRoutine
-    .map((b) => ({
-      startMins: timeToMins(b.startTime),
-      endMins: timeToMins(b.endTime),
-    }))
-    .sort((a, b) => a.startMins - b.startMins)
-
-  const freeGaps: { startMins: number; endMins: number }[] = []
-  let pointer = 0
-
-  for (const block of mergedBlocks) {
-    if (block.startMins > pointer) {
-      freeGaps.push({ startMins: pointer, endMins: block.startMins })
-    }
-    pointer = Math.max(pointer, block.endMins)
-  }
-  if (pointer < 1440) {
-    freeGaps.push({ startMins: pointer, endMins: 1440 })
-  }
-
-  // Sequentially place study sessions in free gaps
-  let currentGapIndex = 0
-  let gapPointer = freeGaps[0] ? freeGaps[0].startMins : 480
-
-  if (day.studySessions) {
-    for (const session of day.studySessions) {
-      while (
-        currentGapIndex < freeGaps.length &&
-        gapPointer + session.durationMinutes > freeGaps[currentGapIndex].endMins
-      ) {
-        currentGapIndex++
-        if (freeGaps[currentGapIndex]) {
-          gapPointer = freeGaps[currentGapIndex].startMins
-        }
-      }
-
-      const sessionStart = gapPointer
-      const sessionEnd = gapPointer + session.durationMinutes
-
-      items.push({
-        kind: "session",
-        id: session.id,
-        session,
-        startTime: minsToTime(sessionStart),
-        endTime: minsToTime(Math.min(1439, sessionEnd)),
-        startMins: sessionStart,
-      })
-
-      gapPointer = sessionEnd
-    }
-  }
-
-  return items.sort((a, b) => a.startMins - b.startMins)
+/** Today's date on the student's calendar (America/Sao_Paulo, D1), not the browser's UTC day. */
+function todayLocal(): string {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Sao_Paulo",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date())
 }
 
 export default function AutoSchedulePage() {
@@ -236,14 +140,15 @@ export default function AutoSchedulePage() {
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [error, setError] = useState<string | null>(null)
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
+  const [warningMessage, setWarningMessage] = useState<string | null>(null)
+  // D5: no routine registered, so the backend assumes a 23:00-07:00 sleep block.
+  const [usingDefaultSleep, setUsingDefaultSleep] = useState<boolean>(false)
 
   // Form state
   const [selectedExamId, setSelectedExamId] = useState<string>("")
   const [maxStudyHour, setMaxStudyHour] = useState<string>("22:00")
   const [sessionDurationMinutes, setSessionDurationMinutes] = useState<number>(45)
-  const [startDate, setStartDate] = useState<string>(
-    new Date().toISOString().split("T")[0]
-  )
+  const [startDate, setStartDate] = useState<string>(todayLocal())
 
   // Animation State
   const [isAnimating, setIsAnimating] = useState<boolean>(false)
@@ -267,6 +172,7 @@ export default function AutoSchedulePage() {
       setExams(examsData || [])
       setSchedules(schedulesData || [])
       setRoutineBlocks(availabilityData?.routineBlocks || [])
+      setUsingDefaultSleep(Boolean(availabilityData?.usingDefaultSleepBlock))
 
       if (examsData && examsData.length > 0 && !selectedExamId) {
         setSelectedExamId(examsData[0].id)
@@ -294,22 +200,41 @@ export default function AutoSchedulePage() {
       setError("Por favor, selecione uma prova.")
       return
     }
+    await runGeneration(selectedExamId, startDate)
+  }
 
+  // D7: the exam changed after this plan was made. Regenerating replaces it (the backend
+  // cancels the stale plan and creates the new one in a single transaction).
+  async function handleRegenerate() {
+    const examId = selectedSchedule?.examId ?? selectedSchedule?.exam?.id
+    if (!examId) {
+      setError("Não foi possível identificar a prova deste cronograma.")
+      return
+    }
+    await runGeneration(examId, todayLocal())
+  }
+
+  async function runGeneration(examId: string, from: string) {
     setError(null)
     setSuccessMessage(null)
+    setWarningMessage(null)
     setIsLoading(true)
 
     try {
       // 1. Call Backend API
       const newSchedule = await generateSchedule(
         {
-          examId: selectedExamId,
+          examId,
           sessionDurationMinutes,
-          startDate,
+          startDate: from,
           maxStudyHour,
         },
         impersonateUserId
       )
+
+      if (newSchedule.warnings?.includes("no_routine")) {
+        setUsingDefaultSleep(true)
+      }
 
       // 2. Start Satisfying Locked Animation Phase
       setIsLoading(false)
@@ -369,11 +294,20 @@ export default function AutoSchedulePage() {
         impersonateUserId
       )
       setSelectedSchedule(updated)
-      setSuccessMessage(
-        !currentAvailable
-          ? "Dia marcado como disponível!"
-          : "Dia marcado como livre! As sessões pendentes foram redistribuídas."
-      )
+      setWarningMessage(null)
+      const unplaced = updated.unplacedSessions?.length ?? 0
+      if (unplaced > 0) {
+        setSuccessMessage(null)
+        setWarningMessage(
+          `${pluralize(unplaced, "sessão não coube", "sessões não couberam")} em nenhum outro dia (respeitando o horário máximo e o limite diário) e ${unplaced === 1 ? "foi marcada" : "foram marcadas"} como pulada${unplaced === 1 ? "" : "s"}. Regenere o cronograma se quiser recolocá-las.`
+        )
+      } else {
+        setSuccessMessage(
+          !currentAvailable
+            ? "Dia marcado como disponível!"
+            : "Dia marcado como livre! As sessões pendentes foram redistribuídas."
+        )
+      }
     } catch (err: any) {
       setError(err.message || "Erro ao alterar dia.")
     } finally {
@@ -461,6 +395,46 @@ export default function AutoSchedulePage() {
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>Atenção</AlertTitle>
           <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+
+      {warningMessage && (
+        <Alert className="border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-300">
+          <AlertCircle className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+          <AlertTitle>Atenção</AlertTitle>
+          <AlertDescription>{warningMessage}</AlertDescription>
+        </Alert>
+      )}
+
+      {usingDefaultSleep && (
+        <Alert className="border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-300">
+          <AlertCircle className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+          <AlertTitle>Rotina não cadastrada</AlertTitle>
+          <AlertDescription>
+            Ainda não sabemos como é o seu dia, então estamos assumindo que você dorme das 23:00 às 07:00 e está livre no resto.{" "}
+            <Link href="/availability" className="underline font-medium">Cadastre sua rotina</Link> para um cronograma mais fiel.
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {selectedSchedule?.status === "active" && selectedSchedule.staleAt && (
+        <Alert className="border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-300">
+          <AlertCircle className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+          <AlertTitle>Cronograma desatualizado</AlertTitle>
+          <AlertDescription className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+            <span>
+              A data ou os tópicos da prova mudaram depois que este cronograma foi gerado. Regenere para que o plano reflita a prova atual; nada é alterado automaticamente.
+            </span>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={handleRegenerate}
+              disabled={isLoading || isAnimating}
+              className="gap-1 text-xs shrink-0"
+            >
+              <RefreshCw className="h-3.5 w-3.5" /> Regenerar cronograma
+            </Button>
+          </AlertDescription>
         </Alert>
       )}
 

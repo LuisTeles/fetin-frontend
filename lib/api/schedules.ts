@@ -34,6 +34,8 @@ export interface StudySession {
   durationMinutes: number;
   status: StudySessionStatus;
   completedAt?: string;
+  /** Wall-clock start ("HH:mm") stored by the backend; null for sessions created before it existed. */
+  plannedStartTime?: string | null;
 }
 
 export interface ScheduleDay {
@@ -68,6 +70,18 @@ export interface Schedule {
   days: ScheduleDay[];
   topicAllocations: ScheduleTopicAllocation[];
   createdAt?: string;
+  /** Set when the exam's date or topics changed after this plan was generated (D7). */
+  staleAt?: string | null;
+  /** Present on a freshly generated plan: "no_routine" means a default sleep block was assumed (D5). */
+  warnings?: string[];
+  /** Present on the response of switching a day off: sessions that fitted nowhere and were skipped. */
+  unplacedSessions?: {
+    id: string;
+    topicId: string;
+    sessionType: StudySessionType;
+    durationMinutes: number;
+    fromDayNumber: number;
+  }[];
 }
 
 export interface GenerateScheduleParams {
