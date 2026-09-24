@@ -1,5 +1,6 @@
 "use client"
 
+import { formatDateSafe } from "@/lib/format"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useEffect, useState } from "react"
 import { User as UserIcon, Calendar, Mail, ShieldAlert } from "lucide-react"
@@ -36,7 +37,7 @@ export function ProfilePanel() {
             }
 
             if (!response.ok || !payload.user) {
-                setError(payload.message ?? "Nao foi possivel carregar o perfil.")
+                setError(payload.message ?? "Não foi possível carregar o perfil.")
                 return
             }
 
@@ -107,7 +108,7 @@ export function ProfilePanel() {
 
                     <div className="flex items-center gap-2 text-xs text-muted-foreground">
                         <Calendar className="h-3.5 w-3.5" />
-                        <span>Cadastrado em {new Date(user.created_at).toLocaleDateString("pt-BR")}</span>
+                        <span>Cadastrado em {formatDateSafe(user.created_at)}</span>
                     </div>
                 </div>
 

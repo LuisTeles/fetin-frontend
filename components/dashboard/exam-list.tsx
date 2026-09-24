@@ -1,5 +1,6 @@
 "use client"
 
+import { formatDateSafe, pluralize } from "@/lib/format"
 import { ListSkeleton } from "@/components/skeletons/list-skeleton"
 import { useEffect, useState } from "react"
 import { useSearchParams } from "next/navigation"
@@ -85,7 +86,7 @@ export function ExamList({ onStatsChange }: ExamListProps) {
     }, [impersonateUserId])
 
     async function handleDelete(id: string, date: string, subjectName: string) {
-        const formattedDate = new Date(date + "T00:00:00").toLocaleDateString("pt-BR")
+        const formattedDate = formatDateSafe(date)
         const confirmed = window.confirm(
             `Deseja realmente excluir a prova de "${subjectName}" do dia ${formattedDate}?`
         )
@@ -118,13 +119,7 @@ export function ExamList({ onStatsChange }: ExamListProps) {
     }
 
     function formatDate(dateStr: string) {
-        // Parse date in local time to avoid timezone offset shifts
-        const date = new Date(dateStr + "T00:00:00")
-        return date.toLocaleDateString("pt-BR", {
-            day: "2-digit",
-            month: "2-digit",
-            year: "numeric",
-        })
+        return formatDateSafe(dateStr)
     }
 
     return (
@@ -222,7 +217,7 @@ export function ExamList({ onStatsChange }: ExamListProps) {
                                                         <BookOpen className="h-3 w-3" />
                                                         {exam.pending_topics_count === 0 
                                                             ? "Tudo concluído!" 
-                                                            : `${exam.pending_topics_count} tópicos pendentes`}
+                                                            : `${pluralize(exam.pending_topics_count, "tópico", "tópicos")} ${exam.pending_topics_count === 1 ? "pendente" : "pendentes"}`}
                                                     </span>
                                                 )}
                                             </div>

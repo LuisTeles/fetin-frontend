@@ -1,5 +1,7 @@
 "use client"
 
+import { formatExamLabel } from "@/lib/api/entities"
+import { formatDateTime } from "@/lib/format"
 import { DetailSkeleton } from "@/components/skeletons/detail-skeleton"
 import { useState, useEffect, useCallback } from "react"
 import { useParams, useRouter } from "next/navigation"
@@ -140,7 +142,7 @@ export default function SingleNotePage() {
 
     const entityLabel = note.subject?.name
         ?? note.topic?.name
-        ?? (note.exam ? `Prova – ${new Date(note.exam.examDate).toLocaleDateString("pt-BR")}` : null)
+        ?? (note.exam ? formatExamLabel(note.exam) : null)
 
     const entityIcon = note.subject ? (
         <BookOpen className="h-3.5 w-3.5 text-blue-500" />
@@ -278,11 +280,11 @@ export default function SingleNotePage() {
                         <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground pt-1 border-b border-border/40 pb-3">
                             <span className="flex items-center gap-1.5">
                                 <Calendar className="h-3.5 w-3.5" />
-                                Criada em {new Date(note.createdAt).toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+                                Criada em {formatDateTime(note.createdAt)}
                             </span>
                             {note.updatedAt !== note.createdAt && (
                                 <span className="flex items-center gap-1.5">
-                                    Atualizada {new Date(note.updatedAt).toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+                                    Atualizada {formatDateTime(note.updatedAt)}
                                 </span>
                             )}
                         </div>

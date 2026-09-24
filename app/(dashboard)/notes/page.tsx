@@ -1,5 +1,6 @@
 "use client"
 
+import { EmptyState } from "@/components/ui/empty-state"
 import { NotesSkeleton } from "@/components/skeletons/notes-skeleton"
 import { CountUp } from "@/components/ui/count-up"
 import { useState, useEffect, useCallback } from "react"
@@ -190,10 +191,29 @@ export default function NotesPage() {
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="p-3 pt-0 flex items-center justify-between">
-                        <CountUp className="text-2xl font-semibold tracking-tight num" value={tags.length} />
-                        <div className="rounded-md bg-muted p-1.5 text-muted-foreground">
-                            <TagIcon className="h-4 w-4" />
-                        </div>
+                        {tags.length === 0 ? (
+                            <EmptyState
+                                variant="inline"
+                                icon={<TagIcon />}
+                                message="Nenhuma tag ainda"
+                                action={
+                                    <button
+                                        type="button"
+                                        onClick={() => setView("tags")}
+                                        className="rounded-md border border-border px-2 py-1 text-[10px] font-medium hover:bg-muted transition-colors cursor-pointer"
+                                    >
+                                        Criar tag
+                                    </button>
+                                }
+                            />
+                        ) : (
+                            <>
+                                <CountUp className="text-2xl font-semibold tracking-tight num" value={tags.length} />
+                                <div className="rounded-md bg-muted p-1.5 text-muted-foreground">
+                                    <TagIcon className="h-4 w-4" />
+                                </div>
+                            </>
+                        )}
                     </CardContent>
                 </Card>
                 <Card className="col-span-2 sm:col-span-1">
@@ -203,10 +223,29 @@ export default function NotesPage() {
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="p-3 pt-0 flex items-center justify-between">
-                        <CountUp className="text-2xl font-semibold tracking-tight num" value={archivedCount} />
-                        <div className="rounded-md bg-muted p-1.5 text-muted-foreground">
-                            <Archive className="h-4 w-4" />
-                        </div>
+                        {archivedCount === 0 ? (
+                            <EmptyState
+                                variant="inline"
+                                icon={<Archive />}
+                                message="Nada arquivado"
+                                action={
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowArchived(true)}
+                                        className="rounded-md border border-border px-2 py-1 text-[10px] font-medium hover:bg-muted transition-colors cursor-pointer"
+                                    >
+                                        Ver arquivadas
+                                    </button>
+                                }
+                            />
+                        ) : (
+                            <>
+                                <CountUp className="text-2xl font-semibold tracking-tight num" value={archivedCount} />
+                                <div className="rounded-md bg-muted p-1.5 text-muted-foreground">
+                                    <Archive className="h-4 w-4" />
+                                </div>
+                            </>
+                        )}
                     </CardContent>
                 </Card>
             </div>

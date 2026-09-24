@@ -72,8 +72,8 @@ export function EffectivenessPanel({ data }: { data: EffectivenessSummary }) {
                 <CardTitle className="text-sm font-bold">Eficácia das Revisões</CardTitle>
                 <CardDescription className="text-pretty text-xs text-muted-foreground">
                     Em que ponto da curva você revisa, por tipo de sessão —{" "}
-                    <span className="tabular-nums">{data.totalReviews}</span> revisões
-                    registradas. O alvo do método é revisar por volta de 50% de retenção.
+                    <span className="tabular-nums">{data.totalReviews}</span>{" "}
+                    {data.totalReviews === 1 ? "revisão registrada" : "revisões registradas"}. O alvo do método é revisar por volta de 50% de retenção.
                 </CardDescription>
             </CardHeader>
 

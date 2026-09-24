@@ -1,5 +1,6 @@
 "use client"
 
+import { formatDateSafe } from "@/lib/format"
 import { DetailSkeleton } from "@/components/skeletons/detail-skeleton"
 import { use, useEffect, useState, FormEvent } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
@@ -368,9 +369,9 @@ export default function SubjectDetailPage({ params }: SubjectDetailPageProps) {
                                         <div className="space-y-0.5">
                                             <p className="text-xs font-bold text-danger flex items-center gap-0.5">
                                                 <Clock className="w-3 h-3" />
-                                                {new Date(exam.exam_date + "T00:00:00").toLocaleDateString("pt-BR")}
+                                                {formatDateSafe(exam.exam_date)}
                                             </p>
-                                            <p className="text-[10px] text-muted-foreground">{exam.topics.length} tópicos associados</p>
+                                            <p className="text-[10px] text-muted-foreground">{exam.topics.length === 1 ? "1 tópico associado" : `${exam.topics.length} tópicos associados`}</p>
                                         </div>
                                         {exam.pending_topics_count > 0 ? (
                                             <Badge variant="outline" className="text-[9px] scale-90 border-warning/20 text-warning bg-warning/5">

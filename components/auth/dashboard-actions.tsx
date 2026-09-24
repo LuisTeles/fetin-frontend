@@ -19,7 +19,7 @@ export function DashboardActions() {
 
     async function deleteAccount() {
         const confirmed = window.confirm(
-            "Deseja realmente excluir sua conta? Esta acao e irreversivel."
+            "Deseja realmente excluir sua conta? Esta ação é irreversível."
         )
 
         if (!confirmed) {
@@ -39,7 +39,7 @@ export function DashboardActions() {
         }
 
         setIsDeletingAccount(false)
-        window.alert("Nao foi possivel excluir a conta. Tente novamente.")
+        window.alert("Não foi possível excluir a conta. Tente novamente.")
     }
 
     return (

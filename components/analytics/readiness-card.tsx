@@ -1,4 +1,4 @@
-import { formatDate, formatPercent } from "@/lib/format"
+import { formatDate, formatPercent, pluralize } from "@/lib/format"
 import {
     Card,
     CardContent,
@@ -83,8 +83,7 @@ export function ReadinessCard({ exam }: { exam: ExamReadiness }) {
                 <CardDescription className="text-xs text-muted-foreground">
                     Prova em {formatDate(exam.examDate)} ·{" "}
                     <span className="tabular-nums">{exam.daysToExam}</span>{" "}
-                    {exam.daysToExam === 1 ? "dia" : "dias"} · {exam.topics.length}{" "}
-                    {exam.topics.length === 1 ? "tópico" : "tópicos"}
+                    {exam.daysToExam === 1 ? "dia" : "dias"} · {pluralize(exam.topics.length, "tópico", "tópicos")}
                 </CardDescription>
             </CardHeader>
 

@@ -1,5 +1,6 @@
 "use client"
 
+import { formatDateSafe, pluralize } from "@/lib/format"
 import { useEffect, useState } from "react"
 import { useSearchParams } from "next/navigation"
 import {
@@ -531,7 +532,7 @@ export default function AutoSchedulePage() {
                     const examDateStr = ex.exam_date || ex.examDate?.split("T")[0] || ""
                     return (
                       <option key={ex.id} value={ex.id}>
-                        {subjectName} — {examDateStr}
+                        {subjectName} — {formatDateSafe(examDateStr, "sem data")}
                       </option>
                     )
                   })}
@@ -595,7 +596,7 @@ export default function AutoSchedulePage() {
                   </CardTitle>
                 </div>
                 <CardDescription className="text-xs mt-0.5">
-                  Período: {selectedSchedule.startDate?.split("T")[0]} até {selectedSchedule.endDate?.split("T")[0]} ({selectedSchedule.totalDays} dias)
+                  Período: {formatDateSafe(selectedSchedule.startDate)} até {formatDateSafe(selectedSchedule.endDate)} ({pluralize(selectedSchedule.totalDays, "dia", "dias")})
                 </CardDescription>
               </div>
 
@@ -714,10 +715,10 @@ export default function AutoSchedulePage() {
                         {!day.isAvailable && <span className="text-[10px] text-destructive">Folga</span>}
                       </div>
                       <div className="text-[10px] text-muted-foreground mt-1">
-                        {day.studyDate?.split("T")[0]}
+                        {formatDateSafe(day.studyDate)}
                       </div>
                       <div className="text-[10px] text-muted-foreground mt-0.5">
-                        {totalCount > 0 ? `${completedCount}/${totalCount} sessões` : "Sem sessões"}
+                        {totalCount > 0 ? `${completedCount}/${totalCount} ${totalCount === 1 ? "sessão" : "sessões"}` : "Sem sessões"}
                       </div>
                     </button>
                   )
@@ -730,7 +731,7 @@ export default function AutoSchedulePage() {
                   <CardHeader className="p-4 border-b border-border/40 flex flex-row items-center justify-between">
                     <div>
                       <CardTitle className="text-sm font-bold flex items-center gap-2">
-                        <span>Dia {activeDay.dayNumber} — {activeDay.studyDate?.split("T")[0]}</span>
+                        <span>Dia {activeDay.dayNumber} — {formatDateSafe(activeDay.studyDate)}</span>
                         {!activeDay.isAvailable && (
                           <Badge variant="outline" className="bg-destructive/10 text-destructive border-destructive/30">
                             Dia Livre (Sem Sessões)
@@ -887,7 +888,7 @@ export default function AutoSchedulePage() {
                       <div className="flex items-center justify-between font-semibold">
                         <span>{alloc.topic?.name}</span>
                         <span className="text-muted-foreground text-[11px]">
-                          {alloc.sessionsCompleted} de {alloc.totalSessionsAllocated} sessões concluídas ({progressPct}%)
+                          {alloc.sessionsCompleted} de {alloc.totalSessionsAllocated} {alloc.totalSessionsAllocated === 1 ? "sessão concluída" : "sessões concluídas"} ({progressPct}%)
                         </span>
                       </div>
                       <div className="w-full bg-muted rounded-full h-2 overflow-hidden">

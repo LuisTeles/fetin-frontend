@@ -46,7 +46,7 @@ export function LoginForm() {
             | ApiError
 
         if (!response.ok) {
-            setError(payload.message ?? "Nao foi possivel fazer login.")
+            setError(payload.message ?? "Não foi possível fazer login.")
             setIsLoading(false)
             return
         }
@@ -112,7 +112,7 @@ export function LoginForm() {
                     </Button>
 
                     <p className="text-center text-sm text-muted-foreground">
-                        Ainda nao tem conta?{" "}
+                        Ainda não tem conta?{" "}
                         <Link className="font-medium text-foreground underline" href="/signup">
                             Criar conta
                         </Link>

@@ -1,5 +1,6 @@
 "use client"
 
+import { formatDateSafe } from "@/lib/format"
 import { useEffect, useState } from "react"
 import { Search, UserCheck, Shield, Clock, Mail, ShieldAlert } from "lucide-react"
 import { useRouter } from "next/navigation"
@@ -158,7 +159,7 @@ export default function AdminUsersPage() {
                                                     </span>
                                                     <span className="flex items-center gap-1">
                                                         <Clock className="h-3.5 w-3.5" />
-                                                        Cadastrado em {new Date(user.created_at).toLocaleDateString("pt-BR")}
+                                                        Cadastrado em {formatDateSafe(user.created_at)}
                                                     </span>
                                                 </div>
                                             </div>

@@ -10,6 +10,7 @@ import {
     apiGetSubjects,
     apiGetTopics,
     apiGetExams,
+    formatExamLabel,
 } from "@/lib/api/entities"
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -51,14 +52,6 @@ const TYPE_CONFIG: Record<
     },
 }
 
-function formatExamLabel(exam: ExamEntity): string {
-    const date = new Date(exam.examDate).toLocaleDateString("pt-BR", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-    })
-    return exam.subject?.name ? `${exam.subject.name} — ${date}` : `Prova ${date}`
-}
 
 // ─── Component ────────────────────────────────────────────────────────────────
 

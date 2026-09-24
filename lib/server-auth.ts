@@ -146,7 +146,7 @@ export async function refreshTokensFromCookie(): Promise<{
 
     if (!payload?.tokens?.access_token || !rotatedToken) {
         await clearAuthCookies()
-        return { ok: false, error: "Resposta de refresh invalida." }
+        return { ok: false, error: "Resposta de refresh inválida." }
     }
 
     // The backend rotates the refresh token on every use, so store the new one.

@@ -1,5 +1,6 @@
 "use client"
 
+import { formatExamLabel } from "@/lib/api/entities"
 import { useState, useEffect, useRef, useCallback } from "react"
 import { Eye, Pencil, Loader2, BookOpen, Tag as TagIcon, Link2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -62,7 +63,7 @@ export function NoteForm({ note, tags, notes = [], onSuccess, onCancel, compact 
     const initialLabel =
         note?.subject?.name ??
         note?.topic?.name ??
-        (note?.exam ? new Date(note.exam.examDate).toLocaleDateString("pt-BR") : "")
+        (note?.exam ? formatExamLabel(note.exam) : "")
 
     const [selectedEntity, setSelectedEntity] = useState<SelectedEntity>({
         type: initialEntityType,

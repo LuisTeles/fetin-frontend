@@ -1,5 +1,6 @@
 "use client"
 
+import { formatDateSafe } from "@/lib/format"
 import { useEffect, useState } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 import { BookOpen, Search, Plus, Trash2, Edit, ArrowRight, BookOpenCheck } from "lucide-react"
@@ -183,7 +184,7 @@ export default function SubjectsPage() {
                                             {subject.name}
                                         </CardTitle>
                                         <CardDescription className="text-[10px] text-muted-foreground">
-                                            Criada em {subject.created_at ? new Date(subject.created_at).toLocaleDateString("pt-BR") : "N/A"}
+                                            Criada em {subject.created_at ? formatDateSafe(subject.created_at) : "N/A"}
                                         </CardDescription>
                                     </div>
                                     {!isImpersonating && (

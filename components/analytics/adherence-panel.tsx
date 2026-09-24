@@ -117,7 +117,8 @@ export function AdherencePanel({ data }: { data: AdherenceSummary }) {
                 <CardTitle className="text-sm font-bold">Aderência ao Cronograma</CardTitle>
                 <CardDescription className="text-pretty text-xs text-muted-foreground">
                     Do que foi planejado, quanto realmente aconteceu — nos últimos{" "}
-                    <span className="tabular-nums">{data.windowDays}</span> dias. Só dias já
+                    <span className="tabular-nums">{data.windowDays}</span>{" "}
+                    {data.windowDays === 1 ? "dia" : "dias"}. Só dias já
                     vencidos entram na conta: uma sessão futura ainda não é uma falha.
                 </CardDescription>
             </CardHeader>

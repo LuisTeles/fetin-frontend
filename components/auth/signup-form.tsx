@@ -42,7 +42,7 @@ export function SignupForm() {
         setError(null)
 
         if (!validation.valid) {
-            setError("A senha nao atende aos requisitos minimos de seguranca.")
+            setError("A senha não atende aos requisitos mínimos de segurança.")
             return
         }
 
@@ -61,7 +61,7 @@ export function SignupForm() {
         const payload = (await response.json().catch(() => ({}))) as ApiResponse
 
         if (!response.ok) {
-            setError(payload.message ?? "Nao foi possivel criar a conta.")
+            setError(payload.message ?? "Não foi possível criar a conta.")
             setIsLoading(false)
             return
         }
@@ -123,7 +123,7 @@ export function SignupForm() {
 
                     {!validation.valid && password.length > 0 ? (
                         <Alert variant="destructive">
-                            <AlertTitle>Senha invalida</AlertTitle>
+                            <AlertTitle>Senha inválida</AlertTitle>
                             <AlertDescription>
                                 Revise os requisitos antes de continuar.
                             </AlertDescription>
@@ -142,7 +142,7 @@ export function SignupForm() {
                     </Button>
 
                     <p className="text-center text-sm text-muted-foreground">
-                        Ja possui conta?{" "}
+                        Já possui conta?{" "}
                         <Link className="font-medium text-foreground underline" href="/login">
                             Fazer login
                         </Link>

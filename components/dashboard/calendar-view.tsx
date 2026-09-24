@@ -14,6 +14,7 @@ import {
     Clock, 
     Trash2, 
     Info, 
+    ChevronDown,
     Settings,
     CheckCircle,
     X,
@@ -25,6 +26,10 @@ import { Badge } from "@/components/ui/badge"
 import { SlidingIndicator } from "@/components/ui/sliding-indicator"
 import { fetchAvailabilitySchedule, RoutineBlock } from "@/lib/api/availability"
 import { TaskForm } from "./task-form"
+import { formatTime, pluralize } from "@/lib/format"
+
+const MAX_MONTH_CHIPS = 3
+const HELP_STORAGE_KEY = "fetin:calendar-help"
 
 // Types matching database schemas
 type Task = {
@@ -71,6 +76,22 @@ export function CalendarView({ onStatsChange }: CalendarViewProps) {
 
     // Date navigation states
     const [currentDate, setCurrentDate] = useState(new Date())
+    // Instructions box: open on the first visit, then remembers the user's last choice.
+    const [helpOpen, setHelpOpen] = useState(true)
+    useEffect(() => {
+        try {
+            const saved = localStorage.getItem(HELP_STORAGE_KEY)
+            if (saved === null) localStorage.setItem(HELP_STORAGE_KEY, "closed")
+            else setHelpOpen(saved === "open")
+        } catch {}
+    }, [])
+    const toggleHelp = () => {
+        const next = !helpOpen
+        setHelpOpen(next)
+        try {
+            localStorage.setItem(HELP_STORAGE_KEY, next ? "open" : "closed")
+        } catch {}
+    }
     const [viewMode, setViewMode] = useState<"month" | "week" | "day">("month")
 
     // Data states
@@ -306,6 +327,12 @@ export function CalendarView({ onStatsChange }: CalendarViewProps) {
         return { dayTasks, dayExams, daySessions, dayRoutineBlocks }
     }
 
+    const openDay = (dateStr: string) => {
+        const [y, m, d] = dateStr.split("-").map(Number)
+        setCurrentDate(new Date(y, m - 1, d))
+        setViewMode("day")
+    }
+
     // MONTH VIEW GENERATION LOGIC
     const renderMonthGrid = () => {
         const year = currentDate.getFullYear()
@@ -372,10 +399,15 @@ export function CalendarView({ onStatsChange }: CalendarViewProps) {
                     return (
                         <div 
                             key={index} 
-                            onClick={() => {
-                                const [y, m, d] = cell.dateStr.split("-").map(Number)
-                                setCurrentDate(new Date(y, m - 1, d))
-                                setViewMode("day")
+                            role="button"
+                            tabIndex={0}
+                            aria-label={`Abrir dia ${cell.dayNum}`}
+                            onClick={() => openDay(cell.dateStr)}
+                            onKeyDown={(e) => {
+                                if (e.target === e.currentTarget && (e.key === "Enter" || e.key === " ")) {
+                                    e.preventDefault()
+                                    openDay(cell.dateStr)
+                                }
                             }}
                             className={`min-h-[100px] p-1.5 bg-background border border-border/30 flex flex-col gap-1 transition-all hover:bg-muted/10 cursor-pointer group ${
                                 !cell.isCurrentMonth ? "opacity-40 bg-muted/5" : ""
@@ -401,87 +433,105 @@ export function CalendarView({ onStatsChange }: CalendarViewProps) {
                                 </button>
                             </div>
 
-                            {/* Events List */}
-                            <div className="flex-1 space-y-1 overflow-y-auto max-h-[80px] scrollbar-thin select-none">
-                                {/* Provas (Exams) */}
-                                {dayExams.map(exam => {
+                            {/* Events List — first 3 chips, then "+N mais" */}
+                            {(() => {
+                                const chips: React.ReactNode[] = []
+                                for (const exam of dayExams) {
                                     const pct = getExamProgressPercentage(exam)
-                                    return (
-                                        <div 
-                                            key={exam.id} 
+                                    chips.push(
+                                        <div
+                                            key={`e-${exam.id}`}
                                             onClick={(e) => {
                                                 e.stopPropagation()
                                                 window.location.href = `/exams?id=${exam.id}`
                                             }}
-                                            className={`text-[9px] px-1 py-0.5 rounded-sm bg-rose-500/10 text-rose-700 dark:text-rose-300 font-semibold truncate hover:bg-rose-500/20 flex flex-col gap-0.5 ${getExamProgressBorder(exam)}`}
+                                            className="text-[9px] px-1 py-0.5 rounded-sm bg-event-exam/10 text-foreground font-semibold truncate hover:bg-event-exam/20 flex items-center gap-0.5 border-l-2 border-event-exam cursor-pointer"
                                             title={`Prova: ${exam.subject_name} (${pct}% concluído)`}
                                         >
-                                            <span className="font-bold flex items-center gap-0.5">
-                                                <BookOpen className="w-2.5 h-2.5 shrink-0" />
-                                                PROVA: {exam.subject_name}
-                                            </span>
-                                            <span className="text-[8px] opacity-80">{pct}% Estudado</span>
+                                            <BookOpen className="w-2.5 h-2.5 shrink-0 text-event-exam" />
+                                            <span className="truncate">Prova: {exam.subject_name}</span>
                                         </div>
                                     )
-                                })}
-
-                                {/* Compromissos de Rotina (Routine Blocks) */}
-                                {dayRoutineBlocks.map(block => (
-                                    <div 
-                                        key={block.id || `${block.title}-${block.startTime}`}
-                                        onClick={(e) => {
-                                            e.stopPropagation()
-                                            window.location.href = `/availability`
-                                        }}
-                                        className="text-[9px] px-1 py-0.5 rounded-sm bg-amber-500/15 text-amber-800 dark:text-amber-300 font-semibold truncate flex items-center gap-0.5 border-l-2 border-amber-500 hover:bg-amber-500/25 cursor-pointer"
-                                        title={`Compromisso de Rotina: ${block.title} (${block.startTime} - ${block.endTime})`}
-                                    >
-                                        <Clock className="w-2.5 h-2.5 shrink-0 text-amber-600 dark:text-amber-400" />
-                                        <span className="truncate">{block.title}</span>
-                                    </div>
-                                ))}
-
-                                {/* Custom Tasks */}
-                                {dayTasks.map(task => (
-                                    <div 
-                                        key={task.id}
-                                        onClick={(e) => {
-                                            e.stopPropagation()
-                                            openEditModal(task)
-                                        }}
-                                        className="text-[9px] px-1 py-0.5 rounded-sm text-foreground/90 font-medium truncate flex items-center justify-between group/item border-l-2"
-                                        style={{ backgroundColor: `${task.color}15`, borderLeftColor: task.color }}
-                                        title={`${task.title} [${task.category.toUpperCase()}]`}
-                                    >
-                                        <span className="truncate flex items-center gap-0.5">
-                                            <CheckSquare className="w-2.5 h-2.5 shrink-0" style={{ color: task.color }} />
-                                            {task.title}
-                                        </span>
-                                        <button 
-                                            onClick={(e) => handleDeleteTask(task.id, e)}
-                                            className="opacity-0 group-hover/item:opacity-100 hover:text-red-500 text-muted-foreground p-0.5 rounded-sm transition-opacity"
+                                }
+                                for (const block of dayRoutineBlocks) {
+                                    chips.push(
+                                        <div
+                                            key={`r-${block.id || `${block.title}-${block.startTime}`}`}
+                                            onClick={(e) => {
+                                                e.stopPropagation()
+                                                window.location.href = `/availability`
+                                            }}
+                                            className="text-[9px] px-1 py-0.5 rounded-sm bg-event-routine/15 text-foreground font-semibold truncate flex items-center gap-0.5 border-l-2 border-event-routine hover:bg-event-routine/25 cursor-pointer"
+                                            title={`Compromisso de Rotina: ${block.title} (${block.startTime} - ${block.endTime})`}
                                         >
-                                            <X className="w-2 h-2" />
-                                        </button>
+                                            <Clock className="w-2.5 h-2.5 shrink-0 text-event-routine" />
+                                            <span className="truncate">{block.title}</span>
+                                        </div>
+                                    )
+                                }
+                                for (const session of daySessions) {
+                                    chips.push(
+                                        <div
+                                            key={`s-${session.id}`}
+                                            onClick={(e) => {
+                                                e.stopPropagation()
+                                                window.location.href = `/auto-schedule`
+                                            }}
+                                            className="text-[9px] px-1 py-0.5 rounded-sm bg-event-session/10 text-foreground truncate flex items-center gap-0.5 border-l-2 border-event-session hover:bg-event-session/20 cursor-pointer"
+                                            title={`Estudo: ${session.topicName} (${session.durationMinutes} min)`}
+                                        >
+                                            <BookOpenCheck className="w-2.5 h-2.5 shrink-0 text-event-session" />
+                                            <span className="truncate font-medium">{session.topicName}</span>
+                                        </div>
+                                    )
+                                }
+                                for (const task of dayTasks) {
+                                    chips.push(
+                                        <div
+                                            key={`t-${task.id}`}
+                                            onClick={(e) => {
+                                                e.stopPropagation()
+                                                openEditModal(task)
+                                            }}
+                                            className="text-[9px] px-1 py-0.5 rounded-sm text-foreground/90 font-medium truncate flex items-center justify-between group/item border-l-2 cursor-pointer"
+                                            style={{ backgroundColor: `${task.color}15`, borderLeftColor: task.color }}
+                                            title={`${task.title} [${task.category.toUpperCase()}]`}
+                                        >
+                                            <span className="truncate flex items-center gap-0.5">
+                                                <CheckSquare className="w-2.5 h-2.5 shrink-0" style={{ color: task.color }} />
+                                                {task.title}
+                                            </span>
+                                            <button
+                                                type="button"
+                                                aria-label="Excluir tarefa"
+                                                onClick={(e) => handleDeleteTask(task.id, e)}
+                                                className="opacity-0 group-hover/item:opacity-100 focus-visible:opacity-100 hover:text-red-500 text-muted-foreground p-0.5 rounded-sm transition-opacity"
+                                            >
+                                                <X className="w-2 h-2" />
+                                            </button>
+                                        </div>
+                                    )
+                                }
+                                const visible = chips.slice(0, MAX_MONTH_CHIPS)
+                                const hidden = chips.length - visible.length
+                                return (
+                                    <div className="flex-1 space-y-1 select-none">
+                                        {visible}
+                                        {hidden > 0 && (
+                                            <button
+                                                type="button"
+                                                onClick={(e) => {
+                                                    e.stopPropagation()
+                                                    openDay(cell.dateStr)
+                                                }}
+                                                className="text-[9px] font-semibold text-muted-foreground hover:text-foreground px-1 cursor-pointer"
+                                            >
+                                                +{hidden} mais
+                                            </button>
+                                        )}
                                     </div>
-                                ))}
-
-                                {/* Study Sessions */}
-                                {daySessions.map(session => (
-                                    <div 
-                                        key={session.id}
-                                        onClick={(e) => {
-                                            e.stopPropagation()
-                                            window.location.href = `/auto-schedule`
-                                        }}
-                                        className="text-[9px] px-1 py-0.5 rounded-sm bg-blue-500/10 text-blue-700 dark:text-blue-300 truncate flex items-center gap-0.5 border-l-2 border-blue-500 hover:bg-blue-500/20 cursor-pointer"
-                                        title={`Estudo: ${session.topicName} (${session.durationMinutes} min)`}
-                                    >
-                                        <Clock className="w-2.5 h-2.5 shrink-0 text-blue-500" />
-                                        <span className="truncate font-medium">{session.topicName}</span>
-                                    </div>
-                                ))}
-                            </div>
+                                )
+                            })()}
                         </div>
                     )
                 })}
@@ -559,7 +609,7 @@ export function CalendarView({ onStatsChange }: CalendarViewProps) {
                                             </div>
                                             <div className="flex justify-between items-center text-[10px] opacity-90 mt-1">
                                                 <span>{pct}% Concluído</span>
-                                                <span className="font-semibold">{exam.topics.length} tópicos</span>
+                                                <span className="font-semibold">{pluralize(exam.topics.length, "tópico", "tópicos")}</span>
                                             </div>
                                         </div>
                                     )
@@ -605,7 +655,7 @@ export function CalendarView({ onStatsChange }: CalendarViewProps) {
                                         <div className="flex items-center justify-between mt-1 text-[9px] text-muted-foreground border-t pt-1">
                                             <span className="flex items-center gap-0.5">
                                                 <Clock className="w-2.5 h-2.5" />
-                                                {new Date(task.date).toLocaleTimeString("pt-BR", {hour: '2-digit', minute:'2-digit'})}
+                                                {formatTime(task.date)}
                                             </span>
                                             <button 
                                                 onClick={(e) => handleDeleteTask(task.id, e)}
@@ -718,7 +768,7 @@ export function CalendarView({ onStatsChange }: CalendarViewProps) {
                                         </Badge>
                                         <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                                             <Clock className="w-3.5 h-3.5" />
-                                            {new Date(task.date).toLocaleTimeString("pt-BR", {hour: '2-digit', minute:'2-digit'})}
+                                            {formatTime(task.date)}
                                         </div>
                                     </div>
                                 </CardHeader>
@@ -838,19 +888,32 @@ export function CalendarView({ onStatsChange }: CalendarViewProps) {
             {/* INSTRUCTIONS PANEL */}
             <Alert className="bg-muted/30 border-border">
                 <Info className="h-4 w-4 shrink-0 text-muted-foreground" />
-                <AlertTitle className="text-xs font-bold flex items-center gap-1">
-                    Instruções do Calendário
+                <AlertTitle className="text-xs font-bold">
+                    <button
+                        type="button"
+                        onClick={toggleHelp}
+                        aria-expanded={helpOpen}
+                        aria-controls="calendar-help"
+                        className="flex w-full items-center justify-between gap-2 rounded-sm text-left cursor-pointer"
+                    >
+                        Instruções do Calendário
+                        <ChevronDown className={`h-3.5 w-3.5 text-muted-foreground transition-transform ${helpOpen ? "rotate-180" : ""}`} />
+                    </button>
                 </AlertTitle>
-                <AlertDescription className="text-[11px] text-muted-foreground space-y-1 mt-1 leading-relaxed">
-                    <p>• Clique em qualquer quadrado do dia para criar uma tarefa personalizada.</p>
-                    <p>• **Compromissos da Rotina**: Atividades fixas (ex: Trabalho, Gym, Aulas) definidas na sua disponibilidade repetem-se semanalmente.</p>
-                    <p>• **Legenda de Provas**: Provas acadêmicas importantes exibem uma borda de progresso correspondente aos tópicos estudados.</p>
-                    <div className="flex items-center gap-3 mt-1.5 flex-wrap">
-                        <span className="flex items-center gap-1 text-[10px] font-medium"><span className="w-2.5 h-2.5 bg-red-500 rounded-xs shrink-0"></span> Baixo Progresso (&lt;30%)</span>
-                        <span className="flex items-center gap-1 text-[10px] font-medium"><span className="w-2.5 h-2.5 bg-amber-500 rounded-xs shrink-0"></span> Médio Progresso (30%-70%)</span>
-                        <span className="flex items-center gap-1 text-[10px] font-medium"><span className="w-2.5 h-2.5 bg-emerald-500 rounded-xs shrink-0"></span> Alto Progresso (&gt;70%)</span>
-                    </div>
-                </AlertDescription>
+                {helpOpen && (
+                    <AlertDescription id="calendar-help" className="text-[11px] text-muted-foreground mt-1 leading-relaxed">
+                        <ul className="space-y-1 list-disc pl-4 marker:text-muted-foreground/60">
+                            <li>Clique em qualquer quadrado do dia para criar uma tarefa personalizada.</li>
+                            <li><strong className="font-semibold text-foreground">Compromissos da Rotina</strong>: atividades fixas (ex: Trabalho, Gym, Aulas) definidas na sua disponibilidade repetem-se semanalmente.</li>
+                            <li><strong className="font-semibold text-foreground">Legenda de Provas</strong>: provas acadêmicas importantes exibem uma borda de progresso correspondente aos tópicos estudados.</li>
+                        </ul>
+                        <div className="flex items-center gap-3 mt-2 flex-wrap">
+                            <span className="flex items-center gap-1 text-[10px] font-medium"><span className="w-2.5 h-2.5 bg-red-500 rounded-xs shrink-0"></span> Baixo Progresso (&lt;30%)</span>
+                            <span className="flex items-center gap-1 text-[10px] font-medium"><span className="w-2.5 h-2.5 bg-amber-500 rounded-xs shrink-0"></span> Médio Progresso (30%-70%)</span>
+                            <span className="flex items-center gap-1 text-[10px] font-medium"><span className="w-2.5 h-2.5 bg-emerald-500 rounded-xs shrink-0"></span> Alto Progresso (&gt;70%)</span>
+                        </div>
+                    </AlertDescription>
+                )}
             </Alert>
 
             {/* CONTROL PANEL */}

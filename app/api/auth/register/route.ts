@@ -25,14 +25,14 @@ export async function POST(request: Request) {
     const payload = await safeJson<AuthSuccessResponse>(response)
 
     if (!payload?.tokens || !payload?.user) {
-        return toJsonError(502, "Resposta invalida do backend.")
+        return toJsonError(502, "Resposta inválida do backend.")
     }
 
     // The refresh token arrives only as a Set-Cookie on the backend response.
     const refreshToken = extractBackendRefreshToken(response)
 
     if (!refreshToken) {
-        return toJsonError(502, "Backend nao retornou o cookie de refresh.")
+        return toJsonError(502, "Backend não retornou o cookie de refresh.")
     }
 
     await writeAuthCookies(payload.tokens, refreshToken)

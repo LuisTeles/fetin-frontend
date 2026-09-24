@@ -18,6 +18,9 @@
   --color-warning: var(--warning);
   --color-danger: var(--danger);
   --color-info: var(--info);
+  --color-event-exam: var(--event-exam);
+  --color-event-routine: var(--event-routine);
+  --color-event-session: var(--event-session);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono);
@@ -109,6 +112,10 @@
   --warning: var(--status-warning);
   --danger: var(--status-critical);
   --info: oklch(0.62 0.16 240);
+  /* Calendar event kinds (left accent border + tint). */
+  --event-exam: oklch(0.6 0.21 20);
+  --event-routine: oklch(0.7 0.16 70);
+  --event-session: oklch(0.55 0.2 260);
 
   --foreground: var(--text);
   --card: var(--surface);
@@ -164,6 +171,9 @@
   --brand-foreground: oklch(0.16 0.01 265);
   --brand-subtle: oklch(0.68 0.16 277 / 15%);
   --info: oklch(0.72 0.13 240);
+  --event-exam: oklch(0.72 0.17 20);
+  --event-routine: oklch(0.8 0.14 80);
+  --event-session: oklch(0.72 0.15 260);
 
   --primary: oklch(0.94 0.005 265);
   --primary-foreground: oklch(0.21 0.02 265);
@@ -180,6 +190,12 @@
   }
   html {
     @apply font-sans;
+  }
+  /* Keyboard focus: one visible brand ring on every interactive element. shadcn controls
+     bring their own ring; :where() keeps this at zero specificity so they still win. */
+  :where(a, button, summary, select, textarea, input, [role="button"], [role="tab"], [tabindex]:not([tabindex="-1"])):focus-visible {
+    outline: 2px solid var(--brand);
+    outline-offset: 2px;
   }
   /* Autofill paints its own opaque background; keep inputs on the surface colour. */
   input:-webkit-autofill,

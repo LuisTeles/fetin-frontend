@@ -1,3 +1,4 @@
+import { pluralize } from "@/lib/format"
 import type {
     BulletDatum,
     DivergingDatum,
@@ -241,7 +242,7 @@ export async function RetentionCurveWidget({ userId }: WidgetProps) {
                                 <li key={c.topicId} className="flex flex-wrap gap-x-2">
                                     <span className="truncate font-medium text-foreground">{c.topicName}</span>
                                     <span className="tabular-nums">
-                                        {c.reviews.length} {c.reviews.length === 1 ? "revisão" : "revisões"}
+                                        {pluralize(c.reviews.length, "revisão", "revisões")}
                                     </span>
                                     <span aria-hidden="true">·</span>
                                     <span className="tabular-nums">agora {Math.round(c.current * 100)}%</span>

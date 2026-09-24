@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Fetin Frontend",
-  description: "Dashboard MVP para validacao de endpoints de autenticacao",
+  description: "Dashboard MVP para validação de endpoints de autenticação",
 }
 
 export default function RootLayout({

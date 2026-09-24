@@ -35,7 +35,7 @@ export function SubjectForm({ subject, onSuccess, onCancel }: SubjectFormProps) 
         setError(null)
 
         if (!name.trim()) {
-            setError("O nome da disciplina e obrigatorio.")
+            setError("O nome da disciplina é obrigatório.")
             setIsLoading(false)
             return
         }
@@ -62,7 +62,7 @@ export function SubjectForm({ subject, onSuccess, onCancel }: SubjectFormProps) 
             const payload = await response.json().catch(() => ({}))
 
             if (!response.ok) {
-                setError(payload.message ?? "Nao foi possivel salvar a disciplina.")
+                setError(payload.message ?? "Não foi possível salvar a disciplina.")
                 setIsLoading(false)
                 return
             }

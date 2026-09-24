@@ -1,3 +1,5 @@
+import { formatDateSafe } from "@/lib/format"
+
 // ─── Shared entity types for the Notes linking system ─────────────────────────
 
 export interface SubjectEntity {
@@ -21,6 +23,13 @@ export interface ExamEntity {
     examDate: string
     createdAt: string
     subject?: { name: string }
+}
+
+/** "Matemática — 24/09/2026"; never renders "Invalid Date". */
+export function formatExamLabel(exam: { examDate?: string; subject?: { name: string } }): string {
+    const date = formatDateSafe(exam.examDate, "")
+    if (exam.subject?.name) return date ? `${exam.subject.name} — ${date}` : exam.subject.name
+    return date ? `Prova ${date}` : "Prova (sem data)"
 }
 
 // ─── API helpers ───────────────────────────────────────────────────────────────
@@ -53,7 +62,16 @@ export async function apiGetExams(): Promise<ExamEntity[]> {
         throw new Error(err.message ?? "Erro ao carregar provas.")
     }
     const data = await res.json()
-    return (data.exams ?? []) as ExamEntity[]
+    // The exams route is snake_case (exam_date, subject_name); normalise to ExamEntity here.
+    return ((data.exams ?? []) as Array<Record<string, unknown>>).map((e) => ({
+        id: e.id as string,
+        subjectId: (e.subjectId ?? e.subject_id) as string,
+        examDate: (e.examDate ?? e.exam_date) as string,
+        createdAt: (e.createdAt ?? e.created_at) as string,
+        subject:
+            (e.subject as { name: string } | undefined) ??
+            (e.subject_name ? { name: e.subject_name as string } : undefined),
+    }))
 }
 
 // ─── Unified search for @ mention popover ─────────────────────────────────────
@@ -106,10 +124,8 @@ export async function apiSearchMentionEntities(
     // Exams
     if (exams.status === "fulfilled") {
         for (const e of exams.value) {
-            const label = e.subject?.name
-                ? `Prova — ${e.subject.name}`
-                : `Prova ${new Date(e.examDate).toLocaleDateString("pt-BR")}`
-            const sublabel = new Date(e.examDate).toLocaleDateString("pt-BR")
+            const sublabel = formatDateSafe(e.examDate, "")
+            const label = formatExamLabel(e)
             if (!q || label.toLowerCase().includes(q) || sublabel.includes(q)) {
                 results.push({ id: e.id, type: "exam", label, sublabel })
             }

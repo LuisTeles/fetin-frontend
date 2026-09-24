@@ -51,7 +51,7 @@ export function SubjectList({ onStatsChange }: SubjectListProps) {
             const payload = (await response.json().catch(() => ({}))) as SubjectsResponse
 
             if (!response.ok) {
-                setError(payload.message ?? "Nao foi possivel buscar as disciplinas.")
+                setError(payload.message ?? "Não foi possível buscar as disciplinas.")
                 setIsLoading(false)
                 return
             }
@@ -86,7 +86,7 @@ export function SubjectList({ onStatsChange }: SubjectListProps) {
             const payload = await response.json().catch(() => ({}))
 
             if (!response.ok) {
-                alert(payload.message ?? "Nao foi possivel excluir a disciplina.")
+                alert(payload.message ?? "Não foi possível excluir a disciplina.")
                 return
             }
 

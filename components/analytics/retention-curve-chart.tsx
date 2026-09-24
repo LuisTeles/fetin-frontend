@@ -1,5 +1,6 @@
 "use client"
 
+import { formatDayMonth } from "@/lib/format"
 import { ResponsiveLine } from "@nivo/line"
 
 import { categoricalPalette } from "@/lib/chart-palette"
@@ -40,15 +41,16 @@ export function RetentionCurveChart({ series }: { series: CurveSeries[] }) {
                 data={data}
                 theme={theme}
                 colors={colors as string[]}
-                margin={{ top: 12, right: 24, bottom: 56, left: 44 }}
+                margin={{ top: 40, right: 24, bottom: 48, left: 44 }}
                 xScale={{ type: "point" }}
                 yScale={{ type: "linear", min: 0, max: 1 }}
                 curve="monotoneX"
                 axisBottom={{
-                    tickRotation: -45,
+                    tickRotation: -35,
+                    format: (v) => formatDayMonth(String(v)),
                     // A tick per sample would be unreadable; show roughly six.
                     tickValues: data[0]?.data.filter((_, i) => i % Math.ceil((data[0]?.data.length || 1) / 6) === 0).map((d) => d.x),
-                    legendOffset: 46,
+                    legendOffset: 40,
                 }}
                 axisLeft={{
                     format: (v) => `${Math.round(Number(v) * 100)}%`,
@@ -61,9 +63,10 @@ export function RetentionCurveChart({ series }: { series: CurveSeries[] }) {
                 animate={!reducedMotion}
                 legends={[
                     {
-                        anchor: "bottom",
+                        anchor: "top-left",
                         direction: "row",
-                        translateY: 54,
+                        translateX: -44,
+                        translateY: -34,
                         itemWidth: 130,
                         itemHeight: 14,
                         symbolSize: 8,

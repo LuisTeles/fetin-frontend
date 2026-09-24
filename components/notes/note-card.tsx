@@ -4,7 +4,9 @@ import { useState } from "react"
 import Link from "next/link"
 import { Pencil, Trash2, Archive, ArchiveRestore, MoreHorizontal, BookOpen, Hash, Maximize2, ExternalLink } from "lucide-react"
 import { TagBadge } from "@/components/notes/tag-badge"
-import { MarkdownPreview } from "@/components/notes/markdown-preview"
+import { formatExamLabel } from "@/lib/api/entities"
+import { formatDateShort, pluralize } from "@/lib/format"
+import { markdownToPlainText } from "@/lib/markdown-text"
 import { type Note } from "@/lib/api/notes"
 import { cn } from "@/lib/utils"
 
@@ -23,8 +25,8 @@ function formatRelativeDate(iso: string): string {
     const hours = Math.floor(minutes / 60)
     if (hours < 24) return `há ${hours}h`
     const days = Math.floor(hours / 24)
-    if (days < 7) return `há ${days} dia${days > 1 ? "s" : ""}`
-    return new Date(iso).toLocaleDateString("pt-BR", { day: "2-digit", month: "short" })
+    if (days < 7) return `há ${pluralize(days, "dia", "dias")}`
+    return formatDateShort(iso)
 }
 
 export function NoteCard({ note, onEdit, onDelete, onArchiveToggle }: NoteCardProps) {
@@ -42,7 +44,7 @@ export function NoteCard({ note, onEdit, onDelete, onArchiveToggle }: NoteCardPr
 
     const entityLabel = note.subject?.name
         ?? note.topic?.name
-        ?? (note.exam ? `Prova – ${new Date(note.exam.examDate).toLocaleDateString("pt-BR")}` : null)
+        ?? (note.exam ? formatExamLabel(note.exam) : null)
 
     const linkedNotesCount =
         (note.outgoingLinks?.length ?? 0) + (note.incomingLinks?.length ?? 0)
@@ -81,7 +83,7 @@ export function NoteCard({ note, onEdit, onDelete, onArchiveToggle }: NoteCardPr
                             {linkedNotesCount > 0 && (
                                 <span className="flex items-center gap-0.5 text-[9px] text-muted-foreground">
                                     <Hash className="h-2.5 w-2.5" />
-                                    {linkedNotesCount} link{linkedNotesCount > 1 ? "s" : ""}
+                                    {pluralize(linkedNotesCount, "link", "links")}
                                 </span>
                             )}
                         </div>
@@ -183,7 +185,9 @@ export function NoteCard({ note, onEdit, onDelete, onArchiveToggle }: NoteCardPr
 
                 {/* ── Markdown preview (truncated) ── */}
                 <div className="max-h-24 overflow-hidden relative pointer-events-none">
-                    <MarkdownPreview content={note.content} />
+                    <p className="text-xs leading-relaxed text-muted-foreground whitespace-pre-line">
+                        {markdownToPlainText(note.content)}
+                    </p>
                     {/* Fade out gradient for long content */}
                     <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-card to-transparent" />
                 </div>
