@@ -36,13 +36,13 @@ export function DisciplineRetentionChart({ data }: { data: DisciplineRetention[]
                 keys={["retention"]}
                 indexBy="name"
                 layout="horizontal"
-                margin={{ top: 8, right: 48, bottom: 28, left: 160 }}
+                margin={{ top: 8, right: 40, bottom: 28, left: 130 }}
                 padding={0.35}
                 valueScale={{ type: "linear", min: 0, max: 100 }}
                 colors={({ data: d }) => retentionColour((d.retention as number) / 100, isDark)}
                 borderRadius={3}
-                axisLeft={{ tickSize: 0, tickPadding: 8 }}
-                axisBottom={{ tickSize: 0, tickPadding: 6, format: (v) => `${v}%` }}
+                axisLeft={{ tickSize: 0, tickPadding: 8, format: (name) => (String(name).length > 20 ? `${String(name).slice(0, 19)}…` : String(name)) }}
+                axisBottom={{ tickSize: 0, tickPadding: 6, tickValues: [0, 50, 100], format: (v) => `${v}%` }}
                 enableGridX
                 enableGridY={false}
                 label={(d) => `${d.value}%`}
@@ -109,7 +109,7 @@ export function WeakTopicsChart({ data }: { data: WeakTopic[] }) {
                 keys={["retention"]}
                 indexBy="key"
                 layout="horizontal"
-                margin={{ top: 8, right: 48, bottom: 28, left: 200 }}
+                margin={{ top: 8, right: 40, bottom: 28, left: 150 }}
                 padding={0.35}
                 valueScale={{ type: "linear", min: 0, max: 100 }}
                 colors={({ data: d }) => retentionColour((d.retention as number) / 100, isDark)}
@@ -119,10 +119,10 @@ export function WeakTopicsChart({ data }: { data: WeakTopic[] }) {
                     tickPadding: 8,
                     format: (key) => {
                         const label = String(key).split("|").slice(1).join("|")
-                        return label.length > 28 ? `${label.slice(0, 27)}…` : label
+                        return label.length > 22 ? `${label.slice(0, 21)}…` : label
                     },
                 }}
-                axisBottom={{ tickSize: 0, tickPadding: 6, format: (v) => `${v}%` }}
+                axisBottom={{ tickSize: 0, tickPadding: 6, tickValues: [0, 50, 100], format: (v) => `${v}%` }}
                 enableGridX
                 enableGridY={false}
                 label={(d) => `${d.value}%`}

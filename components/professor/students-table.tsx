@@ -47,7 +47,9 @@ export function StudentsTable({ students }: { students: ClassStudent[] }) {
     }
 
     return (
-        <div className="overflow-x-auto">
+        // `relative` matters: the sr-only header cell is position:absolute, and without a positioned
+        // ancestor it escapes the scroll container and widens the whole page on narrow screens.
+        <div className="relative overflow-x-auto">
             <table className="w-full text-sm">
                 <thead>
                     <tr className="border-b border-border/40 text-left text-xs text-muted-foreground">
