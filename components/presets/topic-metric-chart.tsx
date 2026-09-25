@@ -6,6 +6,8 @@ import { useNivoTheme } from "@/lib/nivo-theme"
 import { useReducedMotion } from "@/lib/use-reduced-motion"
 
 export interface MetricRow {
+    /** Stable, unique id of the topic. Names are NOT unique ("Exercícios" repeats under different parents). */
+    key: string
     name: string
     /** 0..1, or null when there is no data for this topic (no bar is drawn). */
     value: number | null
@@ -23,16 +25,17 @@ const pct = (v: number) => `${Math.round(v * 100)}%`
 export function TopicMetricChart({ rows, metricLabel }: { rows: MetricRow[]; metricLabel: string }) {
     const { theme, brand } = useNivoTheme()
     const reducedMotion = useReducedMotion()
-    const data = rows.map((r) => ({ name: r.name, value: r.value ?? 0, has: r.value === null ? 0 : 1, detail: r.detail ?? "" }))
-    // The value rides on the category label so it is always readable, even for empty or tiny bars.
-    const valueOf = new Map(rows.map((r) => [r.name, r.value === null ? "—" : pct(r.value)]))
+    const data = rows.map((r) => ({ key: r.key, name: r.name, value: r.value ?? 0, has: r.value === null ? 0 : 1, detail: r.detail ?? "" }))
+    // Bars are indexed by key, so two topics with the same name stay two bars. The label carries the
+    // name and the value, so the value is always readable, even for empty or tiny bars.
+    const labelOf = new Map(rows.map((r) => [r.key, `${r.name}  ·  ${r.value === null ? "—" : pct(r.value)}`]))
 
     return (
         <div style={{ height: Math.max(160, rows.length * 38 + 56) }} role="img" aria-label={`${metricLabel} por tópico`}>
             <ResponsiveBar
                 data={data}
                 keys={["value"]}
-                indexBy="name"
+                indexBy="key"
                 layout="horizontal"
                 valueScale={{ type: "linear", min: 0, max: 1 }}
                 margin={{ top: 8, right: 24, bottom: 36, left: 220 }}
@@ -43,7 +46,7 @@ export function TopicMetricChart({ rows, metricLabel }: { rows: MetricRow[]; met
                 enableGridX
                 gridXValues={[0, 0.25, 0.5, 0.75, 1]}
                 axisBottom={{ format: (v: number) => pct(v), tickValues: [0, 0.25, 0.5, 0.75, 1] }}
-                axisLeft={{ tickSize: 0, tickPadding: 8, format: (name: string) => `${name}  ·  ${valueOf.get(name) ?? ""}` }}
+                axisLeft={{ tickSize: 0, tickPadding: 8, format: (key: string) => labelOf.get(key) ?? "" }}
                 enableLabel={false}
                 animate={!reducedMotion}
                 theme={theme}

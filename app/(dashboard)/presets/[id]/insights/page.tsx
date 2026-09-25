@@ -60,7 +60,7 @@ export default function PresetInsightsPage() {
     }
 
     const current = METRICS.find((m) => m.key === metric)!
-    const rows: MetricRow[] = insights.topics.map((t) => ({ name: t.name, value: t[metric], detail: detailOf(t, metric) }))
+    const rows: MetricRow[] = insights.topics.map((t) => ({ key: t.key, name: t.name, value: t[metric], detail: detailOf(t, metric) }))
 
     return (
         <section className="space-y-6">
