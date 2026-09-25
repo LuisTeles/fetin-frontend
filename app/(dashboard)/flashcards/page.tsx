@@ -96,7 +96,7 @@ function FlashcardsPageInner() {
             </div>
 
             {editing && (
-                <Card>
+                <Card className="overflow-visible">{/* the tag dropdown pops out below the form */}
                     <CardHeader className="flex flex-row items-center justify-between border-b py-3">
                         <CardTitle className="text-sm">{editing === "new" ? "Novo flashcard" : "Editar flashcard"}</CardTitle>
                         <button type="button" onClick={() => setEditing(null)} className="rounded p-1 text-muted-foreground hover:bg-muted cursor-pointer"><X className="h-4 w-4" /></button>
