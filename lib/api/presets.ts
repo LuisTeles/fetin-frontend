@@ -269,6 +269,126 @@ export async function apiRemoveApplication(id: string, mode: "detach" | "delete"
     return data.result
 }
 
+// ─── Versions: diff and merge (student) ───────────────────────────────────────
+
+export type FieldValue = string | number | boolean | null | string[]
+
+export interface FieldChange {
+    field: string
+    base: FieldValue
+    theirs: FieldValue
+    mine: FieldValue
+    /** `auto`: the student left it as delivered. `conflict`: the student changed it too. */
+    resolution: "auto" | "conflict"
+}
+
+export interface EntityDiff {
+    added: { key: string; label: string; fields: Record<string, FieldValue> }[]
+    removed: { key: string; id: string; label: string; has_progress: boolean }[]
+    changed: { key: string; id: string; label: string; fields: FieldChange[] }[]
+}
+
+export interface PresetDiff {
+    application_id: string
+    from_version: number
+    to_version: number
+    up_to_date: boolean
+    topics: EntityDiff
+    exams: EntityDiff
+    tasks: EntityDiff
+    counts: { added: number; removed: number; changed: number }
+}
+
+export interface MergePayload {
+    toVersion: number
+    acceptAdded?: string[]
+    remove?: string[]
+    fieldChoices?: Record<string, Record<string, "theirs" | "mine">>
+}
+
+export interface MergeResult {
+    application_id: string
+    from_version: number
+    to_version: number
+    created: { topics: number; exams: number; tasks: number }
+    updated: { topics: number; exams: number; tasks: number }
+    removed: { topics: number; exams: number; tasks: number }
+    kept: { topics: number; exams: number; tasks: number }
+    skipped: { kind: "topic" | "exam" | "task"; title: string; reason: string }[]
+    schedules: { exam_id: string; generated: boolean; reason?: string }[]
+}
+
+export async function apiGetPresetDiff(applicationId: string): Promise<PresetDiff> {
+    const data = await request<{ diff: PresetDiff }>(`/api/preset-applications/${applicationId}/diff`, undefined, "Erro ao carregar as mudanças.")
+    return data.diff
+}
+
+export async function apiMergePreset(applicationId: string, payload: MergePayload): Promise<MergeResult> {
+    const data = await request<{ result: MergeResult }>(
+        `/api/preset-applications/${applicationId}/merge`,
+        { method: "POST", body: json(payload) },
+        "Erro ao aplicar a atualização.",
+    )
+    return data.result
+}
+
+// ─── Insights (professor) ─────────────────────────────────────────────────────
+
+export interface TopicMetrics {
+    completed_pct: number
+    studied_pct: number
+    avg_retention: number | null
+    session_completion: number | null
+    sessions: { total: number; completed: number; skipped: number }
+    flashcard_accuracy: number | null
+    reviews: number
+}
+
+export interface InsightTopic extends TopicMetrics {
+    key: string
+    name: string
+    students: number
+}
+
+export interface PresetInsights {
+    preset_id: string
+    name: string
+    version: number
+    applied_count: number
+    min_cohort: number
+    hidden: boolean
+    topics: InsightTopic[]
+}
+
+export interface AppliedStudent {
+    student_id: string
+    name: string
+    applied_at: string
+    version_applied: number
+}
+
+export interface StudentProgress {
+    student: { id: string; name: string }
+    applied_at: string
+    version_applied: number
+    topics: (TopicMetrics & { key: string; name: string; is_completed: boolean })[]
+}
+
+export async function apiGetPresetInsights(id: string): Promise<PresetInsights> {
+    const data = await request<{ insights: PresetInsights }>(`/api/presets/${id}/insights`, undefined, "Erro ao carregar o progresso.")
+    return data.insights
+}
+
+export async function apiGetAppliedStudents(id: string): Promise<AppliedStudent[]> {
+    const data = await request<{ students: AppliedStudent[] }>(`/api/presets/${id}/students`, undefined, "Erro ao carregar os alunos.")
+    return data.students ?? []
+}
+
+export async function apiGetStudentProgress(id: string, studentId: string): Promise<StudentProgress> {
+    const data = await request<{ student: StudentProgress }>(`/api/presets/${id}/students/${studentId}`, undefined, "Aluno não encontrado.")
+    return data.student
+}
+
 // ─── Admin ────────────────────────────────────────────────────────────────────
 
 export async function apiSetUserRole(userId: string, role: "USER" | "PROFESSOR"): Promise<void> {

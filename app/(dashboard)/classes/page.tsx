@@ -162,13 +162,18 @@ export default function ClassesPage() {
                                 <CardContent className="space-y-3 px-4">
                                     {c.description && <p className="line-clamp-2 text-xs text-muted-foreground">{c.description}</p>}
                                     <p className="text-xs text-muted-foreground">
-                                        {c.topic_count} {pluralize(c.topic_count, "tópico", "tópicos")}
+                                        {pluralize(c.topic_count, "tópico", "tópicos")}
                                         {" · "}
                                         {c.next_exam_date ? `próxima prova em ${formatDateSafe(c.next_exam_date)}` : "sem prova futura"}
                                     </p>
-                                    <Link href={`/classes/${c.id}`} className={cn(buttonVariants({ variant: c.applied ? "outline" : "default", size: "sm" }))}>
-                                        {c.applied ? "Ver turma" : "Ver prévia e aplicar"}
-                                    </Link>
+                                    <div className="flex flex-wrap gap-2">
+                                        <Link href={`/classes/${c.id}`} className={cn(buttonVariants({ variant: c.applied ? "outline" : "default", size: "sm" }))}>
+                                            {c.applied ? "Ver turma" : "Ver prévia e aplicar"}
+                                        </Link>
+                                        {c.update_available && c.application_id && (
+                                            <Link href={`/classes/updates/${c.application_id}`} className={cn(buttonVariants({ size: "sm" }))}>Revisar atualização</Link>
+                                        )}
+                                    </div>
                                 </CardContent>
                             </Card>
                         ))}
@@ -193,6 +198,9 @@ export default function ClassesPage() {
                                         </p>
                                     </div>
                                     <div className="flex flex-wrap gap-2">
+                                        {classes.some((c) => c.application_id === a.id && c.update_available) && (
+                                            <Link href={`/classes/updates/${a.id}`} className={cn(buttonVariants({ size: "sm" }), "text-xs")}>Revisar atualização</Link>
+                                        )}
                                         <Link href={`/subjects/${a.subject_id}`} className={cn(buttonVariants({ variant: "outline", size: "sm" }), "gap-1 text-xs")}>
                                             <BookOpen className="h-3.5 w-3.5" />Abrir disciplina
                                         </Link>

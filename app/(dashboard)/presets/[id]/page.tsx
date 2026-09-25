@@ -109,6 +109,9 @@ export default function PresetEditorPage() {
                     <Badge variant={preset.status === "published" ? "default" : "outline"}>{STATUS_LABEL[preset.status]}</Badge>
                     {preset.version > 0 && <span className="text-xs text-muted-foreground">v{preset.version}</span>}
                 </div>
+                {preset.version > 0 && (
+                    <Link href={`/presets/${preset.id}/insights`} className={cn(buttonVariants({ variant: "outline" }))}>Progresso dos alunos</Link>
+                )}
                 {!archived && (
                     <div className="flex gap-2">
                         <Button variant="outline" disabled={busy || !dirty} onClick={onSave} className="gap-1"><Save />Salvar rascunho</Button>

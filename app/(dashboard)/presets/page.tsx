@@ -102,11 +102,14 @@ export default function PresetsPage() {
                                         {p.version > 0 && <span className="text-xs font-normal text-muted-foreground">v{p.version}</span>}
                                     </p>
                                     <p className="text-xs text-muted-foreground">
-                                        {p.topic_count ?? 0} {pluralize(p.topic_count ?? 0, "tópico", "tópicos")} · {p.assessment_count ?? 0} {pluralize(p.assessment_count ?? 0, "avaliação", "avaliações")} · editado em {formatDateSafe(p.updated_at)}
+                                        {pluralize(p.topic_count ?? 0, "tópico", "tópicos")} · {pluralize(p.assessment_count ?? 0, "avaliação", "avaliações")} · editado em {formatDateSafe(p.updated_at)}
                                     </p>
                                 </div>
                                 <div className="flex flex-wrap gap-2">
                                     <Link href={`/presets/${p.id}`} className={cn(buttonVariants({ variant: "outline", size: "sm" }), "text-xs")}>Editar</Link>
+                                    {p.version > 0 && (
+                                        <Link href={`/presets/${p.id}/insights`} className={cn(buttonVariants({ variant: "outline", size: "sm" }), "text-xs")}>Progresso</Link>
+                                    )}
                                     <Button size="sm" variant="ghost" disabled={busy} onClick={() => run(() => apiDuplicatePreset(p.id))} className="gap-1 text-xs"><Copy className="h-3.5 w-3.5" />Duplicar</Button>
                                     {p.status !== "archived" && (
                                         <Button size="sm" variant="ghost" disabled={busy} className="gap-1 text-xs" onClick={() => {
