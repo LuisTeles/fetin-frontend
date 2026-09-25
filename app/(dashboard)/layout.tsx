@@ -73,12 +73,17 @@ export default async function DashboardLayout({
                         <li><NavLink href="/notes" icon="notes">Notas Rápidas</NavLink></li>
                         <li><NavLink href="/flashcards" icon="flashcards">Flashcards</NavLink></li>
                         <li><NavLink href="/classes" icon="classes">Turmas</NavLink></li>
+                        <li><NavLink href="/assignments" icon="assignments">Atividades</NavLink></li>
                         <li><NavLink href="/auto-schedule" icon="schedule">Calendário Automático</NavLink></li>
                         <li><NavLink href="/availability" icon="availability">Disponibilidade</NavLink></li>
                         {isProfessor && (
                             <>
-                                <li><NavLink href="/presets" icon="presets">Meus presets</NavLink></li>
+                                <li role="separator" className="my-1 border-t border-border/50" />
+                                <li className="px-3 pb-0.5 pt-1 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Professor</li>
+                                <li><NavLink href="/professor/dashboard" icon="classDashboard">Painel da turma</NavLink></li>
                                 <li><NavLink href="/professor/students" icon="students">Meus alunos</NavLink></li>
+                                <li><NavLink href="/professor/assignments" icon="sent">Atividades enviadas</NavLink></li>
+                                <li><NavLink href="/presets" icon="presets">Meus presets</NavLink></li>
                             </>
                         )}
                         {isAdmin && (

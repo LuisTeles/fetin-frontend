@@ -3,8 +3,10 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import {
+    BarChart3,
     BookOpen,
     CalendarDays,
+    ClipboardCheck,
     Clock,
     GraduationCap,
     LayoutDashboard,
@@ -12,6 +14,7 @@ import {
     LibraryBig,
     ListChecks,
     School,
+    Send,
     ShieldCheck,
     Sparkles,
     StickyNote,
@@ -37,6 +40,9 @@ const ICONS: Record<string, LucideIcon> = {
     classes: School,
     presets: LibraryBig,
     students: Users,
+    assignments: ClipboardCheck,
+    classDashboard: BarChart3,
+    sent: Send,
 }
 
 export type NavIcon = keyof typeof ICONS

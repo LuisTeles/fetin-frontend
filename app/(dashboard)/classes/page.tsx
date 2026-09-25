@@ -108,7 +108,10 @@ export default function ClassesPage() {
             <Card>
                 <CardHeader className="px-4">
                     <CardTitle className="flex items-center gap-2 text-sm font-bold"><KeyRound className="h-4 w-4" />Entrar em uma turma</CardTitle>
-                    <CardDescription className="text-xs">Peça ao professor o código da turma (8 caracteres).</CardDescription>
+                    <CardDescription className="text-xs">
+                        Peça ao professor o código da turma (8 caracteres). Ao entrar, o professor passa a ver seu progresso de estudo
+                        (retenção, adesão, prontidão para provas) e suas notas nas atividades. Ele não vê suas notas, flashcards ou anotações.
+                    </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4 px-4">
                     <form onSubmit={join} className="flex flex-wrap gap-2">

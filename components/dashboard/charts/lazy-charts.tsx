@@ -45,3 +45,23 @@ export const RetentionCurveChart = dynamic(
     () => import("@/components/analytics/retention-curve-chart").then((m) => m.RetentionCurveChart),
     { ssr: false, loading: () => <ChartFallback height={288} /> },
 )
+
+export const DisciplineRetentionChart = dynamic(
+    () => import("@/components/professor/class-charts").then((m) => m.DisciplineRetentionChart),
+    { ssr: false, loading: () => <ChartFallback height={200} /> },
+)
+
+export const RetentionHistogram = dynamic(
+    () => import("@/components/professor/class-charts").then((m) => m.RetentionHistogram),
+    { ssr: false, loading: () => <ChartFallback height={256} /> },
+)
+
+export const WeakTopicsChart = dynamic(
+    () => import("@/components/professor/class-charts").then((m) => m.WeakTopicsChart),
+    { ssr: false, loading: () => <ChartFallback height={240} /> },
+)
+
+export const WeekdayAdherenceChart = dynamic(
+    () => import("@/components/professor/class-charts").then((m) => m.WeekdayAdherenceChart),
+    { ssr: false, loading: () => <ChartFallback height={224} /> },
+)

@@ -54,7 +54,7 @@ export default function ProfessorStudentsPage() {
     }
 
     async function remove(s: RosterItem) {
-        if (!window.confirm(`Remover ${s.name} da turma? Ele deixa de ver seus presets; o que já aplicou continua com ele. Ele pode se vincular de novo com o código.`)) return
+        if (!window.confirm(`Remover ${s.name} da turma? Ele deixa de ver seus presets e de aparecer no seu painel; o que já aplicou continua com ele. Ele pode se vincular de novo com o código.`)) return
         setBusy(true)
         try {
             await apiRemoveStudent(s.link_id)
@@ -70,7 +70,7 @@ export default function ProfessorStudentsPage() {
         <section className="space-y-6">
             <div className="flex flex-col gap-1.5 border-b border-border/40 pb-4">
                 <h1 className="page-title">Meus alunos</h1>
-                <p className="text-xs text-muted-foreground">Compartilhe o código da turma. Aqui você vê apenas o nome de quem se vinculou — nenhum dado de estudo.</p>
+                <p className="text-xs text-muted-foreground">Compartilhe o código da turma. Aqui você gerencia quem está vinculado; o progresso de estudo de cada um fica no Painel da turma.</p>
             </div>
 
             {error && <Alert variant="destructive"><AlertDescription>{error}</AlertDescription></Alert>}
