@@ -36,6 +36,8 @@ export interface DraftQuiz {
 }
 
 const BLOCK = /^```quiz[ \t]*\r?\n([\s\S]*?)\r?\n```[ \t]*$/m
+const FENCE_LINE = /^```quiz/gm
+const KEY_LINE = /^\s*-\s*\[[xX]\]/m
 const HEADER = /^Q(\d+)(?:\s*\((\d+)\s*pts?\))?\s*:\s*(.+)$/i
 const OPTION = /^-\s*\[( |x|X)\]\s*(.+)$/
 
@@ -43,6 +45,13 @@ export function parseDraftQuiz(markdown: string): DraftQuiz {
     const match = BLOCK.exec(markdown)
     if (!match) return { material: markdown.trim(), questions: [], totalPoints: 0, error: "Inclua um bloco ```quiz com ao menos uma questão." }
     const material = (markdown.slice(0, match.index) + markdown.slice(match.index + match[0].length)).trim()
+    // Mirrors the server: a second block or a stray [x] in the material would expose the key.
+    if ((markdown.match(FENCE_LINE) ?? []).length > 1) {
+        return { material, questions: [], totalPoints: 0, error: "Use um único bloco ```quiz, no final do conteúdo." }
+    }
+    if (KEY_LINE.test(material)) {
+        return { material, questions: [], totalPoints: 0, error: "O material não pode conter opções marcadas com [x]; elas só valem dentro do bloco ```quiz." }
+    }
 
     const questions: (DraftQuestion & { correct: number })[] = []
     let error: string | null = null
@@ -69,6 +78,7 @@ export function parseDraftQuiz(markdown: string): DraftQuiz {
         for (const [i, q] of questions.entries()) {
             if (q.points < 1 || q.points > 100) { error = `Q${i + 1}: pontos devem ficar entre 1 e 100.`; break }
             if (q.options.length < 2) { error = `Q${i + 1}: informe ao menos 2 opções.`; break }
+            if (q.options.length > 50) { error = `Q${i + 1}: no máximo 50 opções.`; break }
             if (q.correct < 1) { error = `Q${i + 1}: marque ao menos uma opção correta com [x].`; break }
         }
     }

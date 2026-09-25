@@ -40,7 +40,7 @@ export default async function ProfessorStudentPage({ params }: { params: Promise
                 <div className="space-y-1">
                     <Link href="/professor/dashboard" className="text-xs text-muted-foreground hover:underline">← Painel da turma</Link>
                     <h1 className="page-title">{s.name}</h1>
-                    <p className="text-xs text-muted-foreground">Progresso de estudo e atividades. Somente números: nada do que o aluno escreve é exibido.</p>
+                    <p className="text-xs text-muted-foreground">Progresso de estudo e atividades. Você vê números de progresso e os nomes das disciplinas, tópicos e provas do aluno, nunca o conteúdo de notas ou flashcards.</p>
                 </div>
                 <Link href={`/professor/assignments/new?studentId=${s.id}`} className={cn(buttonVariants({ size: "sm" }), "gap-1")}>
                     <Send className="h-3.5 w-3.5" aria-hidden="true" />Enviar atividade
