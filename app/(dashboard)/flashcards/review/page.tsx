@@ -41,6 +41,36 @@ function topUpForSession(due: Flashcard[], topicCards: Flashcard[]): Flashcard[]
     return [...due, ...extra.slice(0, target - due.length)]
 }
 
+const FACE = "col-start-1 row-start-1 flex min-h-64 flex-col gap-3 rounded-2xl border border-border bg-card p-6 text-card-foreground shadow-[var(--shadow-card)] [backface-visibility:hidden] [-webkit-backface-visibility:hidden]"
+
+/**
+ * A physical card: the front (question) turns over on the Y axis to show the back (answer).
+ * Both faces share one grid cell so the card takes the height of the taller side.
+ */
+function FlipCard({ card, revealed, onReveal }: { card: Flashcard; revealed: boolean; onReveal: () => void }) {
+    const caption = <p className="text-xs text-muted-foreground">{card.topic.subject.name} · {card.topic.name}</p>
+    return (
+        <div className="[perspective:1400px]">
+            <div
+                onClick={revealed ? undefined : onReveal}
+                aria-live="polite"
+                className={`grid transition-transform duration-500 ease-[cubic-bezier(0.3,0.7,0.2,1)] [transform-style:preserve-3d] motion-reduce:transition-none ${revealed ? "[transform:rotateY(180deg)]" : "cursor-pointer"}`}
+            >
+                <div className={FACE} aria-hidden={revealed}>
+                    {caption}
+                    <div className="flex flex-1 flex-col justify-center"><MarkdownPreview content={card.front} /></div>
+                    <p className="text-center text-[11px] text-muted-foreground">Clique ou pressione Espaço para virar</p>
+                </div>
+                <div className={`${FACE} [transform:rotateY(180deg)]`} aria-hidden={!revealed}>
+                    {caption}
+                    <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">Resposta</p>
+                    <div className="flex flex-1 flex-col justify-center"><MarkdownPreview content={card.back} /></div>
+                </div>
+            </div>
+        </div>
+    )
+}
+
 function ReviewInner() {
     const sp = useSearchParams()
     const topicId = sp.get("topicId") ?? undefined
@@ -51,6 +81,9 @@ function ReviewInner() {
     // not reload the queue.
     const sessionRef = useRef(sessionId)
     useEffect(() => { sessionRef.current = sessionId }, [sessionId])
+    // A card opened from the list goes first, due or not; only on the first load, so
+    // "Revisar mais" does not bring it back.
+    const startCardRef = useRef(sp.get("cardId"))
 
     const [queue, setQueue] = useState<Flashcard[] | null>(null)
     const [index, setIndex] = useState(0)
@@ -67,9 +100,14 @@ function ReviewInner() {
     const load = useCallback(async () => {
         try {
             const due = await apiGetDueFlashcards({ topicId, examId, limit: 100 })
+            const startId = startCardRef.current
             // Active cards only (the list default).
-            const topicCards = sessionRef.current && topicId ? await apiGetFlashcards({ topicId }) : null
-            setQueue(topicCards ? topUpForSession(due, topicCards) : due)
+            const topicCards = topicId && (sessionRef.current || startId) ? await apiGetFlashcards({ topicId }) : null
+            let next = sessionRef.current && topicCards ? topUpForSession(due, topicCards) : due
+            const start = startId ? topicCards?.find((c) => c.id === startId) : undefined
+            if (start) next = [start, ...next.filter((c) => c.id !== start.id)]
+            startCardRef.current = null
+            setQueue(next)
             setError(null)
         } catch (err: unknown) {
             setError(err instanceof Error ? err.message : "Erro ao carregar revisões.")
@@ -180,13 +218,9 @@ function ReviewInner() {
         <div className="mx-auto max-w-xl space-y-4">
             <div className="flex items-center justify-between">{back}<span className="text-xs text-muted-foreground">{index + 1} / {queue.length}</span></div>
             {notice && <p role="status" className="rounded-md border bg-muted/40 px-3 py-2 text-xs">{notice}</p>}
-            <Card>
-                <CardContent className="space-y-4 p-6">
-                    <p className="text-xs text-muted-foreground">{current.topic.subject.name} · {current.topic.name}</p>
-                    <MarkdownPreview content={current.front} />
-                    {revealed && <div className="border-t pt-4"><MarkdownPreview content={current.back} /></div>}
-                </CardContent>
-            </Card>
+            {/* Keyed by card: the next card mounts face-up with no flip-back that would
+                show its answer on the way. */}
+            <FlipCard key={current.id} card={current} revealed={revealed} onReveal={reveal} />
             {!revealed ? (
                 <Button className="w-full" onClick={reveal}>Mostrar resposta <kbd className="ml-2 text-[10px] opacity-70">Espaço</kbd></Button>
             ) : (

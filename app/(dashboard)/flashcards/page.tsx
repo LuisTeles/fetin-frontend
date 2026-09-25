@@ -139,9 +139,17 @@ function FlashcardsPageInner() {
                 <EmptyState icon={<Layers className="h-6 w-6" />} message="Nenhum flashcard ainda. Crie o primeiro a partir de um tópico." />
             ) : (
                 <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                    {cards.map((c) => (
-                        <FlashcardTile key={c.id} card={c} href={withUser(`/flashcards/${c.id}`)} onEdit={readOnly ? undefined : () => setEditing(c)} />
-                    ))}
+                    {cards.map((c) => {
+                        const details = withUser(`/flashcards/${c.id}`)
+                        // Archived cards cannot be graded, and impersonation is read-only.
+                        const reviewable = !readOnly && !c.isArchived
+                        return (
+                            <FlashcardTile key={c.id} card={c}
+                                href={reviewable ? `/flashcards/review?topicId=${c.topicId}&cardId=${c.id}` : details}
+                                detailsHref={reviewable ? details : undefined}
+                                onEdit={readOnly ? undefined : () => setEditing(c)} />
+                        )
+                    })}
                 </div>
             )}
         </div>
