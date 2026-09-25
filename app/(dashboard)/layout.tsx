@@ -25,12 +25,15 @@ export default async function DashboardLayout({
 
     const accessToken = cookieStore.get(ACCESS_TOKEN_COOKIE)?.value
     let isAdmin = false
+    let isProfessor = false
     if (accessToken) {
         try {
             const parts = accessToken.split('.')
             if (parts.length === 3) {
                 const payload = JSON.parse(Buffer.from(parts[1], 'base64').toString('utf8'))
                 isAdmin = payload.role === 'ADMIN'
+                // Cosmetic only, like the admin link: the backend re-checks the role in the database.
+                isProfessor = payload.role === 'PROFESSOR'
             }
         } catch {
             // Ignore decoding issues
@@ -69,8 +72,15 @@ export default async function DashboardLayout({
                         <li><NavLink href="/calendar" icon="calendar">Calendário</NavLink></li>
                         <li><NavLink href="/notes" icon="notes">Notas Rápidas</NavLink></li>
                         <li><NavLink href="/flashcards" icon="flashcards">Flashcards</NavLink></li>
+                        <li><NavLink href="/classes" icon="classes">Turmas</NavLink></li>
                         <li><NavLink href="/auto-schedule" icon="schedule">Calendário Automático</NavLink></li>
                         <li><NavLink href="/availability" icon="availability">Disponibilidade</NavLink></li>
+                        {isProfessor && (
+                            <>
+                                <li><NavLink href="/presets" icon="presets">Meus presets</NavLink></li>
+                                <li><NavLink href="/professor/students" icon="students">Meus alunos</NavLink></li>
+                            </>
+                        )}
                         {isAdmin && (
                             <li><NavLink href="/admin/users" icon="admin">Painel Admin</NavLink></li>
                         )}

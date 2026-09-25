@@ -9,11 +9,14 @@ import {
     GraduationCap,
     LayoutDashboard,
     Layers,
+    LibraryBig,
     ListChecks,
+    School,
     ShieldCheck,
     Sparkles,
     StickyNote,
     User,
+    Users,
     type LucideIcon,
 } from "lucide-react"
 
@@ -31,6 +34,9 @@ const ICONS: Record<string, LucideIcon> = {
     schedule: Sparkles,
     availability: Clock,
     admin: ShieldCheck,
+    classes: School,
+    presets: LibraryBig,
+    students: Users,
 }
 
 export type NavIcon = keyof typeof ICONS

@@ -2,7 +2,7 @@
 
 import { formatDateSafe } from "@/lib/format"
 import { useEffect, useState } from "react"
-import { Search, UserCheck, Shield, Clock, Mail, ShieldAlert } from "lucide-react"
+import { Search, UserCheck, Shield, Clock, Mail, ShieldAlert, GraduationCap } from "lucide-react"
 import { useRouter } from "next/navigation"
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
+import { apiSetUserRole } from "@/lib/api/presets"
 
 type UserItem = {
     id: string
@@ -60,6 +61,21 @@ export default function AdminUsersPage() {
             u.name.toLowerCase().includes(search.toLowerCase()) ||
             u.email.toLowerCase().includes(search.toLowerCase())
     )
+
+    async function handleRole(user: UserItem) {
+        const makeProfessor = user.role !== "PROFESSOR"
+        const message = makeProfessor
+            ? `Conceder o papel de professor a ${user.name}? Ele poderá criar presets e receber alunos por código.`
+            : `Remover o papel de professor de ${user.name}? Os presets dele deixam de aparecer para os alunos (quem já aplicou mantém a cópia).`
+        if (!window.confirm(message)) return
+        setError(null)
+        try {
+            await apiSetUserRole(user.id, makeProfessor ? "PROFESSOR" : "USER")
+            await loadUsers()
+        } catch (err: unknown) {
+            setError(err instanceof Error ? err.message : "Não foi possível alterar o papel.")
+        }
+    }
 
     function handleImpersonate(userId: string) {
         // Route to dashboard with search param to trigger impersonation mode
@@ -167,6 +183,16 @@ export default function AdminUsersPage() {
 
                                         <div className="flex items-center gap-2 justify-end shrink-0">
                                             {!isUserAdmin ? (
+                                                <>
+                                                <Button
+                                                    onClick={() => handleRole(user)}
+                                                    size="sm"
+                                                    variant="ghost"
+                                                    className="h-8 gap-1 text-xs"
+                                                >
+                                                    <GraduationCap className="h-3.5 w-3.5" />
+                                                    {user.role === "PROFESSOR" ? "Remover professor" : "Tornar professor"}
+                                                </Button>
                                                 <Button
                                                     onClick={() => handleImpersonate(user.id)}
                                                     size="sm"
@@ -176,6 +202,7 @@ export default function AdminUsersPage() {
                                                     <UserCheck className="h-3.5 w-3.5" />
                                                     Visualizar Dashboard
                                                 </Button>
+                                                </>
                                             ) : (
                                                 <span className="text-[10px] text-muted-foreground font-mono pr-2">
                                                     Administrador
